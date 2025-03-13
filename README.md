@@ -21,3 +21,4 @@ Esta aplicação busca auxiliar no trabalho da comissão de horários do [Instit
 2025-Team-D-Repository
 <br/><br/> Professor Orientador: [Profº Paulo Santos](https://github.com/pauloagsantos)
 > Gestão de Projetos 2025 @ [Politécnico de Tomar](https://www.ipt.pt/).
+<br/> ![Logo IPT](https://portal2.ipt.pt/media/manager.php?src=servico&cmd=file&target=m1_MTc1NzM)
