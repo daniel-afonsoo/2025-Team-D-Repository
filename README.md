@@ -11,7 +11,7 @@ Esta aplicação busca auxiliar no trabalho da comissão de horários do [Instit
 
 ### Equipa de Desenvolvimento (Team D):
 - [André Benquerer](https://github.com/Benquerer)
-- [Daniel](https://github.com/MonsieurAmengood2)
+- [Daniel Afonso](https://github.com/MonsieurAmengood2)
 - [Diogo Cardeira](https://github.com/DLarangeira03)
 - [Diogo Larangeira](https://github.com/DCardeira)
 - [Guilherme Simões](https://github.com/GuilhermeSimoes1)
