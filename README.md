@@ -5,9 +5,10 @@ Esta aplicação busca auxiliar no trabalho da comissão de horários do [Instit
 <sub> Esta descrição ainda irá ser alterada, pelo que o projeto ainda está em desenvolvimento </sub>
 ***
 ### O projeto utiliza as seguintes tecnologias:
-- React.js (Framework principal para desenvolvimento frontend)
-- JavaScript
-- Socket.io (Comunicação em tempo real)
+- React + Vite
+- Express.Js
+- Socket.io
+- Javascript
 
 ### Equipa de Desenvolvimento (Team D):
 - [André Benquerer](https://github.com/Benquerer)
