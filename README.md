@@ -1,8 +1,7 @@
 
-# Aplicação Web para Gestão de Horários
+# EasySchedule IPT
 ## Sobre o Projeto:
-Esta aplicação busca auxiliar no trabalho da comissão de horários do [Instituto Politécnico de Tomar](https://www.ipt.pt/), facilitando a interação entre seus membros durante o processo de tomada de decisão, por meio de uma plataforma moderna, intuitiva e simplificada. 
-<sub> Esta descrição ainda irá ser alterada, pelo que o projeto ainda está em desenvolvimento </sub>
+EasySchedule IPT é uma aplicação desenvolvida para otimizar o trabalho da comissão de horários do[Instituto Politécnico de Tomar](https://www.ipt.pt/) A plataforma oferece uma interface moderna e intuitiva, facilitando a colaboração entre os membros da comissão e agilizando o processo de tomada de decisão durante a organização dos horários acadêmicos de todos os cursos do politécnico.
 ***
 ### O projeto utiliza as seguintes tecnologias:
 - [React](https://react.dev/) + [Vite](https://vite.dev/)
@@ -21,4 +20,4 @@ Esta aplicação busca auxiliar no trabalho da comissão de horários do [Instit
 ***
 2025-Team-D-Repository
 <br/><br/> Professor Orientador: [Profº Paulo Santos](https://github.com/pauloagsantos)
-> Gestão de Projetos 2025 @ [Politécnico de Tomar](https://www.ipt.pt/).
+> Gestão de Projetos 2025 @ [Politécnico de Tomar](https://www.ipt.pt/). [Click here for a nice surprise](https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley)
