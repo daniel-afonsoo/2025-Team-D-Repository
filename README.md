@@ -5,9 +5,9 @@ Esta aplicação busca auxiliar no trabalho da comissão de horários do [Instit
 <sub> Esta descrição ainda irá ser alterada, pelo que o projeto ainda está em desenvolvimento </sub>
 ***
 ### O projeto utiliza as seguintes tecnologias:
-- React + Vite
-- Express.Js
-- Socket.io
+- [React](https://react.dev/) + [Vite](https://vite.dev/)
+- [Express.Js](https://expressjs.com/)
+- [Socket.io](https://socket.io/)
 - Javascript
 
 ### Equipa de Desenvolvimento (Team D):
