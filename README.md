@@ -1,7 +1,7 @@
 
 # EasySchedule IPT
 ## Sobre o Projeto:
-EasySchedule IPT é uma aplicação desenvolvida para otimizar o trabalho da comissão de horários do[Instituto Politécnico de Tomar](https://www.ipt.pt/) A plataforma oferece uma interface moderna e intuitiva, facilitando a colaboração entre os membros da comissão e agilizando o processo de tomada de decisão durante a organização dos horários acadêmicos de todos os cursos do politécnico.
+EasySchedule IPT é uma aplicação desenvolvida para otimizar o trabalho da comissão de horários do <a href="https://www.ipt.pt/" target="_blank">Instituto Politécnico de Tomar</a>. A plataforma oferece uma interface moderna e intuitiva, facilitando a colaboração entre os membros da comissão e agilizando o processo de tomada de decisão durante a organização dos horários acadêmicos de todos os cursos do politécnico.
 ***
 ### O projeto utiliza as seguintes tecnologias:
 - [React](https://react.dev/) + [Vite](https://vite.dev/)
