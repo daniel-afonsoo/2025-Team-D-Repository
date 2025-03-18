@@ -7,7 +7,6 @@ EasySchedule IPT é uma aplicação desenvolvida para otimizar o trabalho da com
 - [React](https://react.dev/) + [Vite](https://vite.dev/)
 - [Express.Js](https://expressjs.com/)
 - [Socket.io](https://socket.io/)
-- Javascript
 
 ### Equipa de Desenvolvimento (Team D):
 - [André Benquerer](https://github.com/Benquerer)
