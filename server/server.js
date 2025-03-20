@@ -19,6 +19,7 @@ const io = new Server(server,{
 
 // base endpoint
 app.get('/', (req, res) => {
+    console.log(`Base endpoint hit. Client's ip: ${req.ip}`)
     res.json({ message: "Hello from the server's backend!" })
 })
 
@@ -29,7 +30,7 @@ io.on("connection", (socket) => {
 
 // starting the server
 server.listen(backendPort, () => {
-    console.log("=============== Easy Schedule IPT - Backend ===============")
+    console.log("\n=============== Easy Schedule IPT - Backend ===============")
     console.log(`Server started. Listening on port ${backendPort}.`)
     console.log("Socket.io server is running...")
     console.log("\n")
