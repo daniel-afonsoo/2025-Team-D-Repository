@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
 
 
-import './PáginaHorários.css';
+import './HorariosAbas.css';
 
 
 //A função TabPanel é responsável por mostrar ou esconder o conteúdo das abas. A função verifica qual aba está ativa e só exibe o conteúdo dessa aba

@@ -1,7 +1,7 @@
 // imports
 import { useState, useEffect, use } from 'react'
 import axios from 'axios'
-import TabsHorarios from './PaginaHorariosAbas';
+import TabsHorarios from './HorariosAbas';
 
 function App() {
 
@@ -25,7 +25,7 @@ function App() {
       <h3>{baseMessage}</h3>
 
 
-      
+      <TabsHorarios />
     </>
   )
 }
