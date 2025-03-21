@@ -10,7 +10,10 @@ function App() {
   // fetch base endpoint message
   useEffect(() => {
     axios.get('http://localhost:5170/')
-      .then(res => setBaseMessage(res.data.message))
+      .then(res => {
+        setBaseMessage(res.data.message)
+
+      })
       .catch(err => {
         console.log("Error: Fetch to base endpoint. " + err)
         setBaseMessage("Error: Fetch to base endpoint.")

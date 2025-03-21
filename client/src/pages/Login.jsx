@@ -12,21 +12,30 @@ const Login = () => {
     
     
     const handleSubmit = async (e) => {
+        //previne que a página de refresh, por default o onsubmit do forms da refresh na página
         e.preventDefault();
+        //elimina todos os erros
         setError("");
-    
-        try {
-          const response = await axios.post("/login", {
+        
+        //post no backend através de axios
+        //dá post do email e da password n backend
+        await axios.post("http://localhost:5170/auth/login", {
             email: email,
             password: password,
-          });
+          })
+          //apresenta na consola a mensagem de sucesso
+          .then(res => {
+            console.log(res.data.message)
+            setEmail("")
+            setPassword("")
+          })
+          //apresenta na consola a mensagem de erro e limpa a variável da password
+          .catch(error => {
+            setError("Erro ao fazer login. Verifique suas credenciais.");
+            console.error(error);
+            setPassword("")
+          })
     
-          console.log("Login bem-sucedido!", response.data);
-          // Aqui você pode salvar o token e redirecionar o usuário
-        } catch (error) {
-          setError("Erro ao fazer login. Verifique suas credenciais.");
-          console.error(error);
-        }
       };
 
 
@@ -50,11 +59,11 @@ const Login = () => {
 			                </div>
                             <div className="login_input_field">
                                 <label><font color="#75c734">Email IPT</font></label>
-                                <input type="email" name="user" required=""  onChange={(e) => setEmail(e.target.value)}/>
+                                <input type="email" name="user" required="" value={email} onChange={(e) => setEmail(e.target.value)}/>
                             </div>
                             <div className="login_input_field">
                                 <label><font color="#75c734">Password</font></label>
-                                <input type="password" name="pass" required="" onChange={(e) => setPassword(e.target.value)}/>
+                                <input type="password" name="pass" required="" value={password} onChange={(e) => setPassword(e.target.value)}/>
                             </div>
 			                <button id="botao_login" type='submit' >Login</button>
                         </form>
