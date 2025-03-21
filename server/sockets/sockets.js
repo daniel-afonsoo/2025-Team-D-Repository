@@ -12,7 +12,8 @@ const setupSockets = (server) => {
         // log new connection
         console.log(`New socket connection. Socket id: ${socket.id}`)
         // send connection ack to client
-        socket.emit("connection-ack", "Real-time connection with server established.")
+        socket.emit("connection-ack-alert", "Real-time connection with server established.")
+        socket.emit("connection-ack-msg", "Real-time connection with server established.")
     })
 
     // log setup
