@@ -4,10 +4,15 @@ const http = require('http')
 const { Server } = require('socket.io')
 const cors = require('cors')
 
+//import routes
+const loginRoutes = require('./endpoints/auth-endpoints')
+
+
 // express instance & server port
 const app = express()
 const backendPort = 5170
 app.use(cors())
+
 
 // socket.io server
 const server = http.createServer(app)
@@ -22,6 +27,10 @@ app.get('/', (req, res) => {
     console.log(`Base endpoint hit. Client's ip: ${req.ip}`)
     res.json({ message: "Hello from the server's backend!" })
 })
+
+//routes
+app.use('/', loginRoutes)
+
 
 // socket.io connection event
 io.on("connection", (socket) => {
