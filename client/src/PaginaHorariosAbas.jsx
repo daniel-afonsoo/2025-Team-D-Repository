@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
 
 
+import './PáginaHorários.css';
+
 
 //A função TabPanel é responsável por mostrar ou esconder o conteúdo das abas. A função verifica qual aba está ativa e só exibe o conteúdo dessa aba
 // A função recebe três coisas:
@@ -26,9 +28,9 @@ function TabPanel({ children, value, index }) {
          //O Box é um componente do Material UI que serve como um container flexível, semelhante a uma <div>, mas com mais controle sobre o layout e estilos.
         //Neste caso estamos a usar um Box para organizar o conteúdo dentro das abas
         //p={6} → Adiciona espaçamento interno (padding) 
-        <Box p={6}>
+        <Box className="tab-content">
          {/*Typography é um estilo visual do Material UI*/}
-          <Typography>{children}</Typography>
+          <Typography className="tab-text">{children}</Typography>
         </Box>
       )}
     </div>
@@ -56,7 +58,7 @@ function TabsHorarios() {
       {/*O valor 3 significa que a borda tem uma espessura média-leve.*/}
       {/*O divider é uma cor padrão do Material UI, geralmente um cinza claro.*/}
       {/* mt: 1 ->Isso adiciona uma margem superior (margin-top) de 1 unidade.*/}
-      <Box sx={{ borderBottom: 3, borderColor: 'divider', mt: 1 }}>
+      <Box className="tabs-container">
         {/*Tabs	é o container que segura todas as abas.*/}
         <Tabs
 
@@ -75,6 +77,7 @@ function TabsHorarios() {
           //Se alguma tecla especial estava pressionada (ctrlKey, shiftKey, altKey) 
           onChange={(e, newIndex) => setTabIndex(newIndex)}
           aria-label="Basic Tabs Example"
+          className="tabs-wrapper"
           centered // <- Centraliza as abas na tela do cliente
         >
 
