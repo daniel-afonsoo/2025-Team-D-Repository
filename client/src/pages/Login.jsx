@@ -1,6 +1,6 @@
 import { useState, useEffect, use } from 'react'
-import "./Login.css";
-import iptLogo from "./imagens/ipt_logo.jpg"
+import "../styles/login.css";
+import iptLogo from "../images/ipt_logo.jpg"
 
 const Login = () => {
 
