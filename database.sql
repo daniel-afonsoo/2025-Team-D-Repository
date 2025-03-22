@@ -1,10 +1,10 @@
-#========== Script para BD - Eazy Schedule IPT ==========#
+#========== Script para BD - Easy Schedule IPT ==========#
 
 #=== creating the database
-CREATE DATABASE IF NOT EXISTS eazyscheduleipt;
+CREATE DATABASE IF NOT EXISTS easyscheduleipt;
 
 #=== using the database
-USE eazyscheduleipt;
+USE easyscheduleipt;
 
 #=== creating the tables
 CREATE TABLE AnoSemeste (Cod_AnoSemeste int(10) NOT NULL AUTO_INCREMENT, Ano int(5), Semeste smallint(1), PRIMARY KEY (Cod_AnoSemeste)) ENGINE=InnoDB;
