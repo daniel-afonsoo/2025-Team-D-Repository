@@ -1,9 +1,9 @@
 const mysql = require('mysql2')
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
+  host: '192.168.56.102',
+  user: 'gpadmin',
+  password: '123qwe',
   database: 'easyscheduleipt',
   waitForConnections: true,
   connectionLimit: 10,
