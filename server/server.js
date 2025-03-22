@@ -4,11 +4,14 @@ const http = require('http')
 const { Server } = require('socket.io')
 const cors = require('cors')
 const pool = require('./db/connection.js')
+const loginRoutes = require('./endpoints/auth-endpoints')
+
 
 // express instance & server port
 const app = express()
 const backendPort = 5170
 app.use(cors())
+
 
 // socket.io server
 const server = http.createServer(app)
@@ -35,6 +38,10 @@ app.get('/getData', (req, res) => {
         res.json(results);
     })
 })
+
+//routes
+app.use('/', loginRoutes)
+
 
 // socket.io connection event
 io.on("connection", (socket) => {
