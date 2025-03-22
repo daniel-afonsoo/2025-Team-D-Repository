@@ -6,7 +6,6 @@ const cors = require('cors')
 const loginRoutes = require('./endpoints/auth-endpoints')
 const dbRoutes = require('./endpoints/database-endpoints')
 
-
 // express instance & server port
 const app = express()
 const backendPort = 5170
@@ -17,7 +16,7 @@ app.use(cors())
 const server = http.createServer(app)
 const io = new Server(server,{
     cors: {
-        origin: "*",                        // accepting requests from all origins for now 
+        origin: "*",   // accepting requests from all origins for now 
     }
 })
 
