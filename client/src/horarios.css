@@ -24,9 +24,9 @@
 .timetable th, .timetable td {
   border: 1px solid black;
   text-align: center;
-  padding: 10px;
-  width: 100px;
-  height: 40px;
+  padding: 5px; /* Reduced padding */
+  width: 80px; /* Reduced width */
+  height: 30px; /* Reduced height */
 }
 
 .timetable .hora {
