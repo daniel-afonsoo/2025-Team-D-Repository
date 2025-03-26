@@ -1,22 +1,26 @@
 // imports
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import Horarios from './horarios'; // Importa a página de horários
-import './horarios.css'; // Importa os estilos
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useSocket } from './utils/useSocket'
 
 function App() {
   // base endpoint message
-  const [baseMessage, setBaseMessage] = useState("fetching server's base endpoint...");
+  const [baseMessage, setBaseMessage] = useState("fethcing server's base endpoint...")
+  const { socketMsg } = useSocket()
 
   // fetch base endpoint message
   useEffect(() => {
     axios.get('http://localhost:5170/')
-      .then(res => setBaseMessage(res.data.message))
+      .then(res => {
+        setBaseMessage(res.data.message)
+
+      })
       .catch(err => {
-        console.log("Error: Fetch to base endpoint. " + err);
-        setBaseMessage("Error: Fetch to base endpoint.");
-      });
-  }, []);
+        console.log("Error: Fetch to base endpoint. " + err)
+        setBaseMessage("Error: Fetch to base endpoint.")
+      })
+    
+  }, [])
 
   return (
     <>
@@ -24,11 +28,10 @@ function App() {
         <h1>Eazy Schedule IPT</h1>
       </a>
       <h3>{baseMessage}</h3>
-
-      {/* Renderiza a página de horários */}
-      <Horarios />
+      <h3>{socketMsg}</h3>
     </>
   );
 }
 
 export default App;
+
