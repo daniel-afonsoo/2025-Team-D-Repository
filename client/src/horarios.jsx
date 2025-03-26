@@ -1,27 +1,31 @@
 import { useState } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import "./horarios.css";
+import "./horarios.css"; // Importa o ficheiro de CSS
 
+// Definição dos dias da semana
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+// Gera as faixas horárias do horário (das 8:30 às 24:00)
 const horas = Array.from({ length: 31 }, (_, i) => {
-  const startHour = 8 + Math.floor((i + 1) / 2);
-  const startMinutes = i % 2 === 0 ? "30" : "00";
-  const endHour = startMinutes === "30" ? startHour + 1 : startHour;
-  const endMinutes = startMinutes === "30" ? "00" : "30";
-  const startTime = `${startHour}:${startMinutes}`;
-  const endTime = `${endHour === 24 ? "00" : endHour}:${endMinutes}`;
-  return `${startTime} - ${endTime}`;
+  const startHour = 8 + Math.floor((i + 1) / 2); // Calcula a hora inicial
+  const startMinutes = i % 2 === 0 ? "30" : "00"; // Define os minutos (30 ou 00)
+  const endHour = startMinutes === "30" ? startHour + 1 : startHour; // Calcula a hora final
+  const endMinutes = startMinutes === "30" ? "00" : "30"; // Define os minutos finais
+  return `${startHour}:${startMinutes} - ${endHour === 24 ? "00" : endHour}:${endMinutes}`;
 });
 
-// Componente Draggable (aula que pode ser movida)
-function Draggable({ id, children }) {
+// Componente que representa uma aula arrastável
+function Draggable({ id, children, isBlocked }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
+    disabled: isBlocked, // Desativa o arrastar se o horário estiver bloqueado
   });
 
+  // Aplica estilo para simular o movimento ao arrastar
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    cursor: isBlocked ? "not-allowed" : "grab", // Altera o cursor se bloqueado
   };
 
   return (
@@ -31,20 +35,18 @@ function Draggable({ id, children }) {
   );
 }
 
-// Componente Droppable (célula que pode receber aulas)
-function Droppable({ id, aulas, children }) {
-  const { isOver, setNodeRef } = useDroppable({
-    id,
-  });
+// Componente que representa um bloco onde as aulas podem ser soltas (drop target)
+function Droppable({ id, aulas, children, isBlocked }) {
+  const { isOver, setNodeRef } = useDroppable({ id });
 
-  const style = {
-    backgroundColor: isOver ? "lightblue" : undefined,
-  };
+  // Altera o fundo do bloco se estiver a ser alvo de um arrastar (hover)
+  const style = { backgroundColor: isOver && !isBlocked ? "lightblue" : undefined };
 
   return (
     <td ref={setNodeRef} style={style} className="empty-slot">
+      {/* Renderiza todas as aulas que estão dentro do bloco */}
       {aulas.map((aula) => (
-        <Draggable key={aula} id={aula}>
+        <Draggable key={aula} id={aula} isBlocked={isBlocked}>
           {aula}
         </Draggable>
       ))}
@@ -53,72 +55,85 @@ function Droppable({ id, aulas, children }) {
   );
 }
 
+// Componente principal que contém o horário
 function Horarios() {
+  // Estados para armazenar os filtros
   const [escola, setEscola] = useState("");
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
-  const [sala, setSala] = useState("");
 
-  // Aulas disponíveis para arrastar
+  // Estado para armazenar as aulas colocadas no horário
+  const [aulas, setAulas] = useState({});
+
+  // Estado com a lista de aulas disponíveis para arrastar
   const [disponiveis, setDisponiveis] = useState([
     "Matemática II - Sala B257",
     "Introdução à Programação - Sala B128",
     "Programação Web - Sala B255",
   ]);
 
-  // Aulas que foram colocadas no horário
-  const [aulas, setAulas] = useState({});
+  // Estado para controlar se o horário está bloqueado
+  const [isBlocked, setIsBlocked] = useState(false);
 
+  // Estado para armazenar mensagens de erro
+  const [erro, setErro] = useState(false);
+
+  // Função chamada quando uma aula é solta (drag and drop)
   const handleDragEnd = (event) => {
+    if (isBlocked) return; // Impede mudanças se o horário estiver bloqueado
+
     const { active, over } = event;
-    if (!over) return;
-  
+    if (!over) {
+      // Se a aula for solta fora do horário, volta para as disponíveis
+      if (!disponiveis.includes(active.id)) {
+        setDisponiveis((prev) => [...prev, active.id]);
+      }
+      return;
+    }
+
     setAulas((prevAulas) => {
       const newAulas = { ...prevAulas };
-  
-      // Remove the class from any previous slots
-      Object.keys(newAulas).forEach((slot) => {
-        newAulas[slot] = newAulas[slot].filter((aula) => aula !== active.id);
-        if (newAulas[slot].length === 0) delete newAulas[slot];
+
+      // Se o bloco já estiver ocupado, ativa o erro e impede a inserção
+      if (newAulas[over.id]) {
+        setErro(true); // Marca erro para exibição posterior
+        return prevAulas;
+      }
+
+      // Remove a aula de qualquer posição anterior
+      Object.keys(newAulas).forEach((key) => {
+        if (newAulas[key] === active.id) {
+          delete newAulas[key];
+        }
       });
-  
-      // Add the class to the new slot
-      if (!newAulas[over.id]) {
-        newAulas[over.id] = [];
-      }
-      newAulas[over.id].push(active.id);
-  
-      return newAulas;
-    });
-  
-    // Remove the class from the "Available Classes" list if it's dragged to the timetable
-    setDisponiveis((prevDisponiveis) => prevDisponiveis.filter((aula) => aula !== active.id));
-  };
-  
-  
 
-  // Função para remover uma aula do horário e devolver à aba de disponíveis
-  const removerAula = (diaHora, aula) => {
-    setAulas((prevAulas) => {
-      const newAulas = { ...prevAulas };
-      newAulas[diaHora] = newAulas[diaHora].filter((a) => a !== aula);
+      // Adiciona a aula ao novo bloco
+      newAulas[over.id] = active.id;
 
-      // Se não houver mais aulas na célula, removemos a chave
-      if (newAulas[diaHora].length === 0) {
-        delete newAulas[diaHora];
-      }
+      // Remove a aula da aba de disponíveis
+      setDisponiveis((prevDisponiveis) =>
+        prevDisponiveis.filter((aula) => aula !== active.id)
+      );
 
       return newAulas;
     });
-
-    // Devolve a aula para as disponíveis
-    setDisponiveis((prevDisponiveis) => [...prevDisponiveis, aula]);
   };
+
+  // Exibe a mensagem de erro apenas uma vez e reseta o estado do erro
+  if (erro) {
+    alert("Este bloco já tem uma aula!");
+    setErro(false); // Reseta o erro após exibir o alerta
+  }
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="horarios-container">
+        {/* Botão para bloquear/desbloquear o horário */}
+        <button onClick={() => setIsBlocked((prev) => !prev)} className="block-btn">
+          {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
+        </button>
+
         <div className="conteudo">
           {/* Tabela de horários */}
           <table className="timetable">
@@ -135,17 +150,12 @@ function Horarios() {
                 <tr key={index}>
                   <td className="hora">{hora}</td>
                   {diasSemana.map((dia) => (
-                    <Droppable key={`${dia}-${hora}`} id={`${dia}-${hora}`} aulas={aulas[`${dia}-${hora}`] || []}>
-                      {/* Botão para remover aulas */}
-                      {(aulas[`${dia}-${hora}`] || []).map((aula) => (
-                        <div key={aula} className="aula-container">
-                          <span>{aula}</span>
-                          <button className="remove-btn" onClick={() => removerAula(`${dia}-${hora}`, aula)}>
-                            X
-                          </button>
-                        </div>
-                      ))}
-                    </Droppable>
+                    <Droppable
+                      key={`${dia}-${hora}`}
+                      id={`${dia}-${hora}`}
+                      aulas={aulas[`${dia}-${hora}`] ? [aulas[`${dia}-${hora}`]] : []}
+                      isBlocked={isBlocked}
+                    />
                   ))}
                 </tr>
               ))}
@@ -154,6 +164,7 @@ function Horarios() {
 
           {/* Filtros e aba de aulas */}
           <div className="filtros-e-aulas">
+            {/* Filtros para seleção de escola, curso, ano e turma */}
             <div className="filtros">
               <select onChange={(e) => setEscola(e.target.value)}>
                 <option value="">Escolher Escola</option>
@@ -178,11 +189,11 @@ function Horarios() {
               </select>
             </div>
 
-            {/* Aba de arrastar aulas */}
+            {/* Aba de aulas disponíveis */}
             <div className="aulas">
               <h3>Aulas Disponíveis</h3>
               {disponiveis.map((aula) => (
-                <Draggable key={aula} id={aula}>
+                <Draggable key={aula} id={aula} isBlocked={isBlocked}>
                   <div className="aula">{aula}</div>
                 </Draggable>
               ))}
