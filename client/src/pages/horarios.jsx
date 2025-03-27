@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import "./horarios.css"; // Importa o ficheiro de CSS
+import "../styles/horarios.css"; // Ensure the correct relative path to the CSS file// Importa o ficheiro de CSS
 
 // Definição dos dias da semana
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -84,40 +84,66 @@ function Horarios() {
     if (isBlocked) return; // Impede mudanças se o horário estiver bloqueado
 
     const { active, over } = event;
+
     if (!over) {
-      // Se a aula for solta fora do horário, volta para as disponíveis
-      if (!disponiveis.includes(active.id)) {
-        setDisponiveis((prev) => [...prev, active.id]);
-      }
+      // Se a aula for solta fora de um bloco válido, adiciona de volta à lista de disponíveis
+      setDisponiveis((prevDisponiveis) => {
+        // Verifica se a aula já está na lista de disponíveis
+        if (!prevDisponiveis.includes(active.id)) {
+          return [...prevDisponiveis, active.id];
+        }
+        return prevDisponiveis;
+      });
+
+      // Remove a aula do horário (estado de aulas)
+      setAulas((prevAulas) => {
+        const newAulas = { ...prevAulas };
+        Object.keys(newAulas).forEach((key) => {
+          if (newAulas[key] === active.id) {
+            delete newAulas[key];
+          }
+        });
+        return newAulas;
+      });
+
       return;
     }
 
     setAulas((prevAulas) => {
       const newAulas = { ...prevAulas };
 
-      // Se o bloco já estiver ocupado, ativa o erro e impede a inserção
+      // Verifica se o bloco já tem uma aula
       if (newAulas[over.id]) {
-        setErro(true); // Marca erro para exibição posterior
-        return prevAulas;
+        alert("Este bloco já tem uma aula!");
+
+        // Garante que a aula não seja adicionada à aba de disponíveis
+        setDisponiveis((prevDisponiveis) => {
+          if (!prevDisponiveis.includes(active.id) && !Object.values(prevAulas).includes(active.id)) {
+            return [...prevDisponiveis, active.id];
+          }
+          return prevDisponiveis;
+        });
+
+        return prevAulas; // Mantém o estado sem alterações
       }
 
-      // Remove a aula de qualquer posição anterior
+      // Remove a aula da posição anterior
       Object.keys(newAulas).forEach((key) => {
         if (newAulas[key] === active.id) {
           delete newAulas[key];
         }
       });
 
-      // Adiciona a aula ao novo bloco
+      // Adiciona a aula à nova posição
       newAulas[over.id] = active.id;
-
-      // Remove a aula da aba de disponíveis
-      setDisponiveis((prevDisponiveis) =>
-        prevDisponiveis.filter((aula) => aula !== active.id)
-      );
 
       return newAulas;
     });
+
+    // Remove a aula da lista de disponíveis apenas se o drop for válido
+    setDisponiveis((prevDisponiveis) =>
+      prevDisponiveis.filter((aula) => aula !== active.id)
+    );
   };
 
   // Exibe a mensagem de erro apenas uma vez e reseta o estado do erro
