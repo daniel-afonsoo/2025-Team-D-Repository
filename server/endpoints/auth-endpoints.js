@@ -1,6 +1,7 @@
 //imports 
 const express = require('express')
 const router = express.Router()
+const pool = require('../db/connection.js') 
 
 // Get request test
 router.get('/test', (req, res) => {
@@ -14,12 +15,13 @@ router.get('/users', (req, res) => {
     return res.json(users)
 })
 
+
 // Post request test
-router.post('/login',(req,res) => {
+router.post('/auth/login',(req,res) => {
     const {email,password} = req.body
-    const query = `SELECT * FROM users WHERE email = ? AND password = ?`
+    const query = `SELECT * FROM docente WHERE Email = ? AND Password = ?`
     const values = [email,password]
-    db.query(query,values,(err,result) => {
+    pool.query(query,values,(err,result) => {
         if(err) {
             console.error(err)
             return res.status(500).json({error: 'Internal server error'})
