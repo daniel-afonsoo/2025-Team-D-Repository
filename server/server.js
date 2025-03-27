@@ -5,6 +5,9 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const multer = require("multer");
 const xlsx = require("xlsx");
+const path = require("path");
+const fs = require("fs");
+
 
 // express instance & server port
 const app = express();
@@ -48,14 +51,34 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
         console.log("Dados convertidos:", data); // DEBUG
 
-        res.json({ success: true, data });
+        // Convert data to SQL INSERT statements
+        let sqlStatements = generateSQL(data);
+
+        // Save SQL to a file
+        const sqlFilePath = path.join(__dirname, "docentes.sql");
+        fs.writeFileSync(sqlFilePath, sqlStatements, "utf-8");
+
+        console.log(`SQL file saved at: ${sqlFilePath}`);
+
+        res.json({ success: true, message: "SQL file generated!", filePath: sqlFilePath });
     } catch (error) {
         console.error("Erro ao processar o Excel:", error);
         res.status(500).json({ error: "Erro ao processar o arquivo" });
     }
 });
 
+// Function to generate SQL INSERT statements
+function generateSQL(data) {
+    let sql = "USE easyscheduleipt;\n\n";
 
+    data.forEach((row) => {
+        if (!row.ID || !row.Nome || !row.Email || !row.Password) return;
+
+        sql += `INSERT INTO Docente (ID, Nome, Email, Password) VALUES (${row.ID}, '${row.Nome}', '${row.Email}', '${row.Password}');\n`;
+    });
+
+    return sql;
+}
 // socket.io connection event
 io.on("connection", (socket) => {
     console.log(`A new user has connected. User ID: ${socket.id}`);
