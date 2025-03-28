@@ -5,10 +5,7 @@ const { setupSockets } = require('./sockets/sockets')
 const cors = require('cors')
 const loginRoutes = require('./endpoints/auth-endpoints')
 const dbRoutes = require('./endpoints/database-endpoints')
-const path = require("path")
-const { uploadFile } = require("./FILTROS/uploadHandler")  // Importando o handler de upload
-const { processExcelFile } = require("./FILTROS/sqlGenerator")  // Importando o gerador de SQL
-const fs = require("fs")
+const sqlRoutes = require('./endpoints/sqlgen-endpoints')
 
 // express instance & server port
 const app = express()
@@ -26,34 +23,10 @@ app.get("/", (req, res) => {
     res.json({ message: "Hello from the server's backend!" });
 });
 
-// Rota para upload do arquivo Excel e geração dos arquivos SQL
-app.post("/upload", uploadFile(), (req, res) => {
-    console.log("Recebendo arquivo:", req.file); // DEBUG
-
-    if (!req.file) {
-        return res.status(400).json({ error: "Nenhum arquivo foi enviado" });
-    }
-
-    try {
-        // Processar o arquivo Excel e gerar os arquivos SQL para cada folha
-        const generatedFiles = processExcelFile(req.file.path);
-
-        console.log(`Arquivos SQL gerados em: ${generatedFiles}`);
-
-        res.json({
-            success: true,
-            message: "Arquivos SQL gerados!",
-            files: generatedFiles,  // Retorna os caminhos dos arquivos gerados
-        });
-    } catch (error) {
-        console.error("Erro ao processar o Excel:", error);
-        res.status(500).json({ error: "Erro ao processar o arquivo" });
-    }
-});
-
 //routes
 app.use('/', loginRoutes)
 app.use('/', dbRoutes)
+app.use('/', sqlRoutes)
 
 // setup socket.io
 setupSockets(server)

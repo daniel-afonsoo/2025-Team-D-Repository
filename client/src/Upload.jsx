@@ -22,17 +22,11 @@ function Upload() {
       const response = await axios.post("http://localhost:5170/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      console.log("Resposta do backend:", response.data); // DEBUG: Ver se os dados chegaram
-
-      if (response.data.success) {
-        setData(response.data.data); // Armazena os dados recebidos do backend
-      } else {
-        alert("Erro ao processar o ficheiro.");
-      }
+      
+      alert(response.data.message)
+      
     } catch (error) {
-      console.error("Erro ao enviar o ficheiro:", error);
-      alert("Erro ao enviar o ficheiro.");
+      alert(`Erro ao enviar o ficheiro:\n ${error}`);
     }
   };
 
