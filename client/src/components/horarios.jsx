@@ -79,16 +79,13 @@ function Horarios() {
   // Estado para armazenar mensagens de erro
   const [erro, setErro] = useState("");
 
-  // Função chamada quando uma aula é solta (drag and drop)
+  // Verifica se todos os filtros foram selecionados
+  const filtrosSelecionados = escola && curso && ano && turma;
+
   const handleDragEnd = (event) => {
     if (isBlocked) return; // Impede mudanças se o horário estiver bloqueado
 
     const { active, over } = event;
-
-    // Verifica se o drop foi no mesmo bloco onde a aula já está
-    if (over && aulas[over.id] === active.id) {
-      return; // Não faz nada se a aula já estiver no bloco de destino
-    }
 
     if (!over) {
       // Se a aula for solta fora de um bloco válido, adiciona de volta à lista de disponíveis
@@ -158,79 +155,82 @@ function Horarios() {
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="horarios-container">
-        {/* Botão para bloquear/desbloquear o horário */}
-        <button onClick={() => setIsBlocked((prev) => !prev)} className="block-btn">
-          {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
-        </button>
-
-        {/* Exibe a mensagem de erro, se houver */}
-        {erro && <div className="error-message">{erro}</div>}
-
-        <div className="conteudo">
-          {/* Tabela de horários */}
-          <table className="timetable">
-            <thead>
-              <tr>
-                <th>Horas</th>
-                {diasSemana.map((dia) => (
-                  <th key={dia}>{dia}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {horas.map((hora, index) => (
-                <tr key={index}>
-                  <td className="hora">{hora}</td>
-                  {diasSemana.map((dia) => (
-                    <Droppable
-                      key={`${dia}-${hora}`}
-                      id={`${dia}-${hora}`}
-                      aulas={aulas[`${dia}-${hora}`] ? [aulas[`${dia}-${hora}`]] : []}
-                      isBlocked={isBlocked}
-                    />
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Filtros e aba de aulas */}
-          <div className="filtros-e-aulas">
-            {/* Filtros para seleção de escola, curso, ano e turma */}
-            <div className="filtros">
-              <select onChange={(e) => setEscola(e.target.value)}>
-                <option value="">Escolher Escola</option>
-                <option value="ESTT">ESTT</option>
-                <option value="ESGT">ESGT</option>
-              </select>
-              <select onChange={(e) => setCurso(e.target.value)}>
-                <option value="">Escolher Curso</option>
-                <option value="Engenharia Informática">Engenharia Informática</option>
-                <option value="Gestão">Gestão</option>
-              </select>
-              <select onChange={(e) => setAno(e.target.value)}>
-                <option value="">Escolher Ano</option>
-                <option value="1">1º Ano</option>
-                <option value="2">2º Ano</option>
-                <option value="3">3º Ano</option>
-              </select>
-              <select onChange={(e) => setTurma(e.target.value)}>
-                <option value="">Escolher Turma</option>
-                <option value="A">Turma A</option>
-                <option value="B">Turma B</option>
-              </select>
-            </div>
-
-            {/* Aba de aulas disponíveis */}
-            <div className="aulas">
-              <h3>Aulas Disponíveis</h3>
-              {disponiveis.map((aula) => (
-                <Draggable key={aula} id={aula} isBlocked={isBlocked}>
-                  <div className="aula">{aula}</div>
-                </Draggable>
-              ))}
-            </div>
+        <div className="layout">
+          {/* Filtros à esquerda */}
+          <div className="filtros">
+            <h3>Filtros</h3>
+            <select onChange={(e) => setEscola(e.target.value)} value={escola}>
+              <option value="">Escolher Escola</option>
+              <option value="ESTT">ESTT</option>
+              <option value="ESGT">ESGT</option>
+            </select>
+            <select onChange={(e) => setCurso(e.target.value)} value={curso}>
+              <option value="">Escolher Curso</option>
+              <option value="Engenharia Informática">Engenharia Informática</option>
+              <option value="Gestão">Gestão</option>
+            </select>
+            <select onChange={(e) => setAno(e.target.value)} value={ano}>
+              <option value="">Escolher Ano</option>
+              <option value="1">1º Ano</option>
+              <option value="2">2º Ano</option>
+              <option value="3">3º Ano</option>
+            </select>
+            <select onChange={(e) => setTurma(e.target.value)} value={turma}>
+              <option value="">Escolher Turma</option>
+              <option value="A">Turma A</option>
+              <option value="B">Turma B</option>
+            </select>
           </div>
+
+          {/* Exibe o horário e a aba de aulas disponíveis apenas se os filtros forem selecionados */}
+          {filtrosSelecionados ? (
+            <div className="conteudo">
+              <div className="timetable-container">
+                <button onClick={() => setIsBlocked((prev) => !prev)} className="block-btn">
+                  {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
+                </button>
+                {erro && <div className="error-message">{erro}</div>}
+                <table className="timetable">
+                  <thead>
+                    <tr>
+                      <th>Horas</th>
+                      {diasSemana.map((dia) => (
+                        <th key={dia}>{dia}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {horas.map((hora, index) => (
+                      <tr key={index}>
+                        <td className="hora">{hora}</td>
+                        {diasSemana.map((dia) => (
+                          <Droppable
+                            key={`${dia}-${hora}`}
+                            id={`${dia}-${hora}`}
+                            aulas={aulas[`${dia}-${hora}`] ? [aulas[`${dia}-${hora}`]] : []}
+                            isBlocked={isBlocked}
+                          />
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="aulas">
+                <h3>Aulas Disponíveis</h3>
+                {disponiveis.map((aula) => (
+                  <Draggable key={aula} id={aula} isBlocked={isBlocked}>
+                    <div className="aula">{aula}</div>
+                  </Draggable>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mensagem-filtros">
+              Por favor, selecione a escola, o curso, o ano e a turma para visualizar o horário.
+            </div>
+          )}
         </div>
       </div>
     </DndContext>
