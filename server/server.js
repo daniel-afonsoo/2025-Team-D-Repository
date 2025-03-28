@@ -5,8 +5,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const path = require("path");
-const { uploadFile } = require("./FILTROS/uploadHandler");  // Import the upload handler
-const { processExcelFile } = require(".//FILTROS/sqlGenerator");  // Import the SQL generator
+const { uploadFile } = require("./FILTROS/uploadHandler");  // Importando o handler de upload
+const { processExcelFile } = require("./FILTROS/sqlGenerator");  // Importando o gerador de SQL
 const fs = require("fs");
 
 // express instance & server port
@@ -18,7 +18,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*", // accepting requests from all origins for now
+        origin: "*", // aceitando solicitações de todos os origens por enquanto
     },
 });
 
@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
     res.json({ message: "Hello from the server's backend!" });
 });
 
-// Route for uploading Excel file and generating SQL
+// Rota para upload do arquivo Excel e geração dos arquivos SQL
 app.post("/upload", uploadFile(), (req, res) => {
     console.log("Recebendo arquivo:", req.file); // DEBUG
 
@@ -37,12 +37,16 @@ app.post("/upload", uploadFile(), (req, res) => {
     }
 
     try {
-        // Process the uploaded file and generate SQL file
-        const sqlFilePath = processExcelFile(req.file.path);
+        // Processar o arquivo Excel e gerar os arquivos SQL para cada folha
+        const generatedFiles = processExcelFile(req.file.path);
 
-        console.log(`SQL file saved at: ${sqlFilePath}`);
+        console.log(`Arquivos SQL gerados em: ${generatedFiles}`);
 
-        res.json({ success: true, message: "SQL file generated!", filePath: sqlFilePath });
+        res.json({
+            success: true,
+            message: "Arquivos SQL gerados!",
+            files: generatedFiles,  // Retorna os caminhos dos arquivos gerados
+        });
     } catch (error) {
         console.error("Erro ao processar o Excel:", error);
         res.status(500).json({ error: "Erro ao processar o arquivo" });
