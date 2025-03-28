@@ -15,7 +15,7 @@ createRoot(document.getElementById('root')).render(
 
 /*
   
- <Curso />
+  <Curso />
   <UC />
   <Sala />
   <Escola />

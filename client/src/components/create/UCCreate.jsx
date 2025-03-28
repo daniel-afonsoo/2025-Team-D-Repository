@@ -39,7 +39,7 @@ const UCCreate = () => {
         // Atualiza o valor do curso na posição selecionada
         novosCursos[index] = value;
         // Atualiza o estado com a nova lista de cursos
-        setCurso(novasEscolas);
+        setCurso(novosCursos);
     };
 
 
