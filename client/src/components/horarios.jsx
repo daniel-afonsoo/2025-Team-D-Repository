@@ -77,7 +77,7 @@ function Horarios() {
   const [isBlocked, setIsBlocked] = useState(false);
 
   // Estado para armazenar mensagens de erro
-  const [erro, setErro] = useState(false);
+  const [erro, setErro] = useState("");
 
   // Função chamada quando uma aula é solta (drag and drop)
   const handleDragEnd = (event) => {
@@ -85,10 +85,14 @@ function Horarios() {
 
     const { active, over } = event;
 
+    // Verifica se o drop foi no mesmo bloco onde a aula já está
+    if (over && aulas[over.id] === active.id) {
+      return; // Não faz nada se a aula já estiver no bloco de destino
+    }
+
     if (!over) {
       // Se a aula for solta fora de um bloco válido, adiciona de volta à lista de disponíveis
       setDisponiveis((prevDisponiveis) => {
-        // Verifica se a aula já está na lista de disponíveis
         if (!prevDisponiveis.includes(active.id)) {
           return [...prevDisponiveis, active.id];
         }
@@ -114,15 +118,17 @@ function Horarios() {
 
       // Verifica se o bloco já tem uma aula
       if (newAulas[over.id]) {
-        alert("Este bloco já tem uma aula!");
+        setErro("Este bloco já tem uma aula!"); // Define a mensagem de erro
 
-        // Garante que a aula não seja adicionada à aba de disponíveis
-        setDisponiveis((prevDisponiveis) => {
-          if (!prevDisponiveis.includes(active.id) && !Object.values(prevAulas).includes(active.id)) {
-            return [...prevDisponiveis, active.id];
-          }
-          return prevDisponiveis;
-        });
+        // Garante que a aula não seja adicionada à aba de disponíveis se já estiver no horário
+        if (!Object.values(prevAulas).includes(active.id)) {
+          setDisponiveis((prevDisponiveis) => {
+            if (!prevDisponiveis.includes(active.id)) {
+              return [...prevDisponiveis, active.id];
+            }
+            return prevDisponiveis;
+          });
+        }
 
         return prevAulas; // Mantém o estado sem alterações
       }
@@ -137,6 +143,9 @@ function Horarios() {
       // Adiciona a aula à nova posição
       newAulas[over.id] = active.id;
 
+      // Limpa a mensagem de erro, se houver
+      setErro("");
+
       return newAulas;
     });
 
@@ -146,12 +155,6 @@ function Horarios() {
     );
   };
 
-  // Exibe a mensagem de erro apenas uma vez e reseta o estado do erro
-  if (erro) {
-    alert("Este bloco já tem uma aula!");
-    setErro(false); // Reseta o erro após exibir o alerta
-  }
-
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="horarios-container">
@@ -159,6 +162,9 @@ function Horarios() {
         <button onClick={() => setIsBlocked((prev) => !prev)} className="block-btn">
           {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
         </button>
+
+        {/* Exibe a mensagem de erro, se houver */}
+        {erro && <div className="error-message">{erro}</div>}
 
         <div className="conteudo">
           {/* Tabela de horários */}
