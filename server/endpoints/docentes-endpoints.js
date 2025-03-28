@@ -30,28 +30,30 @@ router.post('/createDocente',(req,res)=>{
 
 router.post('/updateDocente',(req,res)=>{
     const {id,nome,email,password} = req.body
-    const query = `PUT INTO docente (Nome,Email,Password) VALUES (?,?,?) Where id = ?`
+    const query = `UPDATE docente SET Nome = ?, Email = ?, Password = ? WHERE ID = ?`
     const values = [nome,email,password,id]
     pool.query(query,values,(err,result)=>{
         if(err){
             console.error(err)
             return res.status(500).json({error: 'Internal server error'})
-            res.json({message: 'Docente atualizado com sucesso'})
+        
         }
+        return res.status(200).json({message: 'Docente atualizado com sucesso'})
     })
 
 })
 
 router.post('/deleteDocente',(req,res)=>{
     const {id} = req.body
-    const query = `DELETE FROM docente WHERE id = ?`
+    const query = `DELETE FROM docente WHERE ID = ?`
     const values = [id]
     pool.query(query,values, (err,result)=>{
         if(err){
             console.error(err)
             return res.status(500).json({error: 'Internal server error'})
-            res.json({message: 'Docente eliminado com sucesso'})
         }
+        return res.status(200).json({message: 'Docente eliminado com sucesso'})
+        
     })
 })
 
