@@ -1,0 +1,86 @@
+.horarios-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.instituicao-selector {
+  margin-bottom: 15px;
+}
+
+.conteudo {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.timetable {
+  border-collapse: collapse;
+  width: 800px;
+  table-layout: fixed;
+}
+
+.timetable th, .timetable td {
+  border: 1px solid black;
+  text-align: center;
+  padding: 5px; /* Reduced padding */
+  width: 80px; /* Reduced width */
+  height: 30px; /* Reduced height */
+}
+
+.timetable .hora {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.empty-slot {
+  background-color: white;
+}
+
+.filtros-e-aulas {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.filtros select {
+  display: block;
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 200px;
+}
+
+.aulas {
+  border: 1px solid black;
+  padding: 10px;
+  width: 200px;
+  background-color: #f9f9f9;
+}
+
+.aulas h3 {
+  text-align: center;
+}
+
+.aula {
+  background-color: lightblue;
+  padding: 10px;
+  margin: 5px 0;
+  cursor: grab;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.block-btn {
+  margin-bottom: 15px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.block-btn:hover {
+  background-color: #0056b3;
+}

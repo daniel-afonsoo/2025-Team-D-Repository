@@ -1,26 +1,24 @@
-// server.js
-
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const cors = require("cors");
-const path = require("path");
-const { uploadFile } = require("./FILTROS/uploadHandler");  // Importando o handler de upload
-const { processExcelFile } = require("./FILTROS/sqlGenerator");  // Importando o gerador de SQL
-const fs = require("fs");
+// imports
+const express = require('express')
+const http = require('http')
+const { setupSockets } = require('./sockets/sockets')
+const cors = require('cors')
+const loginRoutes = require('./endpoints/auth-endpoints')
+const dbRoutes = require('./endpoints/database-endpoints')
+const path = require("path")
+const { uploadFile } = require("./FILTROS/uploadHandler")  // Importando o handler de upload
+const { processExcelFile } = require("./FILTROS/sqlGenerator")  // Importando o gerador de SQL
+const fs = require("fs")
 
 // express instance & server port
-const app = express();
-const backendPort = 5170;
-app.use(cors());
+const app = express()
+const backendPort = 5170
 
-// socket.io server
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*", // aceitando solicitações de todos os origens por enquanto
-    },
-});
+app.use(cors())
+app.use(express.json()) // enable json parsing
+
+// setup http server
+const server = http.createServer(app)
 
 // base endpoint
 app.get("/", (req, res) => {
@@ -53,15 +51,15 @@ app.post("/upload", uploadFile(), (req, res) => {
     }
 });
 
-// socket.io connection event
-io.on("connection", (socket) => {
-    console.log(`A new user has connected. User ID: ${socket.id}`);
-});
+//routes
+app.use('/', loginRoutes)
+app.use('/', dbRoutes)
+
+// setup socket.io
+setupSockets(server)
 
 // starting the server
 server.listen(backendPort, () => {
-    console.log("\n=============== Easy Schedule IPT - Backend ===============");
-    console.log(`Server started. Listening on port ${backendPort}.`);
-    console.log("Socket.io server is running...");
-    console.log("\n");
-});
+    console.log("\n=============== Easy Schedule IPT - Backend ===============")
+    console.log(`Server started. Listening on port ${backendPort}.`)
+})
