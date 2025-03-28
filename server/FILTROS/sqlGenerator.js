@@ -10,7 +10,7 @@ function generateSQL(data) {
     data.forEach((row) => {
         if (!row.ID || !row.Nome || !row.Email || !row.Password) return;
 
-        sql += `INSERT INTO Docente (ID, Nome, Email, Password) VALUES (${row.ID}, '${row.Nome}', '${row.Email}', '${row.Password}');\n`;
+        sql += `INSERT INTO Docente (ID, Nome, Email, Password) VALUES (${row.ID}, "${row.Nome}", '${row.Email}', '${row.Password}');\n`;
     });
 
     return sql;
