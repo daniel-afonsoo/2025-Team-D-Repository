@@ -3,6 +3,11 @@ import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css"; // Ensure the correct relative path to the CSS file// Importa o ficheiro de CSS
 
+// sockets
+import { useSocket } from '../utils/useSocket'
+import socket from '../utils/socket' 
+
+
 // Definição dos dias da semana
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
@@ -64,7 +69,13 @@ function Horarios() {
   const [turma, setTurma] = useState("");
 
   // Estado para armazenar as aulas colocadas no horário
-  const [aulas, setAulas] = useState({});
+  //const [aulas, setAulas] = useState({});
+  const { aulas, setAulas } = useSocket() 
+
+  socket.on("update-aulas", (data) => {
+    console.log("update-aulas event received. Data: ", data)
+    setAulas(data);
+  })
 
   // Estado com a lista de aulas disponíveis para arrastar
   const [disponiveis, setDisponiveis] = useState([
@@ -109,6 +120,7 @@ function Horarios() {
       return;
     }
 
+    // Adiciona a aula do horário (estado de aulas)
     setAulas((prevAulas) => {
       const newAulas = { ...prevAulas };
 
@@ -136,8 +148,9 @@ function Horarios() {
 
       // Adiciona a aula à nova posição
       newAulas[over.id] = active.id;
-
+      socket.emit("update-aulas", newAulas );
       return newAulas;
+      
     });
 
     // Remove a aula da lista de disponíveis apenas se o drop for válido
