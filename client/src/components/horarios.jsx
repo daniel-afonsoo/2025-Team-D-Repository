@@ -29,25 +29,39 @@ function Draggable({ id, children, isBlocked }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="aula">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className="aula"
+      onDragStart={() => setAulaSendoArrastada(id)} // Define a aula sendo arrastada
+    >
       {children}
     </div>
   );
 }
 
 // Componente que representa um bloco onde as aulas podem ser soltas (drop target)
-function Droppable({ id, aulas, children, isBlocked }) {
+function Droppable({ id, aulas, children, isBlocked, aulaSendoArrastada }) {
   const { isOver, setNodeRef } = useDroppable({ id });
 
-  // Altera o fundo do bloco se estiver a ser alvo de um arrastar (hover)
-  const style = { backgroundColor: isOver && !isBlocked ? "lightblue" : undefined };
+  // Verifica se o bloco atual é o inicial da aula sendo arrastada
+  const isBlocoInicial = aulas.includes(aulaSendoArrastada);
+
+  // Aplica estilo para destacar o bloco inicial
+  const style = {
+    backgroundColor: isOver && !isBlocked ? "lightblue" : isBlocoInicial ? "lightgreen" : undefined,
+  };
 
   return (
     <td ref={setNodeRef} style={style} className="empty-slot">
-      {/* Renderiza todas as aulas que estão dentro do bloco */}
+      {/* Renderiza a aula se este bloco estiver ocupado */}
       {aulas.map((aula) => (
         <Draggable key={aula} id={aula} isBlocked={isBlocked}>
-          {aula}
+          <div className="aula" onClick={() => iniciarEdicao(aula)}>
+            {aula}
+          </div>
         </Draggable>
       ))}
       {children}
@@ -67,17 +81,34 @@ function Horarios() {
   const [aulas, setAulas] = useState({});
 
   // Estado com a lista de aulas disponíveis para arrastar
-  const [disponiveis, setDisponiveis] = useState([
-    "Matemática II - Sala B257",
-    "Introdução à Programação - Sala B128",
-    "Programação Web - Sala B255",
-  ]);
+  const [disponiveis, setDisponiveis] = useState([]); // Inicializa como uma lista vazia
 
   // Estado para controlar se o horário está bloqueado
   const [isBlocked, setIsBlocked] = useState(false);
 
+  const [novaAula, setNovaAula] = useState({
+    disciplina: "",
+    sala: "",
+    professor: "",
+    duracao: "1h",
+  });
+
+  const [aulaEmEdicao, setAulaEmEdicao] = useState(null); // Armazena a aula em edição
+
+  const [aulaSelecionada, setAulaSelecionada] = useState(""); // Armazena a seleção do dropdown
+
   // Estado para armazenar mensagens de erro
   const [erro, setErro] = useState("");
+
+  // Estado para armazenar o termo de pesquisa
+  const [termoPesquisa, setTermoPesquisa] = useState("");
+
+  const [aulaSendoArrastada, setAulaSendoArrastada] = useState(null); // Armazena o ID da aula sendo arrastada
+
+  // Filtra as aulas disponíveis com base no termo de pesquisa
+  const aulasFiltradas = disponiveis.filter((aula) =>
+    aula.toLowerCase().includes(termoPesquisa.toLowerCase())
+  );
 
   // Verifica se todos os filtros foram selecionados
   const filtrosSelecionados = escola && curso && ano && turma;
@@ -86,6 +117,9 @@ function Horarios() {
     if (isBlocked) return; // Impede mudanças se o horário estiver bloqueado
 
     const { active, over } = event;
+
+    // Limpa o estado da aula sendo arrastada
+    setAulaSendoArrastada(null);
 
     if (!over) {
       // Se a aula for solta fora de um bloco válido, adiciona de volta à lista de disponíveis
@@ -110,25 +144,23 @@ function Horarios() {
       return;
     }
 
+    const aula = disponiveis.find((a) => a === active.id) || Object.values(aulas).find((a) => a === active.id);
+    const duracao = parseInt(aula.match(/\((\d+)h\)/)?.[1] || "1", 10); // Extrai a duração da aula (ex.: "2h" -> 2)
+    const [dia, hora] = over.id.split("-"); // Divide o ID do bloco (ex.: "Segunda-8:30")
+
+    const horaIndex = horas.findIndex((h) => h.startsWith(hora)); // Encontra o índice da hora inicial
+    const blocosNecessarios = Array.from({ length: duracao * 2 }, (_, i) => `${dia}-${horas[horaIndex + i]}`); // Calcula os blocos consecutivos
+
+    // Verifica se algum dos blocos já está ocupado por outra aula
+    const conflito = blocosNecessarios.some((bloco) => aulas[bloco] && aulas[bloco] !== active.id);
+    if (conflito) {
+      setErro("Conflito: Um ou mais blocos já estão ocupados!");
+      return;
+    }
+
+    // Atualiza o estado de aulas para incluir os blocos ocupados
     setAulas((prevAulas) => {
       const newAulas = { ...prevAulas };
-
-      // Verifica se o bloco já tem uma aula
-      if (newAulas[over.id]) {
-        setErro("Este bloco já tem uma aula!"); // Define a mensagem de erro
-
-        // Garante que a aula não seja adicionada à aba de disponíveis se já estiver no horário
-        if (!Object.values(prevAulas).includes(active.id)) {
-          setDisponiveis((prevDisponiveis) => {
-            if (!prevDisponiveis.includes(active.id)) {
-              return [...prevDisponiveis, active.id];
-            }
-            return prevDisponiveis;
-          });
-        }
-
-        return prevAulas; // Mantém o estado sem alterações
-      }
 
       // Remove a aula da posição anterior
       Object.keys(newAulas).forEach((key) => {
@@ -137,19 +169,72 @@ function Horarios() {
         }
       });
 
-      // Adiciona a aula à nova posição
-      newAulas[over.id] = active.id;
-
-      // Limpa a mensagem de erro, se houver
-      setErro("");
+      // Adiciona a aula aos blocos necessários
+      blocosNecessarios.forEach((bloco) => {
+        newAulas[bloco] = active.id;
+      });
 
       return newAulas;
     });
 
-    // Remove a aula da lista de disponíveis apenas se o drop for válido
+    // Remove a aula da lista de disponíveis, se ela estava lá
     setDisponiveis((prevDisponiveis) =>
       prevDisponiveis.filter((aula) => aula !== active.id)
     );
+
+    // Limpa a mensagem de erro, se houver
+    setErro("");
+  };
+
+  const adicionarAula = () => {
+    const { disciplina, sala, professor, duracao } = novaAula;
+
+    if (!disciplina || !sala || !professor || !duracao) {
+      alert("Preencha todos os campos antes de adicionar a aula.");
+      return;
+    }
+
+    const novaAulaTexto = `${disciplina} - ${sala} - ${professor} (${duracao})`;
+    setDisponiveis((prev) => [...prev, novaAulaTexto]);
+
+    setNovaAula({ disciplina: "", sala: "", professor: "", duracao: "1h" });
+  };
+
+  const iniciarEdicao = (aula) => {
+    const [disciplina, sala, professor, duracao] = aula
+      .match(/^(.*?) - (.*?) - (.*?) \((.*?)\)$/)
+      .slice(1); // Extrai os campos da aula
+  
+    setAulaEmEdicao({ disciplina, sala, professor, duracao, original: aula });
+  };
+
+  const salvarEdicao = () => {
+    const { disciplina, sala, professor, duracao, original } = aulaEmEdicao;
+  
+    if (!disciplina || !sala || !professor || !duracao) {
+      alert("Preencha todos os campos antes de salvar a aula.");
+      return;
+    }
+  
+    const novaAulaTexto = `${disciplina} - ${sala} - ${professor} (${duracao})`;
+  
+    // Atualiza a lista de aulas disponíveis
+    setDisponiveis((prev) =>
+      prev.map((aula) => (aula === original ? novaAulaTexto : aula))
+    );
+  
+    // Atualiza as aulas no horário
+    setAulas((prevAulas) => {
+      const newAulas = { ...prevAulas };
+      Object.keys(newAulas).forEach((key) => {
+        if (newAulas[key] === original) {
+          newAulas[key] = novaAulaTexto;
+        }
+      });
+      return newAulas;
+    });
+  
+    setAulaEmEdicao(null); // Limpa o estado de edição
   };
 
   return (
@@ -209,6 +294,7 @@ function Horarios() {
                             id={`${dia}-${hora}`}
                             aulas={aulas[`${dia}-${hora}`] ? [aulas[`${dia}-${hora}`]] : []}
                             isBlocked={isBlocked}
+                            aulaSendoArrastada={aulaSendoArrastada} // Passa o estado como prop
                           />
                         ))}
                       </tr>
@@ -219,11 +305,133 @@ function Horarios() {
 
               <div className="aulas">
                 <h3>Aulas Disponíveis</h3>
-                {disponiveis.map((aula) => (
+                <input
+                  type="text"
+                  placeholder="Pesquisar aulas..."
+                  value={termoPesquisa}
+                  onChange={(e) => setTermoPesquisa(e.target.value)}
+                  className="barra-pesquisa"
+                />
+                {aulasFiltradas.map((aula) => (
                   <Draggable key={aula} id={aula} isBlocked={isBlocked}>
-                    <div className="aula">{aula}</div>
+                    <div className="aula" onClick={() => iniciarEdicao(aula)}>
+                      {aula}
+                    </div>
                   </Draggable>
                 ))}
+
+                <div className="nova-aula">
+                  <h3>Adicionar Nova Aula</h3>
+                  <div className="inputs-container">
+                    <input
+                      type="text"
+                      placeholder="Disciplina"
+                      value={novaAula.disciplina}
+                      onChange={(e) => setNovaAula({ ...novaAula, disciplina: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Sala"
+                      value={novaAula.sala}
+                      onChange={(e) => setNovaAula({ ...novaAula, sala: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Professor"
+                      value={novaAula.professor}
+                      onChange={(e) => setNovaAula({ ...novaAula, professor: e.target.value })}
+                    />
+                  </div>
+                  <div className="actions-container">
+                    <select
+                      onChange={(e) => setNovaAula({ ...novaAula, duracao: e.target.value })}
+                      value={novaAula.duracao}
+                    >
+                      <option value="1h">1h</option>
+                      <option value="2h">2h</option>
+                      <option value="3h">3h</option>
+                      <option value="4h">4h</option>
+                    </select>
+                    <button onClick={adicionarAula}>Adicionar Aula</button>
+                  </div>
+                </div>
+
+                {aulaEmEdicao && (
+                  <div className="editar-aula">
+                    <h3>Editar Aula</h3>
+                    <div className="inputs-container">
+                      <input
+                        type="text"
+                        placeholder="Disciplina"
+                        value={aulaEmEdicao.disciplina}
+                        onChange={(e) =>
+                          setAulaEmEdicao({ ...aulaEmEdicao, disciplina: e.target.value })
+                        }
+                      />
+                      <input
+                        type="text"
+                        placeholder="Sala"
+                        value={aulaEmEdicao.sala}
+                        onChange={(e) =>
+                          setAulaEmEdicao({ ...aulaEmEdicao, sala: e.target.value })
+                        }
+                      />
+                      <input
+                        type="text"
+                        placeholder="Professor"
+                        value={aulaEmEdicao.professor}
+                        onChange={(e) =>
+                          setAulaEmEdicao({ ...aulaEmEdicao, professor: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="actions-container">
+                      <select
+                        onChange={(e) =>
+                          setAulaEmEdicao({ ...aulaEmEdicao, duracao: e.target.value })
+                        }
+                        value={aulaEmEdicao.duracao}
+                      >
+                        <option value="1h">1h</option>
+                        <option value="2h">2h</option>
+                        <option value="3h">3h</option>
+                        <option value="4h">4h</option>
+                      </select>
+                      <button onClick={salvarEdicao}>Salvar</button>
+                      <button onClick={() => setAulaEmEdicao(null)}>Cancelar</button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="editar-aula-container">
+                  <h3>Editar Aula</h3>
+                  <select
+                    onChange={(e) => setAulaSelecionada(e.target.value)} // Atualiza apenas o estado do dropdown
+                    value={aulaSelecionada}
+                    className="editar-aula-select"
+                  >
+                    <option value="" disabled>
+                      Selecione uma aula para editar
+                    </option>
+                    {disponiveis.map((aula) => (
+                      <option key={aula} value={aula}>
+                        {aula}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => {
+                      if (!aulaSelecionada) {
+                        alert("Por favor, selecione uma aula para editar.");
+                        return;
+                      }
+                      iniciarEdicao(aulaSelecionada); // Atualiza o estado `aulaEmEdicao` com a aula selecionada
+                    }}
+                    className="editar-aula-btn"
+                  >
+                    Editar Aula
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
