@@ -10,6 +10,7 @@ const DocenteCreate = () => {
     const [password, setPassword] = useState("1234");
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false); // Estado para controlar a visibilidade da senha
+    const [successMessage, setSuccessMessage] = useState(""); 
 
     const handleSubmit = async (e) => {
         //previne que a página de refresh, por default o onsubmit do forms da refresh na página
@@ -23,7 +24,31 @@ const DocenteCreate = () => {
             return;
         }
 
+        // Criar docente para mandar para o backend
+        const novoDocente = {
+            nome,
+            email,
+            password
+        };
+
+         //post no backend através de axios
+        //dá post do nome, email e da password no backend
+        axios.post("http://localhost:5170/createDocente", novoDocente, {
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => {
+            if (response.status === 200) {
+                setSuccessMessage("Docente criado com sucesso!");
+                setNome("");
+                setEmail("");
+                setPassword("1234");
+            }
+        })
+        .catch(err => {
+            setError(err.response?.data?.message || "Erro ao criar docente.");
+        });
     };
+
 
     // Função para alternar a visibilidade da senha
     const togglePasswordVisibility = () => {
@@ -35,6 +60,7 @@ const DocenteCreate = () => {
         <div className="formulario">
             <div className='loginSquare'>
                 {error && <p style={{ color: "red" }}>{error}</p>}
+                {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
                 <form className='forms' onSubmit={handleSubmit}>
                     <div className='createIdentifier'>
                         <p><b>Criar Docente</b></p>
