@@ -3,7 +3,7 @@ import socket from './socket'
 
 export function useSocket() {
     const [socketMsg, setSocketMsg] = useState("fetching socket connection...")
-    const [aulas, setAulas] = useState({})
+    const [schedule, setAulas] = useState([])
 
     useEffect(() => {
         socket.on("connection-ack-msg", (data) => {
@@ -11,5 +11,11 @@ export function useSocket() {
         })
     }, [])
 
-    return { socketMsg , aulas, setAulas }
+    useEffect(() => {
+        socket.on("update-aulas", (data) => {
+            setAulas(data.newAulas);
+        })
+    }, [])
+
+    return { socketMsg , schedule, setAulas }
 }
