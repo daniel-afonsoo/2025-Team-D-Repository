@@ -1,7 +1,7 @@
 .horarios-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   padding: 20px;
 }
 
@@ -9,39 +9,29 @@
   margin-bottom: 15px;
 }
 
-.conteudo {
+.layout {
   display: flex;
   align-items: flex-start;
   gap: 20px;
-}
-
-.timetable {
-  border-collapse: collapse;
-  width: 800px;
-  table-layout: fixed;
-}
-
-.timetable th, .timetable td {
-  border: 1px solid black;
-  text-align: center;
-  padding: 5px; /* Reduced padding */
-  width: 80px; /* Reduced width */
-  height: 30px; /* Reduced height */
-}
-
-.timetable .hora {
-  background-color: #f0f0f0;
-  font-weight: bold;
-}
-
-.empty-slot {
-  background-color: white;
+  width: 100%;
 }
 
 .filtros-e-aulas {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 200px;
+}
+
+.filtros h3 {
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .filtros select {
@@ -51,11 +41,48 @@
   width: 200px;
 }
 
+.conteudo {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
+.timetable-container {
+  flex: 3;
+}
+
+.timetable {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0;
+}
+
+.timetable th, .timetable td {
+  border: 1px solid black;
+  text-align: center;
+  padding: 8px;
+}
+
+.timetable .hora {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.empty-slot {
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
+.empty-slot.lightgreen {
+  background-color: lightgreen !important;
+}
+
 .aulas {
+  flex: 1;
   border: 1px solid black;
   padding: 10px;
-  width: 200px;
   background-color: #f9f9f9;
+  margin-top: 0;
 }
 
 .aulas h3 {
@@ -82,5 +109,150 @@
 }
 
 .block-btn:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.mensagem-filtros {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.nova-aula {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.nova-aula h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Espaçamento entre os inputs */
+}
+
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.actions-container select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.actions-container button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.actions-container button:hover {
+  background-color: #0056b3;
+}
+
+.barra-pesquisa {
+  width: 94%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.editar-aula {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.editar-aula h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.actions-container select,
+.actions-container button {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.actions-container button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.actions-container button:hover {
+  background-color: #0056b3;
+}
+
+.editar-aula-container {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.editar-aula-container h3 {
+  margin-bottom: 10px;
+}
+
+.editar-aula-select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.editar-aula-btn {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.editar-aula-btn:hover {
   background-color: #0056b3;
 }
