@@ -1,11 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './pages/App.jsx'
-import Login from './pages/Login.jsx'
-import Horarios from './components/horarios.jsx'
+import App from './pages/App'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Horarios />
+    <App />
   </StrictMode>,
 )
