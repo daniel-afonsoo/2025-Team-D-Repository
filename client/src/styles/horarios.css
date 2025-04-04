@@ -54,20 +54,22 @@
 
 .timetable {
   border-collapse: collapse;
-  width: 100%;
+  width: 95%;
   margin-top: 0;
+  font-size: 16px; /* Aumentar o tamanho da fonte */
 }
 
 .timetable th,
 .timetable td {
-  border: 1px solid black;
+  border: 3px solid blue;
   text-align: center;
-  padding: 8px;
+  padding: 12px; /* Aumentar o padding */
 }
 
 .timetable .hora {
   background-color: #f0f0f0;
   font-weight: bold;
+  font-size: 18px; /* Aumentar o tamanho da fonte para as horas */
 }
 
 .empty-slot {
@@ -366,4 +368,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.class-entry {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: lightblue;
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  overflow: hidden;
+  height: 100%; /* Ensure it spans the correct height */
+}
+
+.class-entry strong {
+  font-size: 16px;
+}
+
+.class-entry .location {
+  font-size: 12px;
+  color: gray;
 }

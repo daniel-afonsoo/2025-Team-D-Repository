@@ -72,6 +72,7 @@ function Horarios() {
   const [newClass, setNewClass] = useState({ subject: "", location: "", duration: 60 });
   const [editingClass, setEditingClass] = useState(null);
   const [selectedClassId, setSelectedClassId] = useState(""); // ID da aula selecionada no dropdown
+  const [showAddPopup, setShowAddPopup] = useState(false); // Controla o popup de adicionar aulas
 
   // Fetch schedule from the server on component mount
   useEffect(() => {
@@ -95,59 +96,53 @@ function Horarios() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-  
+
     if (!over) {
-      // Se a aula for solta fora de um bloco válido, mova-a de volta para "Aulas Disponíveis"
       setSchedule((prevSchedule) =>
         prevSchedule.map((cls) =>
           cls.id.toString() === active.id
-            ? { ...cls, day: null, start: null } // Redefinir valores para "Aulas Disponíveis"
+            ? { ...cls, day: null, start: null }
             : cls
         )
       );
-      setErro(""); // Limpar mensagens de erro anteriores
+      setErro("");
       return;
     }
-  
-    const activeId = active.id; // ID da aula arrastada
-    const overId = over.id; // ID do bloco onde a aula foi solta
+
+    const activeId = active.id;
+    const overId = over.id;
     const [overDay, overTime] = overId.split("-");
-  
-    // Verificar se o bloco já está ocupado, ignorando a aula que está sendo movida
+
     const isBlockOccupied = schedule.some(
       (cls) =>
         cls.day === overDay &&
         cls.start === overTime &&
-        cls.id.toString() !== activeId // Ignorar a aula que está sendo movida
+        cls.id.toString() !== activeId
     );
-  
+
     if (isBlockOccupied) {
       setErro("Este bloco já está ocupado por outra aula.");
       return;
     }
-  
+
     const draggedClass = schedule.find((cls) => cls.id.toString() === activeId);
-  
+
     if (draggedClass) {
       const updatedClass = {
         ...draggedClass,
         day: overDay,
         start: overTime,
       };
-  
-      // Enviar a atualização para o servidor
+
       socket.emit("move-aula", updatedClass);
-  
-      // Atualizar o estado local
+
       setSchedule((prevSchedule) =>
         prevSchedule.map((cls) => (cls.id === draggedClass.id ? updatedClass : cls))
       );
-  
-      // Limpar mensagens de erro anteriores
+
       setErro("");
     }
   };
-  
 
   const addClass = () => {
     if (!newClass.subject || !newClass.location || !newClass.duration) {
@@ -155,21 +150,12 @@ function Horarios() {
       return;
     }
 
-    // Verificar se o bloco já está ocupado
-    const isBlockOccupied = schedule.some(
-      (cls) => cls.day === newClass.day && cls.start === newClass.start
-    );
-
-    if (isBlockOccupied) {
-      setErro("Não é possível adicionar uma aula no mesmo bloco.");
-      return;
-    }
-
     const newClassWithId = { ...newClass, id: Date.now(), day: null, start: null };
     socket.emit("add-aula", { newAula: newClassWithId });
     setSchedule((prev) => [...prev, newClassWithId]);
     setNewClass({ subject: "", location: "", duration: 60 });
-    setErro(""); // Limpar mensagens de erro anteriores
+    setShowAddPopup(false); // Fechar o popup após adicionar a aula
+    setErro("");
   };
 
   const editClass = (classId) => {
@@ -245,197 +231,183 @@ function Horarios() {
             </select>
           </div>
 
-          {/* Add and Edit Classes */}
-          <div className="add-edit-classes">
-            <h3>Adicionar Aula</h3>
-            <input
-              type="text"
-              placeholder="Disciplina"
-              value={newClass.subject}
-              onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Localização"
-              value={newClass.location}
-              onChange={(e) => setNewClass({ ...newClass, location: e.target.value })}
-            />
-            <input
-              type="number"
-              placeholder="Duração (minutos)"
-              value={newClass.duration}
-              onChange={(e) => setNewClass({ ...newClass, duration: parseInt(e.target.value, 10) })}
-            />
-            <button onClick={addClass}>Adicionar</button>
-
-            {editingClass && (
-              <div className="edit-class">
-                <h3>Editar Aula</h3>
-                <input
-                  type="text"
-                  placeholder="Disciplina"
-                  value={editingClass.subject}
-                  onChange={(e) =>
-                    setEditingClass({ ...editingClass, subject: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Localização"
-                  value={editingClass.location}
-                  onChange={(e) =>
-                    setEditingClass({ ...editingClass, location: e.target.value })
-                  }
-                />
-                <input
-                  type="number"
-                  placeholder="Duração (minutos)"
-                  value={editingClass.duration}
-                  onChange={(e) =>
-                    setEditingClass({
-                      ...editingClass,
-                      duration: parseInt(e.target.value, 10),
-                    })
-                  }
-                />
-                <button onClick={saveEditedClass}>Salvar</button>
+          {/* Show content only if filters are selected */}
+          {filtrosSelecionados ? (
+            <>
+              {/* Botão para abrir o popup de adicionar aulas */}
+              <div className="add-class-button">
+                <button onClick={() => setShowAddPopup(true)}>Adicionar Aula</button>
               </div>
-            )}
-          </div>
 
-          {/* Timetable */}
-          <div className="conteudo">
-            <div className="timetable-container">
-              <button onClick={() => setIsBlocked((prev) => !prev)} className="block-btn">
-                {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
-              </button>
-              {erro && <div className="error-message">{erro}</div>}
-              <table className="timetable">
-                <thead>
-                  <tr>
-                    <th>Horas</th>
-                    {diasSemana.map((dia) => (
-                      <th key={dia}>{dia}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {horas.map((hora, index) => (
-                    <tr key={index}>
-                      <td className="hora">{hora}</td>
-                      {diasSemana.map((dia) => {
-                        const classItem = schedule.find(
-                          (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
-                        );
+              {/* Popup para adicionar aulas */}
+              {showAddPopup && (
+                <div className="add-popup">
+                  <div className="popup-content">
+                    <h3>Adicionar Aula</h3>
+                    <input
+                      type="text"
+                      placeholder="Disciplina"
+                      value={newClass.subject}
+                      onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Localização"
+                      value={newClass.location}
+                      onChange={(e) => setNewClass({ ...newClass, location: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Duração (minutos)"
+                      value={newClass.duration}
+                      onChange={(e) =>
+                        setNewClass({ ...newClass, duration: parseInt(e.target.value, 10) })
+                      }
+                    />
+                    <button onClick={addClass}>Salvar</button>
+                    <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
+                    {erro && <div className="error-message">{erro}</div>}
+                  </div>
+                </div>
+              )}
 
-                        if (classItem) {
-                          return (
-                            <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked}>
-                              <Draggable id={classItem.id.toString()} isBlocked={isBlocked}>
-                                <div
-                                  className="class-entry"
-                                  style={{
-                                    gridRow: `span ${classItem.duration / 30}`, // Assuming each grid row represents 30 minutes
-                                  }}
-                                >
-                                  <strong>{classItem.subject}</strong>
-                                  <br />
-                                  <span className="location">{classItem.location}</span>
-                                  <button onClick={() => editClass(classItem.id)}>Editar</button>
-                                </div>
-                              </Draggable>
-                            </Droppable>
-                          );
-                        }
+              {/* Timetable */}
+              <div className="conteudo">
+                <div className="timetable-container">
+                  <button onClick={() => setIsBlocked((prev) => !prev)} className="block-btn">
+                    {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
+                  </button>
+                  {erro && <div className="error-message">{erro}</div>}
+                  <table className="timetable">
+                    <thead>
+                      <tr>
+                        <th>Horas</th>
+                        {diasSemana.map((dia) => (
+                          <th key={dia}>{dia}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {horas.map((hora, index) => (
+                        <tr key={index}>
+                          <td className="hora">{hora}</td>
+                          {diasSemana.map((dia) => {
+                            const classItem = schedule.find(
+                              (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
+                            );
 
-                        return (
-                          <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} />
-                        );
-                      })}
-                    </tr>
+                            if (classItem) {
+                              const durationBlocks = classItem.duration / 30;
+                              return (
+                                <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked}>
+                                  <Draggable id={classItem.id.toString()} isBlocked={isBlocked}>
+                                    <div
+                                      className="class-entry"
+                                      style={{
+                                        gridRow: `span ${durationBlocks}`, // Assuming each grid row represents 30 minutes
+                                      }}
+                                    >
+                                      <strong>{classItem.subject}</strong>
+                                      <br />
+                                      <span className="location">{classItem.location}</span>
+                                    </div>
+                                  </Draggable>
+                                </Droppable>
+                              );
+                            }
+
+                            return (
+                              <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} />
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Available Classes */}
+              <div className="aulas-disponiveis">
+                <h3>Aulas Disponíveis</h3>
+                {filtrosSelecionados ? (
+                  aulasDisponiveis.length > 0 ? (
+                    aulasDisponiveis.map((aula) => (
+                      <Draggable key={aula.id} id={aula.id.toString()} isBlocked={isBlocked}>
+                        <div className="aula-disponivel">
+                          <strong>{aula.subject}</strong>
+                          <br />
+                          <span>{aula.location}</span>
+                        </div>
+                      </Draggable>
+                    ))
+                  ) : (
+                    <p>Nenhuma aula disponível.</p>
+                  )
+                ) : (
+                  <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
+                )}
+              </div>
+
+              {/* Dropdown para selecionar a aula */}
+              <div className="edit-dropdown">
+                <h3>Editar Aula</h3>
+                <select
+                  value={selectedClassId}
+                  onChange={(e) => setSelectedClassId(e.target.value)}
+                >
+                  <option value="">Selecione uma aula</option>
+                  {schedule.map((cls) => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.subject} - {cls.location}
+                    </option>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Available Classes */}
-          <div className="aulas-disponiveis">
-            <h3>Aulas Disponíveis</h3>
-            {filtrosSelecionados ? (
-              aulasDisponiveis.length > 0 ? (
-                aulasDisponiveis.map((aula) => (
-                  <Draggable key={aula.id} id={aula.id.toString()} isBlocked={isBlocked}>
-                    <div className="aula-disponivel">
-                      <strong>{aula.subject}</strong>
-                      <br />
-                      <span>{aula.location}</span>
-                    </div>
-                  </Draggable>
-                ))
-              ) : (
-                <p>Nenhuma aula disponível.</p>
-              )
-            ) : (
-              <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
-            )}
-          </div>
-
-          {/* Dropdown para selecionar a aula */}
-          <div className="edit-dropdown">
-            <h3>Editar Aula</h3>
-            <select
-              value={selectedClassId}
-              onChange={(e) => setSelectedClassId(e.target.value)}
-            >
-              <option value="">Selecione uma aula</option>
-              {schedule.map((cls) => (
-                <option key={cls.id} value={cls.id}>
-                  {cls.subject} - {cls.location}
-                </option>
-              ))}
-            </select>
-            <button onClick={openEditPopup} disabled={!selectedClassId}>
-              Editar
-            </button>
-          </div>
-
-          {/* Popup para editar a aula */}
-          {editingClass && (
-            <div className="edit-popup">
-              <div className="popup-content">
-                <h3>Editar Aula</h3>
-                <input
-                  type="text"
-                  placeholder="Disciplina"
-                  value={editingClass.subject}
-                  onChange={(e) =>
-                    setEditingClass({ ...editingClass, subject: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Localização"
-                  value={editingClass.location}
-                  onChange={(e) =>
-                    setEditingClass({ ...editingClass, location: e.target.value })
-                  }
-                />
-                <input
-                  type="number"
-                  placeholder="Duração (minutos)"
-                  value={editingClass.duration}
-                  onChange={(e) =>
-                    setEditingClass({
-                      ...editingClass,
-                      duration: parseInt(e.target.value, 10),
-                    })
-                  }
-                />
-                <button onClick={saveEditedClass}>Salvar</button>
-                <button onClick={() => setEditingClass(null)}>Cancelar</button>
+                </select>
+                <button onClick={openEditPopup} disabled={!selectedClassId}>
+                  Editar
+                </button>
               </div>
-            </div>
+
+              {/* Popup para editar a aula */}
+              {editingClass && (
+                <div className="edit-popup">
+                  <div className="popup-content">
+                    <h3>Editar Aula</h3>
+                    <input
+                      type="text"
+                      placeholder="Disciplina"
+                      value={editingClass.subject}
+                      onChange={(e) =>
+                        setEditingClass({ ...editingClass, subject: e.target.value })
+                      }
+                    />
+                    <input
+                      type="text"
+                      placeholder="Localização"
+                      value={editingClass.location}
+                      onChange={(e) =>
+                        setEditingClass({ ...editingClass, location: e.target.value })
+                      }
+                    />
+                    <input
+                      type="number"
+                      placeholder="Duração (minutos)"
+                      value={editingClass.duration}
+                      onChange={(e) =>
+                        setEditingClass({
+                          ...editingClass,
+                          duration: parseInt(e.target.value, 10),
+                        })
+                      }
+                    />
+                    <button onClick={saveEditedClass}>Salvar</button>
+                    <button onClick={() => setEditingClass(null)}>Cancelar</button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
           )}
         </div>
       </div>
