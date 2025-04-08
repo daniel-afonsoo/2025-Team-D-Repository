@@ -57,7 +57,7 @@ const setupSockets = (server) => {
             }else{
                 // error in adding aula
                 console.log("Error adding aula: ", data.newAulas)
-                socket.emit("add-aula-error", "Esta aula não pode ser adicionada.")
+                socket.emit("add-aula-error", {message : "Esta aula não pode ser adicionada."})
             }
         })
 
@@ -73,7 +73,7 @@ const setupSockets = (server) => {
             }else{
                 // error in removing aula
                 console.log("Error removing aula: ", data.aulaId)
-                socket.emit("remove-aula-error", "Esta aula não pode ser removida.")
+                socket.emit("remove-aula-error", {message : "Esta aula não pode ser removida."})
             }
         })
 

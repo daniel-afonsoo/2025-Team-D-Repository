@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
-import socket from "../utils/socket";
+import socket from "../utils/socket"; // Import the socket instance
+import { useSocket } from "../utils/useSocket"
 
 // Define the days of the week
 const diasSemana = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -58,7 +59,11 @@ function Droppable({ id, children, isBlocked }) {
 
 // Main Horarios component
 function Horarios() {
-  const [schedule, setSchedule] = useState([]); // State to store the schedule from the server
+
+  // lista das aulas
+  const { aulasMarcadas } = useSocket(); // Fetch the schedule from the server
+  const [ aulasDisponiveis, setAulasDisponiveis] = useState([]); // State for available classes
+
   const [isBlocked, setIsBlocked] = useState(false); // State to block the schedule
   const [erro, setErro] = useState(""); // State for error messages
 
@@ -68,138 +73,29 @@ function Horarios() {
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
 
-  // States for adding and editing classes
-  const [newClass, setNewClass] = useState({ subject: "", location: "", duration: 60 });
-  const [editingClass, setEditingClass] = useState(null);
-  const [selectedClassId, setSelectedClassId] = useState(""); // ID da aula selecionada no dropdown
-  const [showAddPopup, setShowAddPopup] = useState(false); // Controla o popup de adicionar aulas
-
-  // Fetch schedule from the server on component mount
-  useEffect(() => {
-    // Listen for schedule updates from the server
-    socket.on("update-aulas", (data) => {
-      console.log("Received schedule from server:", data);
-      // Ensure all classes start in "Aulas Disponíveis"
-      const updatedSchedule = data.newAulas.map((cls) => ({
-        ...cls,
-        day: null,
-        start: null,
-      }));
-      setSchedule(updatedSchedule);
-    });
-
-    // Cleanup the socket listener on component unmount
-    return () => {
-      socket.off("update-aulas");
-    };
-  }, []);
-
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
     if (!over) {
-      setSchedule((prevSchedule) =>
-        prevSchedule.map((cls) =>
-          cls.id.toString() === active.id
-            ? { ...cls, day: null, start: null }
-            : cls
-        )
-      );
+      console.log("Dropped outside the schedule");
       setErro("");
       return;
-    }
+    }else{
+      const newAula = {
 
-    const activeId = active.id;
-    const overId = over.id;
-    const [overDay, overTime] = overId.split("-");
-
-    const isBlockOccupied = schedule.some(
-      (cls) =>
-        cls.day === overDay &&
-        cls.start === overTime &&
-        cls.id.toString() !== activeId
-    );
-
-    if (isBlockOccupied) {
-      setErro("Este bloco já está ocupado por outra aula.");
-      return;
-    }
-
-    const draggedClass = schedule.find((cls) => cls.id.toString() === activeId);
-
-    if (draggedClass) {
-      const updatedClass = {
-        ...draggedClass,
-        day: overDay,
-        start: overTime,
+        start: over.id.split("-")[1], // Extract the start time from the droppable ID
+        end: over.id.split("-")[1], // Extract the end time from the droppable ID
+        day: over.id.split("-")[0], // Extract the day from the droppable ID
       };
-
-      socket.emit("move-aula", updatedClass);
-
-      setSchedule((prevSchedule) =>
-        prevSchedule.map((cls) => (cls.id === draggedClass.id ? updatedClass : cls))
-      );
-
-      setErro("");
-    }
-  };
-
-  const addClass = () => {
-    if (!newClass.subject || !newClass.location || !newClass.duration) {
-      setErro("Preencha todos os campos para adicionar uma aula.");
-      return;
+      socket.emit("add-aula", { newAula: newAula } ); // Emit the new class to the server
     }
 
-    const newClassWithId = { ...newClass, id: Date.now(), day: null, start: null };
-    socket.emit("add-aula", { newAula: newClassWithId });
-    setSchedule((prev) => [...prev, newClassWithId]);
-    setNewClass({ subject: "", location: "", duration: 60 });
-    setShowAddPopup(false); // Fechar o popup após adicionar a aula
-    setErro("");
-  };
+    
 
-  const editClass = (classId) => {
-    const classToEdit = schedule.find((cls) => cls.id === classId);
-    if (classToEdit) {
-      setEditingClass({ ...classToEdit }); // Crie uma cópia do objeto para evitar mutações
-    } else {
-      setErro("Aula não encontrada para edição.");
-    }
-  };
-
-  const saveEditedClass = () => {
-    if (!editingClass.subject || !editingClass.location || !editingClass.duration) {
-      setErro("Preencha todos os campos para salvar a aula.");
-      return;
-    }
-
-    socket.emit("edit-aula", { updatedAula: editingClass });
-    setSchedule((prevSchedule) =>
-      prevSchedule.map((cls) =>
-        cls.id === editingClass.id ? editingClass : cls
-      )
-    );
-    setEditingClass(null);
-    setSelectedClassId(""); // Limpar seleção
-    setErro("");
-  };
-
-  const openEditPopup = () => {
-    const classToEdit = schedule.find((cls) => cls.id.toString() === selectedClassId);
-    if (classToEdit) {
-      setEditingClass({ ...classToEdit });
-    } else {
-      setErro("Aula não encontrada para edição.");
-    }
   };
 
   // Check if all filters are selected
   const filtrosSelecionados = escola && curso && ano && turma;
-
-  // Filter available classes (those not yet assigned to the schedule)
-  const aulasDisponiveis = filtrosSelecionados
-    ? schedule.filter((cls) => !cls.day || !cls.start)
-    : [];
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
@@ -234,43 +130,6 @@ function Horarios() {
           {/* Show content only if filters are selected */}
           {filtrosSelecionados ? (
             <>
-              {/* Botão para abrir o popup de adicionar aulas */}
-              <div className="add-class-button">
-                <button onClick={() => setShowAddPopup(true)}>Adicionar Aula</button>
-              </div>
-
-              {/* Popup para adicionar aulas */}
-              {showAddPopup && (
-                <div className="add-popup">
-                  <div className="popup-content">
-                    <h3>Adicionar Aula</h3>
-                    <input
-                      type="text"
-                      placeholder="Disciplina"
-                      value={newClass.subject}
-                      onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Localização"
-                      value={newClass.location}
-                      onChange={(e) => setNewClass({ ...newClass, location: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Duração (minutos)"
-                      value={newClass.duration}
-                      onChange={(e) =>
-                        setNewClass({ ...newClass, duration: parseInt(e.target.value, 10) })
-                      }
-                    />
-                    <button onClick={addClass}>Salvar</button>
-                    <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
-                    {erro && <div className="error-message">{erro}</div>}
-                  </div>
-                </div>
-              )}
-
               {/* Timetable */}
               <div className="conteudo">
                 <div className="timetable-container">
@@ -292,7 +151,7 @@ function Horarios() {
                         <tr key={index}>
                           <td className="hora">{hora}</td>
                           {diasSemana.map((dia) => {
-                            const classItem = schedule.find(
+                            const classItem = aulasMarcadas.find(
                               (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
                             );
 
@@ -348,63 +207,6 @@ function Horarios() {
                   <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
                 )}
               </div>
-
-              {/* Dropdown para selecionar a aula */}
-              <div className="edit-dropdown">
-                <h3>Editar Aula</h3>
-                <select
-                  value={selectedClassId}
-                  onChange={(e) => setSelectedClassId(e.target.value)}
-                >
-                  <option value="">Selecione uma aula</option>
-                  {schedule.map((cls) => (
-                    <option key={cls.id} value={cls.id}>
-                      {cls.subject} - {cls.location}
-                    </option>
-                  ))}
-                </select>
-                <button onClick={openEditPopup} disabled={!selectedClassId}>
-                  Editar
-                </button>
-              </div>
-
-              {/* Popup para editar a aula */}
-              {editingClass && (
-                <div className="edit-popup">
-                  <div className="popup-content">
-                    <h3>Editar Aula</h3>
-                    <input
-                      type="text"
-                      placeholder="Disciplina"
-                      value={editingClass.subject}
-                      onChange={(e) =>
-                        setEditingClass({ ...editingClass, subject: e.target.value })
-                      }
-                    />
-                    <input
-                      type="text"
-                      placeholder="Localização"
-                      value={editingClass.location}
-                      onChange={(e) =>
-                        setEditingClass({ ...editingClass, location: e.target.value })
-                      }
-                    />
-                    <input
-                      type="number"
-                      placeholder="Duração (minutos)"
-                      value={editingClass.duration}
-                      onChange={(e) =>
-                        setEditingClass({
-                          ...editingClass,
-                          duration: parseInt(e.target.value, 10),
-                        })
-                      }
-                    />
-                    <button onClick={saveEditedClass}>Salvar</button>
-                    <button onClick={() => setEditingClass(null)}>Cancelar</button>
-                  </div>
-                </div>
-              )}
             </>
           ) : (
             <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
