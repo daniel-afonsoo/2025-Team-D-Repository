@@ -1,3 +1,4 @@
+// Importações de pacotes, estilos, imagens e componentes
 import { useState, useEffect } from 'react';
 import "../../styles/edit_remove_Forms.css";
 import bin from '../../images/bin.png';
@@ -5,16 +6,20 @@ import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal'; 
 
+// Componente principal para listar, editar e remover escolas
 const Curso_edit_remove = () => {
+  // Estados para controlar dados, modais e campos de edição
   const [dados, setDados] = useState([]);
   const [modalAberta, setModalAberta] = useState(false);
   const [modalEdicaoAberta, setModalEdicaoAberta] = useState(false);
   const [idParaRemover, setIdParaRemover] = useState(null);
   const [editarItemId, setEditarItemId] = useState(null);
   const [editarCampos, setEditarCampos] = useState({});
-  const [tituloModal, setTituloModal] = useState('Editar Docente'); 
 
+  // Título do modal de edição
+  const [tituloModal, setTituloModal] = useState('Editar Escola'); 
 
+  // Simula os dados ao iniciar o componente
   useEffect(() => {
     const dadosSimulados = [
       { id: 1, nome: "Escola Superior de Gestão de Tomar", abreviatura: "ESGT"},
@@ -24,16 +29,19 @@ const Curso_edit_remove = () => {
     setDados(dadosSimulados);
   }, []);
 
+  // Abre o modal de confirmação de remoção
   const abrirModal = (id) => {
     setIdParaRemover(id);
     setModalAberta(true);
   };
 
+  // Fecha o modal de remoção
   const fecharModal = () => {
     setModalAberta(false);
     setIdParaRemover(null);
   };
 
+  // Remove uma escola
   const confirmarRemocao = () => {
     if (idParaRemover !== null) {
       setDados(dados.filter(item => item.id !== idParaRemover));
@@ -41,6 +49,7 @@ const Curso_edit_remove = () => {
     fecharModal();
   };
 
+  // Abre o modal de edição com os dados da escola
   const abrirModalEdicao = (item) => {
     setEditarItemId(item.id);
     setEditarCampos(item);
@@ -48,23 +57,26 @@ const Curso_edit_remove = () => {
     setModalEdicaoAberta(true);
   };
 
-
+  // Fecha o modal de edição
   const fecharModalEdicao = () => {
     setModalEdicaoAberta(false);
     setEditarItemId(null);
     setEditarCampos({});
   };
 
+  // Atualiza os campos do formulário
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditarCampos(prev => ({ ...prev, [name]: value }));
   };
 
+  // Salva as alterações feitas na escola
   const confirmarEdicao = () => {
     setDados(dados.map(item => item.id === editarItemId ? editarCampos : item));
     fecharModalEdicao();
   };
 
+  // Renderização dos cartões e modais
   return (
     <div className="lista-container">
       <div className="lista">
@@ -90,7 +102,6 @@ const Curso_edit_remove = () => {
         onConfirm={confirmarRemocao}
       />
 
-    
       <ModalEdicao
         isOpen={modalEdicaoAberta}
         onClose={fecharModalEdicao}

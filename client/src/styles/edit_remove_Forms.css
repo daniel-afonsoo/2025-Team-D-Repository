@@ -2,15 +2,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Centraliza os cartões na tela */
     gap: 15px;
-    /* Espaço entre os cartões */
 }
 
 .lista {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    /* 2 a 3 por linha */
     gap: 20px;
     width: 100%;
     max-width: 900px;
@@ -35,7 +32,6 @@
     background-size: 100%;
     color: white;
     min-width: 150px;
-    /* Garante alinhamento uniforme */
     text-align: center;
 }
 

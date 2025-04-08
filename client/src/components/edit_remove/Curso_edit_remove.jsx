@@ -3,18 +3,20 @@ import "../../styles/edit_remove_Forms.css";
 import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
-import ModalEdicao from './EditModal'; // Novo componente!
+import ModalEdicao from './EditModal'; // Componente do modal de edição
 
+// Componente principal responsável pela listagem, edição e remoção de cursos
 const Curso_edit_remove = () => {
+  // Estados para controlar dados, modais e campos de edição
   const [dados, setDados] = useState([]);
   const [modalAberta, setModalAberta] = useState(false);
   const [modalEdicaoAberta, setModalEdicaoAberta] = useState(false);
   const [idParaRemover, setIdParaRemover] = useState(null);
   const [editarItemId, setEditarItemId] = useState(null);
   const [editarCampos, setEditarCampos] = useState({});
-  const [tituloModal, setTituloModal] = useState('Editar Curso'); // Estado para o título do modal
+  const [tituloModal, setTituloModal] = useState('Editar Curso');
 
-
+  // Carrega dados simulados ao iniciar o componente
   useEffect(() => {
     const dadosSimulados = [
       { id: 1, nome: "Engenharia Informática", abreviatura: "LEI", codCurso: "911", escola: "ESTT" },
@@ -25,11 +27,11 @@ const Curso_edit_remove = () => {
       { id: 6, nome: "Recursos Humanos", abreviatura: "RH", codCurso: "885", escola: "ESGT" },
       { id: 7, nome: "Contabilidade", abreviatura: "Ct", codCurso: "820", escola: "ESGT" },
       { id: 8, nome: "Psicologia", abreviatura: "PS", codCurso: "42", escola: "ESCT" }
-      
     ];
     setDados(dadosSimulados);
   }, []);
 
+  // Funções auxiliares para abrir/fechar modais e manipular dados
   const abrirModal = (id) => {
     setIdParaRemover(id);
     setModalAberta(true);
@@ -50,10 +52,9 @@ const Curso_edit_remove = () => {
   const abrirModalEdicao = (item) => {
     setEditarItemId(item.id);
     setEditarCampos(item);
-    setTituloModal('Editar Curso');  // Definindo o título para edição
+    setTituloModal('Editar Curso');
     setModalEdicaoAberta(true);
   };
-
 
   const fecharModalEdicao = () => {
     setModalEdicaoAberta(false);
@@ -98,17 +99,17 @@ const Curso_edit_remove = () => {
         onConfirm={confirmarRemocao}
       />
 
-    
       <ModalEdicao
         isOpen={modalEdicaoAberta}
         onClose={fecharModalEdicao}
         onChange={handleChange}
         campos={editarCampos}
         onSave={confirmarEdicao}
-        titulo={tituloModal} // Passando o título dinâmico para o modal
+        titulo={tituloModal}
       />
     </div>
   );
 };
+
 
 export default Curso_edit_remove;

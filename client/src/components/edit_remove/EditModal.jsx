@@ -1,21 +1,23 @@
 import React from 'react';
 import "../../styles/editModal.css";
 
+// Componente de modal de edição genérico
 const ModalEdicao = ({ isOpen, onClose, onSave, campos, onChange, titulo }) => {
+  // Se o modal não estiver aberto, não renderiza nada
   if (!isOpen) return null;
 
-  // Filtrando a chave 'id' para não ser exibida
+  // Remove o campo 'id' da lista de inputs (não precisa ser editado)
   const camposSemId = Object.keys(campos).filter(key => key !== 'id');
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2 className='title'>{titulo}</h2> {/* Usando a prop 'titulo' aqui */}
-
-        {/* Mapeando os campos dinamicamente, excluindo 'id' */}
+        <h2 className='title'>{titulo}</h2>
         {camposSemId.map((key) => (
           <div key={key} className="input-field">
-            <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+            <label htmlFor={key}>
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+            </label>
             <input
               id={key}
               type="text"

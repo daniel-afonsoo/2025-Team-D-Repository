@@ -3,18 +3,20 @@ import "../../styles/edit_remove_Forms.css";
 import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
-import ModalEdicao from './EditModal'; 
+import ModalEdicao from './EditModal';
 
+// Componente principal para listar, editar e remover unidades curriculares
 const Curso_edit_remove = () => {
+  // Estados para controlar dados, modais e campos de edição
   const [dados, setDados] = useState([]);
   const [modalAberta, setModalAberta] = useState(false);
   const [modalEdicaoAberta, setModalEdicaoAberta] = useState(false);
   const [idParaRemover, setIdParaRemover] = useState(null);
   const [editarItemId, setEditarItemId] = useState(null);
   const [editarCampos, setEditarCampos] = useState({});
-  const [tituloModal, setTituloModal] = useState('Editar Curso'); // Estado para o título do modal
+  const [tituloModal, setTituloModal] = useState('Editar Curso');
 
-
+  // Simula o carregamento inicial dos dados
   useEffect(() => {
     const dadosSimulados = [
       { id: 1, nome: "Programação Web", horas: "5", codCurso: "911"},
@@ -26,16 +28,19 @@ const Curso_edit_remove = () => {
     setDados(dadosSimulados);
   }, []);
 
+  // Abrir o modal de confirmação e guardar o ID do item a remover
   const abrirModal = (id) => {
     setIdParaRemover(id);
     setModalAberta(true);
   };
 
+  // Fechar o modal de confirmação
   const fecharModal = () => {
     setModalAberta(false);
     setIdParaRemover(null);
   };
 
+  // Confirmar e aplicar a remoção do item
   const confirmarRemocao = () => {
     if (idParaRemover !== null) {
       setDados(dados.filter(item => item.id !== idParaRemover));
@@ -43,6 +48,7 @@ const Curso_edit_remove = () => {
     fecharModal();
   };
 
+  // Abrir o modal de edição e preencher os campos com os dados do item
   const abrirModalEdicao = (item) => {
     setEditarItemId(item.id);
     setEditarCampos(item);
@@ -50,18 +56,20 @@ const Curso_edit_remove = () => {
     setModalEdicaoAberta(true);
   };
 
-
+  // Fechar o modal de edição e limpar os dados
   const fecharModalEdicao = () => {
     setModalEdicaoAberta(false);
     setEditarItemId(null);
     setEditarCampos({});
   };
 
+  // Atualizar campos do formulário conforme o utilizador edita
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditarCampos(prev => ({ ...prev, [name]: value }));
   };
 
+  // Confirmar e aplicar as alterações no item editado
   const confirmarEdicao = () => {
     setDados(dados.map(item => item.id === editarItemId ? editarCampos : item));
     fecharModalEdicao();
@@ -93,14 +101,13 @@ const Curso_edit_remove = () => {
         onConfirm={confirmarRemocao}
       />
 
-    
       <ModalEdicao
         isOpen={modalEdicaoAberta}
         onClose={fecharModalEdicao}
         onChange={handleChange}
         campos={editarCampos}
         onSave={confirmarEdicao}
-        titulo={tituloModal} // Passando o título dinâmico para o modal
+        titulo={tituloModal}
       />
     </div>
   );
