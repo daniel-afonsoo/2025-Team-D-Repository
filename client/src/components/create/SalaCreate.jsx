@@ -22,6 +22,28 @@ const SalaCreate = () => {
             return;
         }
 
+        // Criar curso para mandar para o backend
+        const novaSala = {
+            nome,
+            escola
+        };
+
+        //post no backend através de axios
+        //dá post do nome, escola no backend
+        axios.post("http://localhost:5170/createSala", novaSala, {
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(response => {
+                if (response.status === 200) {
+                    setSuccessMessage("Sala criada com sucesso!");
+                    setNome("");
+                    setEscola("")
+                }
+            })
+            .catch(err => {
+                setError(err.response?.data?.message || "Erro ao criar Sala.");
+            });
+
     };
 
     // Função para adicionar uma nova dropdown ao array de escolas

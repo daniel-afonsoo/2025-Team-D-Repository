@@ -19,12 +19,42 @@ const CursoCreate = () => {
         setError("");
 
         // Verifica se os campos estão vazios
-        if (!nome.trim() || !abreviatura.trim() || escola[0] == "" ||  codCurso === null || codCurso === "") { 
+        if (!nome.trim() || !abreviatura.trim() || escola[0] == "" || codCurso === null || codCurso === "") {
             setError("Por favor, preencha todos os campos.");
             return;
         }
 
+        // Criar curso para mandar para o backend
+        const novoCurso = {
+            nome,
+            abreviatura,
+            escola,
+            codCurso
+        };
+
+        //post no backend através de axios
+        //dá post do nome, abreviatura, escola, codCurso no backend
+        axios.post("http://localhost:5170/createCurso", novoCurso, {
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(response => {
+                if (response.status === 200) {
+                    setSuccessMessage("Curso criado com sucesso!");
+                    setNome("");
+                    setAbreviatura("")
+                    setEscola("")
+                    setCodCurso("")
+                }
+            })
+            .catch(err => {
+                setError(err.response?.data?.message || "Erro ao criar Curso.");
+            });
+
     };
+
+
+
+
 
     // Função para adicionar uma nova dropdown ao array de escolas
     const adicionarDropdown = () => {

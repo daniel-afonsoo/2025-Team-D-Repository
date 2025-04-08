@@ -24,6 +24,32 @@ const UCCreate = () => {
             return;
         }
 
+        // Criar Unidade Curricular para mandar para o backend
+        const novoCurso = {
+            nome,
+            horas,
+            curso,
+            codUC
+        };
+
+        //post no backend através de axios
+        //dá post do nome, horas, curso, codUC no backend
+        axios.post("http://localhost:5170/createUC", novoCurso, {
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(response => {
+                if (response.status === 200) {
+                    setSuccessMessage("UC criada com sucesso!");
+                    setNome("");
+                    setHoras("")
+                    setCurso("")
+                    setCodUC("")
+                }
+            })
+            .catch(err => {
+                setError(err.response?.data?.message || "Erro ao criar UC.");
+            });
+
     };
 
     // Função para adicionar uma nova dropdown ao array de cursos

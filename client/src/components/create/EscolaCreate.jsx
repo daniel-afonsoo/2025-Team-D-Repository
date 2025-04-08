@@ -9,7 +9,7 @@ const EscolaCreate = () => {
     const [abreviatura, setAbreviatura] = useState("");
     const [localidade, setLocalidade] = useState("");
     const [error, setError] = useState("");
-    
+
 
     const handleSubmit = async (e) => {
         //previne que a página de refresh, por default o onsubmit do forms da refresh na página
@@ -23,9 +23,33 @@ const EscolaCreate = () => {
             return;
         }
 
+        // Criar escola para mandar para o backend
+        const novaEscola = {
+            nome,
+            abreviatura,
+            localidade
+        };
+
+        //post no backend através de axios
+        //dá post do nome, abreviatura, localidade no backend
+        axios.post("http://localhost:5170/createEscola", novaEscola, {
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(response => {
+                if (response.status === 200) {
+                    setSuccessMessage("Escola criado com sucesso!");
+                    setNome("");
+                    setAbreviatura("")
+                    setLocalidade("")
+                }
+            })
+            .catch(err => {
+                setError(err.response?.data?.message || "Erro ao criar Escola.");
+            });
+
     };
 
-    
+
 
     return (
         <div className="formulario">
@@ -45,7 +69,7 @@ const EscolaCreate = () => {
                     </div>
                     <div className="create_input_field">
                         <label><font color="#75c734">Localidade da Escola</font></label>
-                        <input className='textbox_input'  type="text" name="localidade" required="" value={localidade} onChange={(e) => setLocalidade(e.target.value)} />
+                        <input className='textbox_input' type="text" name="localidade" required="" value={localidade} onChange={(e) => setLocalidade(e.target.value)} />
                     </div>
                     <button className="botao_create" type='submit' >Criar</button>
                 </form>
