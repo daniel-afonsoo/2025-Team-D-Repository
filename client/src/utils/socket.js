@@ -8,4 +8,12 @@ socket.on("connection-ack-alert", (data) => {
     alert(data)
 })
 
+socket.on("add-aula-error", (data) => {
+    alert(data.message)
+})
+
+socket.on("remove-aula-error", (data) => {
+    alert(data.message)
+})
+
 export default socket;

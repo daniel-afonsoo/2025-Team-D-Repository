@@ -1,10 +1,10 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import Login from './pages/Login.jsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './pages/App';
+import Horarios from './components/horarios'; // Certifique-se de que o nome começa com letra maiúscula
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Login />
+    <Horarios /> {/* Use o nome correto do componente */}
   </StrictMode>,
-)
+);
