@@ -6,6 +6,9 @@ const cors = require('cors')
 const loginRoutes = require('./endpoints/auth-endpoints')
 const dbRoutes = require('./endpoints/database-endpoints')
 const sqlRoutes = require('./endpoints/sqlgen-endpoints')
+const docenteRoutes = require('./endpoints/docentes-endpoints')
+const salaRoutes = require('./endpoints/sala-endpoints')
+const escolaRoutes = require('./endpoints/escola-endpoints')
 
 // express instance & server port
 const app = express()
@@ -27,6 +30,9 @@ app.get("/", (req, res) => {
 app.use('/', loginRoutes)
 app.use('/', dbRoutes)
 app.use('/', sqlRoutes)
+app.use('/', docenteRoutes)
+app.use('/', salaRoutes)
+app.use('/',escolaRoutes)
 
 // setup socket.io
 setupSockets(server)
