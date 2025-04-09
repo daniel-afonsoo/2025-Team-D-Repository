@@ -1,10 +1,21 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './pages/App';
-import Horarios from './components/horarios'; // Certifique-se de que o nome começa com letra maiúscula
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.jsx'
+import Login from './pages/Login.jsx'
+import CursoEdit from './components/edit_remove/Curso_edit_remove.jsx'
+import  DocenteEdit from './components/edit_remove/Docente_edit_remove.jsx'
+import  EscolaEdit from './components/edit_remove/Escola_edit_remove.jsx'
+import  UcEdit from './components/edit_remove/UC_edit_remove.jsx'
+import  SalaEdit from './components/edit_remove/Sala_edit_remove.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Horarios /> {/* Use o nome correto do componente */}
+    <SalaEdit/>
+    <UcEdit />
+    <EscolaEdit />
+    <DocenteEdit />
+    <CursoEdit />
+    <Horarios />
   </StrictMode>,
-);
+)
+
