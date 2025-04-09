@@ -18,9 +18,10 @@ const horas = Array.from({ length: 31 }, (_, i) => {
 });
 
 // Draggable component
-function Draggable({ id, children, isBlocked }) {
+function Draggable({ id, children, isBlocked, aulaInfo }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
+    data: { aulaInfo },
     disabled: isBlocked, // Disable dragging if the schedule is blocked
   });
 
@@ -60,12 +61,16 @@ function Droppable({ id, children, isBlocked }) {
 // Main Horarios component
 function Horarios() {
 
-  // lista das aulas
-  const { aulasMarcadas } = useSocket(); // Fetch the schedule from the server
-  const [ aulasDisponiveis, setAulasDisponiveis] = useState([]); // State for available classes
+  // lista das aulas marcadas
+  const { aulasMarcadas } = useSocket(); 
+
+  // aulas disponíveis
+  const [ aulasDisponiveis, setAulasDisponiveis] = useState([]); // Lista de aulas disponiveis
+  const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30 });
 
   const [isBlocked, setIsBlocked] = useState(false); // State to block the schedule
   const [erro, setErro] = useState(""); // State for error messages
+  const [showAddPopup, setShowAddPopup] = useState(false);
 
   // Filters
   const [escola, setEscola] = useState("");
@@ -75,24 +80,64 @@ function Horarios() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-
+  
+    // check if drop spot is valid
     if (!over) {
-      console.log("Dropped outside the schedule");
+      alert("Dropped outside the schedule");
       setErro("");
       return;
-    }else{
-      const newAula = {
-
-        start: over.id.split("-")[1], // Extract the start time from the droppable ID
-        end: over.id.split("-")[1], // Extract the end time from the droppable ID
-        day: over.id.split("-")[0], // Extract the day from the droppable ID
-      };
-      socket.emit("add-aula", { newAula: newAula } ); // Emit the new class to the server
+    }
+    
+    // check if theres already a class in the drop spot
+    const existingClass = aulasMarcadas.find(
+      (cls) => cls.day === over.id.split("-")[0] && cls.start === over.id.split("-")[1]
+    );
+    if (existingClass) {
+      alert("Class already exists in this slot");
+      return;
     }
 
-    
+    //routine to add new aula to schedule
+    if(active.id.startsWith("disponivel_")){
+      const [day, start] = over.id.split("-"); // get day and start time from over id
+      const newAula = {
+        day,
+        start,
+        subject: active.data.current.aulaInfo.subject,
+        location: active.data.current.aulaInfo.location,
+      };
+  
+      // Emit the event to the server to add the new class
+      socket.emit("add-aula", { newAula });
+      // remove aula from aulasDisponiveis
+      setAulasDisponiveis((prev) => prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id));
+
+    }else if(active.id.startsWith("marcada_")){ //routine to update existing aula in schedule
+      let codAula = active.data.current.aulaInfo.Cod_Aula
+      console.log(codAula)
+      const [newDay, newStart] = over.id.split("-"); // get day and start time from over id
+      socket.emit("update-aula", { codAula, newDay, newStart });
+    }
 
   };
+
+  // Function to add a new class
+  const addClass = () => {
+    // add newAula to disponiveis
+    setAulasDisponiveis((prev) => [
+      ...prev,
+      {
+        id: aulasDisponiveis.length + 1,
+        subject: newAula.subject,
+        location: newAula.location,
+        duration: newAula.duration,
+      },
+    ]);
+    // clear newAula
+    setNewAula({ subject: "", location: "", duration: 30 });
+    // clear popup
+    setShowAddPopup(false);
+  }
 
   // Check if all filters are selected
   const filtrosSelecionados = escola && curso && ano && turma;
@@ -130,6 +175,41 @@ function Horarios() {
           {/* Show content only if filters are selected */}
           {filtrosSelecionados ? (
             <>
+              {/* Botão para abrir o popup de adicionar aulas */}
+              <div className="add-class-button">
+                <button onClick={() => setShowAddPopup(true)}>Adicionar Aula</button>
+              </div>
+
+              {/* Popup para adicionar aulas */}
+              {showAddPopup && (
+                <div className="add-popup">
+                  <div className="popup-content">
+                    <h3>Adicionar Aula</h3>
+                    <input
+                      type="text"
+                      placeholder="Disciplina"
+                      value={newAula.subject}
+                      onChange={(e) => setNewAula({ ...newAula, subject: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Localização"
+                      value={newAula.location}
+                      onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Duração (minutos)"
+                      value={newAula.duration}
+                      onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
+                    />
+                    <button onClick={addClass}>Salvar</button>
+                    <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
+                    {erro && <div className="error-message">{erro}</div>}
+                  </div>
+                </div>
+              )}
+
               {/* Timetable */}
               <div className="conteudo">
                 <div className="timetable-container">
@@ -159,7 +239,7 @@ function Horarios() {
                               const durationBlocks = classItem.duration / 30;
                               return (
                                 <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked}>
-                                  <Draggable id={classItem.id.toString()} isBlocked={isBlocked}>
+                                  <Draggable id={"marcada_" + classItem.Cod_Aula} isBlocked={isBlocked} aulaInfo={classItem}>
                                     <div
                                       className="class-entry"
                                       style={{
@@ -192,7 +272,7 @@ function Horarios() {
                 {filtrosSelecionados ? (
                   aulasDisponiveis.length > 0 ? (
                     aulasDisponiveis.map((aula) => (
-                      <Draggable key={aula.id} id={aula.id.toString()} isBlocked={isBlocked}>
+                      <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
                         <div className="aula-disponivel">
                           <strong>{aula.subject}</strong>
                           <br />
