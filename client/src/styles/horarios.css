@@ -11,28 +11,24 @@
 
 .layout {
   display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  width: 100%;
-}
+  flex-direction: column; /* Garante que a tabela fique abaixo dos filtros e botões */
 
-.filtros-e-aulas {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  width: 100%;
 }
 
 .filtros {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Alinha os filtros em linha horizontal */
   gap: 10px;
-  width: 200px;
-  margin-bottom: 20px; /* Espaço entre os filtros e a seção de adicionar aulas */
+  width: auto; /* Ajusta a largura para caber os elementos */
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .filtros h3 {
   text-align: center;
-  margin-bottom: 10px;
+  margin: 0; /* Remove default margins */
+  padding: 0;
 }
 
 .filtros select {
@@ -42,34 +38,73 @@
   width: 200px;
 }
 
-.conteudo {
+.filters-and-buttons {
   display: flex;
-  gap: 20px;
-  flex: 1;
+  flex-direction: row; /* Align filters, add button, and lock button horizontally */
+  gap: 10px; /* Add spacing between elements */
+  align-items: center; /* Align them vertically */
+  margin-bottom: 20px; /* Add spacing below the container */
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: row; /* Align buttons horizontally */
+   /* Add spacing between buttons */
+}
+
+/* Adjust layout to place "Aulas Disponíveis" to the right of the timetable */
+.conteudo {
+  display: flex; /* Align timetable and available classes horizontally */
+  flex-direction: row;
+  gap: 20px;/* Add spacing between timetable and available classes */
 }
 
 .timetable-container {
-  flex: 3;
+  flex: 3; /* Allocate more space to the timetable */
+  margin: 0; /* Remove unnecessary margins */
+  text-align: left; /* Ensure content is aligned to the left */
 }
 
+/* Improved table styling */
 .timetable {
   border-collapse: collapse;
-  width: 95%;
-  margin-top: 0;
-  font-size: 16px; /* Aumentar o tamanho da fonte */
+  width: 100%;
+  margin-top: 20px;
+  font-size: 16px;
+  background-color: #f9f9f9; /* Light background for the table */
+  border: 1px solid #ddd; /* Subtle border for the table */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow for a modern look */
+  table-layout: fixed; /* Ensure consistent column widths */
 }
 
-.timetable th,
+.timetable th {
+  background-color: #4CAF50; /* Green header background */
+  color: white; /* White text for contrast */
+  padding: 12px; /* Add padding for better spacing */
+  text-align: center; /* Center align header text */
+  font-weight: bold;
+  border: 1px solid #ddd; /* Border between header cells */
+}
+
 .timetable td {
-  border: 3px solid blue;
-  text-align: center;
-  padding: 12px; /* Aumentar o padding */
+  border: 1px solid #ddd; /* Border between cells */
+  text-align: center; /* Center align cell text */
+  padding: 10px; /* Add padding for better spacing */
+  word-wrap: break-word; /* Ensure text wraps within cells */
+}
+
+.timetable tr:nth-child(even) {
+  background-color: #f2f2f2; /* Alternate row background for readability */
+}
+
+.timetable tr:hover {
+  background-color: #ddd; /* Highlight row on hover */
 }
 
 .timetable .hora {
-  background-color: #f0f0f0;
+  background-color: #e0f7fa; /* Light blue background for time column */
   font-weight: bold;
-  font-size: 18px; /* Aumentar o tamanho da fonte para as horas */
+  color: #00796b; /* Darker blue-green text */
 }
 
 .empty-slot {
@@ -94,26 +129,36 @@
 }
 
 .aula {
-  background-color: lightblue;
-  padding: 10px;
-  margin: 5px 0;
+  background-color: #90ee90; /* Verde claro */
+  padding: 12px;
+  margin: 8px 0;
   cursor: grab;
   text-align: center;
-  border: 1px solid black;
+  border: 2px solid #006400; /* Borda verde escuro */
+  border-radius: 8px; /* Bordas arredondadas */
+  font-weight: bold;
+  color: #004d00; /* Texto verde escuro */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+}
+
+.aula:hover {
+  background-color: #32cd32; /* Verde mais vibrante ao passar o mouse */
+  color: white; /* Texto branco para contraste */
 }
 
 .block-btn {
   margin-bottom: 15px;
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #32cd32; /* Verde vibrante */
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .block-btn:hover {
-  background-color: #0056b3;
+  background-color: #228b22; /* Verde mais escuro ao passar o mouse */
 }
 
 .error-message {
@@ -145,8 +190,7 @@
 
 .inputs-container {
   display: flex;
-  flex-direction: column;
-  gap: 10px; /* Espaçamento entre os inputs */
+  flex-direction: column;/* Espaçamento entre os inputs */
 }
 
 .actions-container {
@@ -173,125 +217,7 @@
   background-color: #0056b3;
 }
 
-.barra-pesquisa {
-  width: 94%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-}
 
-.editar-aula {
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-}
-
-.editar-aula h3 {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.editar-aula-container {
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  text-align: center;
-}
-
-.editar-aula-container h3 {
-  margin-bottom: 10px;
-}
-
-.editar-aula-select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.editar-aula-btn {
-  padding: 8px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.editar-aula-btn:hover {
-  background-color: #0056b3;
-}
-
-/* Estilo para a seção de adicionar e editar aulas */
-.add-edit-classes {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px; /* Espaço entre esta seção e o restante do layout */
-}
-
-.add-edit-classes h3 {
-  margin-bottom: 10px;
-}
-
-.add-edit-classes input {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.add-edit-classes button {
-  padding: 10px;
-  font-size: 14px;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.add-edit-classes button:hover {
-  background-color: #0056b3;
-}
-
-/* Dropdown para selecionar a aula */
-.edit-dropdown {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.edit-dropdown select {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.edit-dropdown button {
-  padding: 10px;
-  font-size: 14px;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.edit-dropdown button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
 
 /* Popup para editar e adicionar aulas */
 .popup-content {
@@ -339,22 +265,25 @@
 }
 
 /* Botão para abrir o popup de adicionar aulas */
-.add-class-button {
+.add-buttons {
   margin-bottom: 20px;
+  flex-direction: row;
 }
 
-.add-class-button button {
+.add-class-button {
   padding: 10px 20px;
-  font-size: 14px;
-  color: #fff;
-  background-color: #007bff;
+  margin-bottom: 15px;
+  color: white;
+  background-color: #32cd32; /* Verde vibrante */
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  white-space: nowrap;
+  font-weight: bold; /* Garante que o texto fica na mesma linha */
 }
 
 .add-class-button button:hover {
-  background-color: #0056b3;
+  background-color: #228b22; /* Verde mais escuro ao passar o mouse */
 }
 
 /* Popup para adicionar aulas */
@@ -391,4 +320,14 @@
 .class-entry .location {
   font-size: 12px;
   color: gray;
+}
+
+.aulas-disponiveis {
+  flex: 1; /* Allocate less space to available classes */
+  display: flex;
+  flex-direction: column; /* Add spacing between available classes */
+}
+
+.aulas-disponiveis h3 {
+  text-align: center;
 }
