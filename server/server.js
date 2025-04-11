@@ -9,6 +9,10 @@ const sqlRoutes = require('./endpoints/sqlgen-endpoints')
 const docenteRoutes = require('./endpoints/docentes-endpoints')
 const salaRoutes = require('./endpoints/sala-endpoints')
 const escolaRoutes = require('./endpoints/escola-endpoints')
+const aulaRoutes = require('./endpoints/aula-endpoints')
+const anosemestreRoutes = require('./endpoints/anosemestre-endpoints')
+const cursoRoutes = require('./endpoints/curso-endpoints')
+const ucRouter = require('./endpoints/uc-endpoint.js')
 
 // express instance & server port
 const app = express()
@@ -33,6 +37,10 @@ app.use('/', sqlRoutes)
 app.use('/', docenteRoutes)
 app.use('/', salaRoutes)
 app.use('/',escolaRoutes)
+app.use('/', aulaRoutes)
+app.use('/', anosemestreRoutes)
+app.use('/', cursoRoutes)
+app.use('/', ucRouter)
 
 // setup socket.io
 setupSockets(server)

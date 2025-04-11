@@ -3,7 +3,7 @@ const router = express.Router()
 const pool = require('../db/connection.js')
 
 //FUNCIONA
-router.get('/getEscola',(res)=>{
+router.get('/getEscola',(req,res)=>{
     const query = "SELECT * FROM escola"
     pool.query(query, (err,results)=>{
         if(err){
