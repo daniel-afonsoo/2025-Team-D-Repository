@@ -1,6 +1,7 @@
 import React from "react";
-import { useDraggable, useDroppable } from "@dnd-kit/core";
 import "../../styles/schedule.css";
+import Droppable from "../horarios/Droppable";
+import Draggable from "../horarios/Draggable";
 
 // Days of the week
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -14,48 +15,7 @@ const horas = Array.from({ length: 31 }, (_, i) => {
   return `${startHour}:${startMinutes} - ${endHour === 24 ? "00" : endHour}:${endMinutes}`;
 });
 
-// Draggable component
-function Draggable({ id, children, isBlocked, aulaInfo }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-    data: { aulaInfo },
-    disabled: isBlocked,
-  });
-
-  const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    cursor: isBlocked ? "not-allowed" : "grab",
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className="aula"
-    >
-      {children}
-    </div>
-  );
-}
-
-// Droppable component
-function Droppable({ id, children, isBlocked }) {
-  const { isOver, setNodeRef } = useDroppable({ id });
-
-  const style = {
-    backgroundColor: isOver && !isBlocked ? "lightblue" : undefined,
-  };
-
-  return (
-    <td ref={setNodeRef} style={style} className="empty-slot">
-      {children}
-    </td>
-  );
-}
-
-function Schedule({ aulasMarcadas, isBlocked }) {
+function Scheduleold({ aulasMarcadas, isBlocked }) {
   return (
     <div className="schedule-container">
       <table className="schedule-table">
@@ -79,8 +39,16 @@ function Schedule({ aulasMarcadas, isBlocked }) {
                 if (classItem) {
                   const durationBlocks = classItem.duration / 30;
                   return (
-                    <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} key={`${dia}-${hora}`}>
-                      <Draggable id={"marcada_" + classItem.Cod_Aula} isBlocked={isBlocked} aulaInfo={classItem}>
+                    <Droppable
+                      id={`${dia}-${hora.split(" - ")[0]}`}
+                      isBlocked={isBlocked}
+                      key={`${dia}-${hora}`}
+                    >
+                      <Draggable
+                        id={"marcada_" + classItem.Cod_Aula}
+                        isBlocked={isBlocked}
+                        aulaInfo={classItem}
+                      >
                         <div
                           className="class-entry"
                           style={{
@@ -97,7 +65,11 @@ function Schedule({ aulasMarcadas, isBlocked }) {
                 }
 
                 return (
-                  <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} key={`${dia}-${hora}`} />
+                  <Droppable
+                    id={`${dia}-${hora.split(" - ")[0]}`}
+                    isBlocked={isBlocked}
+                    key={`${dia}-${hora}`}
+                  />
                 );
               })}
             </tr>
@@ -108,4 +80,4 @@ function Schedule({ aulasMarcadas, isBlocked }) {
   );
 }
 
-export default Schedule;
+export default Scheduleold;

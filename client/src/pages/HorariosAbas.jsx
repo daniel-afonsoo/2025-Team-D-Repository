@@ -3,7 +3,7 @@ import { useState } from 'react';
 // O Material UI fornece componentes prontos e altamente personalizáveis para criar interfaces modernas e responsivas de forma rápida.
 import { Tabs, Tab, Box, Typography } from '@mui/material';
 import '../styles/HorariosAbas.css';
-//import Schedule from '../components/abas/Schedule.jsx';
+import Schedule from '../components/abas/Schedule.jsx';
 
 //A função TabPanel é um componente que representa o conteúdo de cada aba.
 
