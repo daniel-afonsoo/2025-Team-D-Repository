@@ -4,9 +4,9 @@ const { Server } = require('socket.io');
 const setupSockets = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: "*",                        // accepting requests from all origins for now 
+            origin: "*", // accepting requests from all origins for now
         }
-    })
+    });
 
     let schedule = [ // get initial data for DB
         // Segunda classes
@@ -33,76 +33,77 @@ const setupSockets = (server) => {
 
     io.on("connection", (socket) => {
         // log new connection
-        console.log(`New socket connection. Socket id: ${socket.id}`)
+        console.log(`New socket connection. Socket id: ${socket.id}`);
 
         // send connection ack to client
-        socket.emit("connection-ack-alert", "Real-time connection established.")
+        socket.emit("connection-ack-alert", "Real-time connection established.");
 
         // send server aulas state to client
-        socket.emit("update-aulas", { newAulas: schedule })
-        console.log(`Data sent ${schedule}`)
+        socket.emit("update-aulas", { newAulas: schedule });
+        console.log(`Data sent ${schedule}`);
+
+        // handle request for assigned classes
+        socket.on("get-aulas", () => {
+            socket.emit("update-aulas", { newAulas: schedule });
+        });
 
         // add aula to server
         socket.on("add-aula", (data) => {
             // check if the class is valid
-            let valid = true
+            let valid = true;
             if (valid) {  // always true for now, add validation logic later (post to database)
-                //add id to new aula
-                let newId = schedule.length + 1
-                data.newAula.Cod_Aula = newId
-                schedule.push(data.newAula) // add to server schedule
-                console.log("Aula added: ", data.newAula)
+                // add id to new aula
+                let newId = schedule.length + 1;
+                data.newAula.Cod_Aula = newId;
+                schedule.push(data.newAula); // add to server schedule
+                console.log("Aula added: ", data.newAula);
                 // broadcast to all clients update
-                io.emit("update-aulas", { newAulas: schedule })
+                io.emit("update-aulas", { newAulas: schedule });
             } else {
                 // error in adding aula
-                console.log("Error adding aula: ", data.newAulas)
-                socket.emit("add-aula-error", { message: "Esta aula não pode ser adicionada." })
+                console.log("Error adding aula: ", data.newAulas);
+                socket.emit("add-aula-error", { message: "Esta aula não pode ser adicionada." });
             }
-        })
+        });
 
         // remove aula from server
         socket.on("remove-aula", (data) => {
             // check if the class is in the schedule
-            let aulaExists = schedule.some((aula) => aula.Cod_Aula === data.codAula)
+            let aulaExists = schedule.some((aula) => aula.Cod_Aula === data.codAula);
             if (aulaExists) {
-                schedule = schedule.filter((aula) => aula.Cod_Aula !== data.codAula)
-                console.log("Aula removed: ", data.codAula)
+                schedule = schedule.filter((aula) => aula.Cod_Aula !== data.codAula);
+                console.log("Aula removed: ", data.codAula);
                 // broadcast to all clients update
-                io.emit("update-aulas", { newAulas: schedule })
+                io.emit("update-aulas", { newAulas: schedule });
             } else {
                 // error in removing aula
-                console.log("Error removing aula: ", data.codAula)
-                socket.emit("remove-aula-error", { message: "Esta aula não pode ser removida." })
-            }
-        })
-
-        socket.on("update-aula", (data) => {
-            console.log(data.newDay)
-            console.log(data.newStart)
-            // update aula in schedule
-            let aulaToUpdate = schedule.find((aula) => aula.Cod_Aula === data.codAula);
-            if (aulaToUpdate) {
-                aulaToUpdate.day = data.newDay
-                aulaToUpdate.start = data.newStart
-                console.log("Aula updated: ", aulaToUpdate)
-                // broadcast to all clients update
-                io.emit("update-aulas", { newAulas: schedule })
-            } else {
-
-                console.log("Error updating aula: ", codaula)
-                socket.emit("update-aula-error", { message: "Esta aula não pode ser atualizada." })
+                console.log("Error removing aula: ", data.codAula);
+                socket.emit("remove-aula-error", { message: "Esta aula não pode ser removida." });
             }
         });
 
-
-    })
-
+        // update aula in server
+        socket.on("update-aula", (data) => {
+            console.log(data.newDay);
+            console.log(data.newStart);
+            // update aula in schedule
+            let aulaToUpdate = schedule.find((aula) => aula.Cod_Aula === data.codAula);
+            if (aulaToUpdate) {
+                aulaToUpdate.day = data.newDay;
+                aulaToUpdate.start = data.newStart;
+                console.log("Aula updated: ", aulaToUpdate);
+                // broadcast to all clients update
+                io.emit("update-aulas", { newAulas: schedule });
+            } else {
+                console.log("Error updating aula: ", data.codAula);
+                socket.emit("update-aula-error", { message: "Esta aula não pode ser atualizada." });
+            }
+        });
+    });
 
     // log setup
-    console.log("Socket.io server setup complete. ")
-
-}
+    console.log("Socket.io server setup complete.");
+};
 
 // export
-module.exports = { setupSockets }
+module.exports = { setupSockets };
