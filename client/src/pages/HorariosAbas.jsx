@@ -1,12 +1,10 @@
 import { useState } from 'react';
-
 //Material UI (MUI) é uma biblioteca de componentes de UI para React, inspirada no Material Design do Google. 
 // O Material UI fornece componentes prontos e altamente personalizáveis para criar interfaces modernas e responsivas de forma rápida.
 import { Tabs, Tab, Box, Typography } from '@mui/material';
-
-
-import './HorariosAbas.css';
-
+import '../styles/HorariosAbas.css';
+import Schedule from '../components/abas/Schedule.jsx';
+//A função TabPanel é um componente que representa o conteúdo de cada aba.
 
 //A função TabPanel é responsável por mostrar ou esconder o conteúdo das abas. A função verifica qual aba está ativa e só exibe o conteúdo dessa aba
 // A função recebe três coisas:
@@ -95,9 +93,15 @@ function TabsHorarios() {
       </Box>
       {/* Conteúdo das abas */}
       {/*Somente o painel cujo index é igual ao value será exibido.*/}
-      <TabPanel value={tabIndex} index={0}>Turmas</TabPanel>
-      <TabPanel value={tabIndex} index={1}>Docentes</TabPanel>
-      <TabPanel value={tabIndex} index={2}>Salas</TabPanel>
+      <TabPanel value={tabIndex} index={0}>
+        <Schedule />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={1}>
+        <Schedule />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={2}>
+        <Schedule />
+      </TabPanel>
     </Box>
   );
 }

@@ -9,7 +9,8 @@ import UCCreate from './components/create/UCCreate.jsx'
 import  EscolaEdit from './components/edit_remove/Escola_edit_remove.jsx'
 import  UcEdit from './components/edit_remove/UC_edit_remove.jsx'
 import  SalaEdit from './components/edit_remove/Sala_edit_remove.jsx'
-import  Horarios from './components/horarios.jsx'
+import  Horarios from './pages/horarios.jsx'
+import HorariosAbas from './pages/HorariosAbas.jsx'
 import Login from './pages/Login.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')).render(
     <EscolaCreate/>
     <CursoCreate/>
     <UCCreate/>  */}
-    <Horarios /> 
+    {/* <Horarios />  */}
+    <HorariosAbas/>
   </StrictMode>,
 )
