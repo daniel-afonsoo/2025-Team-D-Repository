@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db/connection.js')
+const bcrypt = require('bcrypt')
 
 //FUNCIONA
 router.get('/getDocente',(req,res)=>{
@@ -26,10 +27,13 @@ router.post('/createDocente', async (req, res) => {
     }
 
     try {
-        // Verificar se o docente já existe
+        
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Verificar se o docente já existe (apenas pelo email)
         const [resultado] = await pool.promise().query(
-            `SELECT * FROM docente WHERE Nome = ? and Email = ? and Password = ?`,
-            [nome, email, password]
+            `SELECT * FROM docente WHERE Email = ?`,
+            [email]
         );
         if (resultado.length > 0) {
             return res.status(400).json({ error: 'Esse docente já existe' });
@@ -37,7 +41,7 @@ router.post('/createDocente', async (req, res) => {
 
         // Inserir novo docente
         const query = `INSERT INTO docente (Nome, Email, Password) VALUES (?, ?, ?)`;
-        const values = [nome, email, password];
+        const values = [nome, email, hashedPassword];
         await pool.promise().query(query, values);
 
         return res.status(200).json({ message: 'Docente criado com sucesso' });

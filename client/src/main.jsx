@@ -14,16 +14,6 @@ import Login from './pages/Login.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <Login />   */}
-    {/* <SalaEdit/>
-    <UcEdit />
-    <EscolaEdit />
-    <DocenteEdit />
-    <CursoEdit />
-    <DocenteCreate/>  
-    <EscolaCreate/>
-    <CursoCreate/>
-    <UCCreate/>  */}
-    <Horarios /> 
+    <Login/>  
   </StrictMode>,
 )
