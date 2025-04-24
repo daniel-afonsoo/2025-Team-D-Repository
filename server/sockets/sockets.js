@@ -8,6 +8,14 @@ const setupSockets = (server) => {
         }
     })
 
+    //interceptor for console.log
+    const originalLog = console.log;
+    console.log = function (...args) {
+        const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' ');
+        io.emit('console-log', message); // broadcast to all clients
+        originalLog.apply(console, args); // still print to terminal
+    };
+
     let schedule = [ // get initial data for DB
         // Segunda classes
         { Cod_Aula: 1, day: "Segunda", start: "10:00", end: "12:00", subject: "Análise Matemática I", location: "Sala B255" },
