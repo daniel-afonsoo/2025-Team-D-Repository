@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 //Material UI (MUI) é uma biblioteca de componentes de UI para React, inspirada no Material Design do Google. 
 // O Material UI fornece componentes prontos e altamente personalizáveis para criar interfaces modernas e responsivas de forma rápida.
-import { Tabs, Tab, Box, Typography } from '@mui/material';
-import '../styles/HorariosAbas.css';
-import Schedule from '../components/abas/Schedule.jsx';
+import { Tabs, Tab, Box, Typography } from "@mui/material";
+import "../styles/HorariosAbas.css";
+import Schedule from "../components/abas/Schedule.jsx";
+import socket from "../utils/socket"; // Import the socket instance
 
 //A função TabPanel é um componente que representa o conteúdo de cada aba.
 
@@ -24,11 +25,11 @@ function TabPanel({ children, value, index }) {
     //Isto em conjunto garante um melhor controle do layout e do desempenho da aplicação! 
     <div hidden={value !== index}>
       {value === index && (
-         //O Box é um componente do Material UI que serve como um container flexível, semelhante a uma <div>, mas com mais controle sobre o layout e estilos.
+        //O Box é um componente do Material UI que serve como um container flexível, semelhante a uma <div>, mas com mais controle sobre o layout e estilos.
         //Neste caso estamos a usar um Box para organizar o conteúdo dentro das abas
         //p={6} → Adiciona espaçamento interno (padding) 
         <Box className="tab-content">
-         {/*Typography é um estilo visual do Material UI*/}
+          {/*Typography é um estilo visual do Material UI*/}
           <Typography className="tab-text">{children}</Typography>
         </Box>
       )}
@@ -37,7 +38,6 @@ function TabPanel({ children, value, index }) {
 }
 
 function TabsHorarios() {
-
   // Estado para controlar a aba ativa
   //useState(0) cria um estado inicial com o valor 0 ,ou seja, a primeira aba (Turmas) está ativa.
   //tabIndex →Valor atual do estado (qual aba está ativa).
@@ -51,6 +51,25 @@ function TabsHorarios() {
   //Quando chamamos setTabIndex(newIndex), o React atualiza o estado tabIndex com o novo valor
   const [tabIndex, setTabIndex] = useState(0);
 
+  // Estado para armazenar as aulas já atribuídas
+  const [aulasMarcadas, setAulasMarcadas] = useState([]);
+
+  // Buscar as aulas atribuídas quando o componente é montado ou quando a aba muda
+  useEffect(() => {
+    // Emitir evento para buscar as aulas atribuídas
+    socket.emit("get-aulas");
+
+    // Ouvir o evento de atualização das aulas atribuídas
+    socket.on("update-aulas", (data) => {
+      setAulasMarcadas(data.newAulas); // Atualizar o estado com as aulas atribuídas
+    });
+
+    // Limpar o listener quando o componente é desmontado ou quando a aba muda
+    return () => {
+      socket.off("update-aulas");
+    };
+  }, [tabIndex]);
+
   return (
     <Box>
       {/*borderBottom: 1->Isso cria uma linha na parte inferior do elemento.*/}
@@ -60,11 +79,9 @@ function TabsHorarios() {
       <Box className="tabs-container">
         {/*Tabs	é o container que segura todas as abas.*/}
         <Tabs
-
           //value={tabIndex} → Controla qual a aba que está ativa no momento.
           value={tabIndex}
-
-           //O estado tabIndex é um número (0, 1 ou 2), indicando a aba ativa.
+          //O estado tabIndex é um número (0, 1 ou 2), indicando a aba ativa.
           //Quando o utilizador clica numa aba, setTabIndex(newIndex) atualiza o estado para esse índice.
           //Isso faz com que o conteúdo da aba mude dinamicamente.
           //onChange → É acionado quando o utilizador clica numa aba.
@@ -79,8 +96,7 @@ function TabsHorarios() {
           className="tabs-wrapper"
           centered // <- Centraliza as abas na tela do cliente
         >
-
-        {/*Cada <Tab> representa uma aba, e label="..." define o nome dela.
+          {/*Cada <Tab> representa uma aba, e label="..." define o nome dela.
             Os índices são automáticos:
             "Turmas" → index = 0
             "Docentes" → index = 1
@@ -95,13 +111,13 @@ function TabsHorarios() {
       {/* Conteúdo das abas */}
       {/*Somente o painel cujo index é igual ao value será exibido.*/}
       <TabPanel value={tabIndex} index={0}>
-        <Schedule />
+        <Schedule aulasMarcadas={aulasMarcadas} isBlocked={false} />
       </TabPanel>
       <TabPanel value={tabIndex} index={1}>
-        <Schedule />
+        <Schedule aulasMarcadas={aulasMarcadas} isBlocked={false} />
       </TabPanel>
       <TabPanel value={tabIndex} index={2}>
-        <Schedule />
+        <Schedule aulasMarcadas={aulasMarcadas} isBlocked={false} />
       </TabPanel>
     </Box>
   );
