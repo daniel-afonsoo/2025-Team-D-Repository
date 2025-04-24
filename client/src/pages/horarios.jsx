@@ -1,15 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import { Tabs, Tab, Box, Typography } from "@mui/material";
 import "../styles/horarios.css";
 import socket from "../utils/socket"; // Import the socket instance
 import Filtros from "../components/horarios/Filtros";
 import Draggable from "../components/horarios/Draggable";
 import Scheduleold from "../components/abas/Schedule";
 
+// TabPanel component to manage tab content
+function TabPanel({ children, value, index }) {
+  return (
+    <div hidden={value !== index}>
+      {value === index && (
+        <Box className="tab-content">
+          <Typography className="tab-text">{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
 function Horarios() {
-  const [aulasMarcadas, setAulasMarcadas] = useState([]);
-  const [aulasDisponiveis, setAulasDisponiveis] = useState([]);
+  const [tabIndex, setTabIndex] = useState(0); // State to track the active tab
+  const [aulasMarcadas, setAulasMarcadas] = useState([]); // State to store assigned classes
+  const [aulasDisponiveis, setAulasDisponiveis] = useState([]); // State to store available classes
   const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30 });
   const [isBlocked, setIsBlocked] = useState(false);
   const [erro, setErro] = useState("");
@@ -23,7 +38,7 @@ function Horarios() {
 
   const filtrosSelecionados = escola && curso && ano && turma;
 
-  // Fetch assigned classes when filters are selected
+  // Fetch assigned classes when filters are selected or when the tab changes
   useEffect(() => {
     if (filtrosSelecionados) {
       socket.emit("get-aulas");
@@ -36,7 +51,7 @@ function Horarios() {
         socket.off("update-aulas");
       };
     }
-  }, [filtrosSelecionados]);
+  }, [filtrosSelecionados, tabIndex]);
 
   // Fetch available (unassigned) classes when filters are selected
   useEffect(() => {
@@ -132,60 +147,28 @@ function Horarios() {
 
           {filtrosSelecionados ? (
             <>
-              {showAddPopup && (
-                <div className="add-popup">
-                  <div className="popup-content">
-                    <h3>Adicionar Aula</h3>
-                    <input
-                      type="text"
-                      placeholder="Disciplina"
-                      value={newAula.subject}
-                      onChange={(e) => setNewAula({ ...newAula, subject: e.target.value })}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Localização"
-                      value={newAula.location}
-                      onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="Duração (minutos)"
-                      value={newAula.duration}
-                      onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
-                    />
-                    <button onClick={addClass}>Salvar</button>
-                    <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
-                    {erro && <div className="error-message">{erro}</div>}
-                  </div>
-                </div>
-              )}
-
-              <div className="conteudo">
+              <Box className="tabs-container">
+                <Tabs
+                  value={tabIndex}
+                  onChange={(e, newIndex) => setTabIndex(newIndex)}
+                  aria-label="Basic Tabs Example"
+                  className="tabs-wrapper"
+                  centered
+                >
+                  <Tab label="Turmas" />
+                  <Tab label="Docentes" />
+                  <Tab label="Salas" />
+                </Tabs>
+              </Box>
+              <TabPanel value={tabIndex} index={0}>
                 <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
-
-                <div className="aulas-disponiveis">
-                  <h3>Aulas Disponíveis</h3>
-                  {aulasDisponiveis.length > 0 ? (
-                    aulasDisponiveis.map((aula) => (
-                      <Draggable
-                        key={aula.Cod_Aula}
-                        id={"disponivel_" + aula.Cod_Aula}
-                        isBlocked={isBlocked}
-                        aulaInfo={aula}
-                      >
-                        <div className="aula-disponivel">
-                          <strong>{aula.subject}</strong>
-                          <br />
-                          <span>{aula.location}</span>
-                        </div>
-                      </Draggable>
-                    ))
-                  ) : (
-                    <p>Nenhuma aula disponível.</p>
-                  )}
-                </div>
-              </div>
+              </TabPanel>
+              <TabPanel value={tabIndex} index={1}>
+                <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
+              </TabPanel>
+              <TabPanel value={tabIndex} index={2}>
+                <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
+              </TabPanel>
             </>
           ) : (
             <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
