@@ -1,0 +1,41 @@
+.area {
+    text-align: center;
+    margin-top: 10%;
+    
+  }
+  
+  .titulo {
+    margin-bottom: 50px;
+    font-family: "Titillium Web", sans-serif;
+    font-size: 40px;
+  }
+  
+  .destaque {
+    font-weight: bold;
+    font-family: "Titillium Web", sans-serif;
+    font-size: 40px;
+  }
+  
+  .botoes-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+  }
+  
+  
+.botao{
+    font-size: 30px;
+    text-align: center;
+    font-family: "Courier New", Courier, monospace;
+    border-radius: 12px;
+    font-weight: bold;
+    text-shadow: 0 0 3px #FFF;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    margin-right: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    cursor: pointer;;
+}

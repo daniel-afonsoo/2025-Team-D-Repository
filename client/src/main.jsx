@@ -11,9 +11,15 @@ import  UcEdit from './components/edit_remove/UC_edit_remove.jsx'
 import  SalaEdit from './components/edit_remove/Sala_edit_remove.jsx'
 import  Horarios from './components/horarios.jsx'
 import Login from './pages/Login.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import HorarioPage from './pages/Horario.jsx'
+import BackOffice from './pages/BackOffice.jsx'
+import Navbar from './components/Navbar.jsx'
 
 createRoot(document.getElementById('root')).render(
+  
   <StrictMode>
+    <Navbar />
     {/* <Login />   */}
     {/* <SalaEdit/>
     <UcEdit />
@@ -23,7 +29,14 @@ createRoot(document.getElementById('root')).render(
     <DocenteCreate/>  
     <EscolaCreate/>
     <CursoCreate/>
-    <UCCreate/>  */}
-    <Horarios /> 
+    <UCCreate/>  
+    <Horarios />
+    
+    <HorarioPage />
+    
+    <Dashboard /> 
+    */}
+     <BackOffice />
+    
   </StrictMode>,
 )
