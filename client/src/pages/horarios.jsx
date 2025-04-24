@@ -3,18 +3,22 @@ import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { Tabs, Tab, Box, Typography } from "@mui/material";
 import "../styles/horarios.css";
-import socket from "../utils/socket"; // Import the socket instance
+import socket from "../utils/socket";
 import Filtros from "../components/horarios/Filtros";
 import Draggable from "../components/horarios/Draggable";
 import Scheduleold from "../components/abas/Schedule";
+import AddAulaPopup from "../components/abas/AddAulaPopup"; // Import the new component
 
-// TabPanel component to manage tab content
+// Define the TabPanel component
 function TabPanel({ children, value, index }) {
   return (
     <div hidden={value !== index}>
       {value === index && (
         <Box className="tab-content">
-          <Typography className="tab-text">{children}</Typography>
+          {/* Ensure Typography renders as a div */}
+          <Typography component="div" className="tab-text">
+            {children}
+          </Typography>
         </Box>
       )}
     </div>
@@ -22,15 +26,14 @@ function TabPanel({ children, value, index }) {
 }
 
 function Horarios() {
-  const [tabIndex, setTabIndex] = useState(0); // State to track the active tab
-  const [aulasMarcadas, setAulasMarcadas] = useState([]); // State to store assigned classes
-  const [aulasDisponiveis, setAulasDisponiveis] = useState([]); // State to store available classes
+  const [tabIndex, setTabIndex] = useState(0);
+  const [aulasMarcadas, setAulasMarcadas] = useState([]);
+  const [aulasDisponiveis, setAulasDisponiveis] = useState([]);
   const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30 });
   const [isBlocked, setIsBlocked] = useState(false);
   const [erro, setErro] = useState("");
   const [showAddPopup, setShowAddPopup] = useState(false);
 
-  // Filters
   const [escola, setEscola] = useState("");
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
@@ -38,13 +41,12 @@ function Horarios() {
 
   const filtrosSelecionados = escola && curso && ano && turma;
 
-  // Fetch assigned classes when filters are selected or when the tab changes
   useEffect(() => {
     if (filtrosSelecionados) {
       socket.emit("get-aulas");
 
       socket.on("update-aulas", (data) => {
-        setAulasMarcadas(data.newAulas); // Update the assigned classes
+        setAulasMarcadas(data.newAulas);
       });
 
       return () => {
@@ -53,20 +55,19 @@ function Horarios() {
     }
   }, [filtrosSelecionados, tabIndex]);
 
-  // Fetch available (unassigned) classes when filters are selected
   useEffect(() => {
     if (filtrosSelecionados) {
       socket.emit("get-unassigned-aulas");
 
       socket.on("update-unassigned-aulas", (data) => {
-        setAulasDisponiveis(data.unassignedAulas); // Update the available classes
+        setAulasDisponiveis(data.unassignedAulas);
       });
 
       return () => {
         socket.off("update-unassigned-aulas");
       };
     } else {
-      setAulasDisponiveis([]); // Clear available classes if filters are not selected
+      setAulasDisponiveis([]);
     }
   }, [escola, curso, ano, turma]);
 
@@ -172,6 +173,17 @@ function Horarios() {
             </>
           ) : (
             <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
+          )}
+
+          {/* Render the AddAulaPopup component */}
+          {showAddPopup && (
+            <AddAulaPopup
+              newAula={newAula}
+              setNewAula={setNewAula}
+              addClass={addClass}
+              setShowAddPopup={setShowAddPopup}
+              erro={erro}
+            />
           )}
         </div>
       </div>
