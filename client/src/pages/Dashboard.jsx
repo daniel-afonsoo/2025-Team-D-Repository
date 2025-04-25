@@ -1,5 +1,6 @@
 import React from 'react';
 import "../styles/dashboard-backoffice.css"
+import { Link } from 'react-router-dom'; // Importe o Link
 
 const Dashboard = () => {
 
@@ -9,9 +10,9 @@ const Dashboard = () => {
     <div className="area">
       <h1 className="titulo">Bem-vindo <span className="destaque">{nome}</span></h1>
       <div className="botoes-container">
-        <button className="botao">Horários ESGT</button>
-        <button className="botao">Horários ESTT</button>
-        <button className="botao">Horários ESTA</button>
+         <Link to="/HorariosESGT" className="botao">Horários ESGT</Link>
+         <Link to="/HorariosESTT" className="botao">Horários ESTT</Link>
+         <Link to="/HorariosESTA" className="botao">Horários ESTA</Link>
       </div>
     </div>
   );
