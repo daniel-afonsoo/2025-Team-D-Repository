@@ -1,5 +1,7 @@
 // imports
 const { Server } = require('socket.io');
+const pool = require("../db/connection"); // Import the database connection pool
+
 
 const setupSockets = (server) => {
     const io = new Server(server, {
@@ -53,25 +55,80 @@ const setupSockets = (server) => {
             socket.emit("update-unassigned-aulas", { unassignedAulas });
         });
 
-        // add aula to server
-        socket.on("add-aula", (data) => {
-            // check if the class is valid
-            let valid = true;
-            if (valid) {  // always true for now, add validation logic later (post to database)
-                // add id to new aula
-                let newId = schedule.length + 1;
-                data.newAula.Cod_Aula = newId;
-                data.newAula.assigned = true; // Mark as assigned
-                schedule.push(data.newAula); // add to server schedule
-                console.log("Aula added: ", data.newAula);
-                // broadcast to all clients update
-                io.emit("update-aulas", { newAulas: schedule });
-            } else {
-                // error in adding aula
-                console.log("Error adding aula: ", data.newAulas);
-                socket.emit("add-aula-error", { message: "Esta aula não pode ser adicionada." });
+        socket.on("add-aula", async (data) => {
+            try {
+              console.log("Received add-aula event with data:", data); // Debugging log
+          
+              // Extract the aula details from the data
+              const {
+                Cod_Docente,
+                Cod_Sala,
+                Cod_Turma,
+                Cod_Uc,
+                Cod_Curso,
+                Cod_AnoSemestre,
+                Dia,
+                Inicio,
+                Fim,
+              } = data.newAula;
+          
+              // Insert the new aula into the database
+              const [result] = await pool.query(
+                `INSERT INTO aula (Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim]
+              );
+          
+              // Get the inserted aula's ID
+              const newId = result.insertId;
+          
+              // Add the new aula to the in-memory schedule (optional, for broadcasting)
+              const newAula = {
+                Cod_Aula: newId,
+                Cod_Docente,
+                Cod_Sala,
+                Cod_Turma,
+                Cod_Uc,
+                Cod_Curso,
+                Cod_AnoSemestre,
+                Dia,
+                Inicio,
+                Fim,
+                assigned: true,
+              };
+              console.log("Current schedule before push:", schedule);
+              schedule.push(newAula);
+          
+              console.log("Aula added to database and schedule: ", newAula);
+          
+              // Broadcast the updated schedule to all clients
+              console.log("Broadcasting updated schedule:", schedule);
+              io.emit("update-aulas", { newAulas: schedule });
+            } catch (error) {
+                console.error("Error adding aula to database:", error); // Log the full error
+                socket.emit("add-aula-error", { message: "Erro ao adicionar aula ao banco de dados." });
             }
-        });
+          });
+
+        // add aula to server
+        // socket.on("add-aula", (data) => {
+        //     check if the class is valid
+        //     let valid = true;
+        //     if (valid) {  // always true for now, add validation logic later (post to database)
+        //         add id to new aula
+        //         let newId = schedule.length + 1;
+        //         data.newAula.Cod_Aula = newId;
+        //         data.newAula.assigned = true; // Mark as assigned
+        //         schedule.push(data.newAula); // add to server schedule
+        //         console.log("Aula added: ", data.newAula);
+        //         broadcast to all clients update
+        //         io.emit("update-aulas", { newAulas: schedule });
+        //     } else {
+        //         error in adding aula
+        //         console.log("Error adding aula: ", data.newAulas);
+        //         socket.emit("add-aula-error", { message: "Esta aula não pode ser adicionada." });
+        //     }
+        // });
 
         // remove aula from server
         socket.on("remove-aula", (data) => {

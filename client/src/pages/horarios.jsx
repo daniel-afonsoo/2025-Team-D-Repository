@@ -3,11 +3,11 @@ import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { Tabs, Tab, Box, Typography } from "@mui/material";
 import "../styles/horarios.css";
-import socket from "../utils/socket";
+import socket, { onUpdateAulas } from "../utils/socket";
 import Filtros from "../components/horarios/Filtros";
 import Draggable from "../components/horarios/Draggable";
 import Scheduleold from "../components/abas/Schedule";
-import AddAulaPopup from "../components/abas/AddAulaPopup"; // Import the new component
+import AddAulaPopup from "../components/abas/AddAulaPopup";
 
 // Define the TabPanel component
 function TabPanel({ children, value, index }) {
@@ -15,7 +15,6 @@ function TabPanel({ children, value, index }) {
     <div hidden={value !== index}>
       {value === index && (
         <Box className="tab-content">
-          {/* Ensure Typography renders as a div */}
           <Typography component="div" className="tab-text">
             {children}
           </Typography>
@@ -41,20 +40,32 @@ function Horarios() {
 
   const filtrosSelecionados = escola && curso && ano && turma;
 
+  // Listen for "update-aulas" event
+  useEffect(() => {
+    onUpdateAulas((data) => {
+      console.log("Updating aulasMarcadas with data:", data.newAulas); // Debugging log
+      setAulasMarcadas(data.newAulas);
+    });
+
+    // Cleanup listener on component unmount
+    return () => {
+      socket.off("update-aulas");
+    };
+  }, []);
+
+  // Debugging log for aulasDisponiveis
+  useEffect(() => {
+    console.log("Updated aulasDisponiveis:", aulasDisponiveis);
+  }, [aulasDisponiveis]);
+
+  // Fetch aulas when filters are selected
   useEffect(() => {
     if (filtrosSelecionados) {
       socket.emit("get-aulas");
-
-      socket.on("update-aulas", (data) => {
-        setAulasMarcadas(data.newAulas);
-      });
-
-      return () => {
-        socket.off("update-aulas");
-      };
     }
   }, [filtrosSelecionados, tabIndex]);
 
+  // Fetch unassigned aulas
   useEffect(() => {
     if (filtrosSelecionados) {
       socket.emit("get-unassigned-aulas");
@@ -96,7 +107,7 @@ function Horarios() {
         subject: active.data.current.aulaInfo.subject,
         location: active.data.current.aulaInfo.location,
       };
-
+      console.log("Emitting add-aula event with data:", newAula);
       socket.emit("add-aula", { newAula });
       setAulasDisponiveis((prev) => prev.filter((aula) => aula.Cod_Aula !== active.data.current.aulaInfo.Cod_Aula));
     } else if (active.id.startsWith("marcada_")) {
@@ -107,6 +118,11 @@ function Horarios() {
   };
 
   const addClass = () => {
+    console.log("addClass function called with newAula:", newAula);
+
+    // Emit the new aula to the backend
+    socket.emit("add-aula", { newAula });
+
     setAulasDisponiveis((prev) => [
       ...prev,
       {
