@@ -1,5 +1,6 @@
 // imports
 const { Server } = require('socket.io');
+const { setSocketIOInstance, logToClient, getBufferedLogs } = require('../utils/logger'); // import logger instance
 
 const setupSockets = (server) => {
     const io = new Server(server, {
@@ -8,13 +9,7 @@ const setupSockets = (server) => {
         }
     })
 
-    //interceptor for console.log
-    const originalLog = console.log;
-    console.log = function (...args) {
-        const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' ');
-        io.emit('console-log', message); // broadcast to all clients
-        originalLog.apply(console, args); // still print to terminal
-    };
+    setSocketIOInstance(io); // set the socket.io instance in the logger
 
     let schedule = [ // get initial data for DB
         // Segunda classes
@@ -40,6 +35,12 @@ const setupSockets = (server) => {
     ];
 
     io.on("connection", (socket) => {
+
+        // Send buffered logs to newly connected client
+        getBufferedLogs().forEach(log => {
+            socket.emit('console-log', log);
+        });
+
         // log new connection
         console.log(`New socket connection. Socket id: ${socket.id}`)
 
@@ -106,9 +107,8 @@ const setupSockets = (server) => {
 
     })
 
-
     // log setup
-    console.log("Socket.io server setup complete. ")
+    logToClient("setup", "Socket.io setup complete");
 
 }
 
