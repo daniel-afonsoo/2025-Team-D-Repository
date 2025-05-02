@@ -31,12 +31,36 @@ const Login = () => {
           })
           //apresenta na consola a mensagem de erro e limpa a variável da password
           .catch(error => {
-            setError("Erro ao fazer login. Verifique suas credenciais.");
-            console.error(error);
-            setPassword("")
-          })
-    
+            if (error.response) {
+              const status = error.response.status;
+      
+              if (status === 401) {
+                setError("Credenciais inválidas. Verifique o email e a password.");
+              } else if (status === 429) {
+                setError("Demasiadas tentativas. Tente novamente daqui a 15 minutos.");
+              } else if (status === 500) {
+                setError("Erro interno do servidor. Tente novamente mais tarde.");
+              } else {
+                setError(`Erro inesperado. Código: ${status}`);
+              }
+      
+              console.error("Erro de resposta do servidor:", error.response.data);
+      
+            } else if (error.request) {
+              // Requisição feita, mas sem resposta
+              setError("Servidor indisponível. Verifique a ligação ou tente mais tarde.");
+              console.error("Erro de requisição:", error.request);
+      
+            } else {
+              // Erro na configuração da requisição
+              setError("Ocorreu um erro. Tente novamente.");
+              console.error("Erro desconhecido:", error.message);
+            }
+      
+            setPassword(""); // Limpa a password
+          });
       };
+      
 
 
 
