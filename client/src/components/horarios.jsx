@@ -1,28 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
-import socket from "../utils/socket"; // Import the socket instance
-import { useSocket } from "../utils/useSocket"
+import socket from "../utils/socket";
+import { useSocket } from "../utils/useSocket";
 
-// Define the days of the week
+// Days of the week
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-// Generate time slots (from 8:30 to 24:00)
+// Generate time slots from 08:30 to 24:00 in 30-minute intervals
 const horas = Array.from({ length: 31 }, (_, i) => {
-  const startHour = 8 + Math.floor((i + 1) / 2); // Calculate the start hour
-  const startMinutes = i % 2 === 0 ? "30" : "00"; // Define the minutes (30 or 00)
-  const endHour = startMinutes === "30" ? startHour + 1 : startHour; // Calculate the end hour
-  const endMinutes = startMinutes === "30" ? "00" : "30"; // Define the end minutes
-  return `${startHour}:${startMinutes} - ${endHour === 24 ? "00" : endHour}:${endMinutes}`;
+  const hour = 8 + Math.floor(i / 2); // The start hour
+  const minutes = i % 2 === 0 ? "00" : "30"; // Alternates between 00 and 30 minutes
+  const start = `${hour.toString().padStart(2, "0")}:${minutes}`; // Format start time
+  const endHour = minutes === "30" ? hour + 1 : hour; // End hour is the next hour if start is :30
+  const endMinutes = minutes === "30" ? "00" : "30"; // End minutes is 00 if start is :30
+  const end = `${endHour.toString().padStart(2, "0")}:${endMinutes}`; // Format end time
+  return `${start} - ${end}`;
 });
 
-// Draggable component
+
+// Draggable class box
 function Draggable({ id, children, isBlocked, aulaInfo }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
     data: { aulaInfo },
-    disabled: isBlocked, // Disable dragging if the schedule is blocked
+    disabled: isBlocked,
   });
 
   const style = {
@@ -43,7 +46,7 @@ function Draggable({ id, children, isBlocked, aulaInfo }) {
   );
 }
 
-// Droppable component
+// Droppable cell
 function Droppable({ id, children, isBlocked }) {
   const { isOver, setNodeRef } = useDroppable({ id });
 
@@ -58,9 +61,8 @@ function Droppable({ id, children, isBlocked }) {
   );
 }
 
-// Main Horarios component
+// Main component
 function Horarios() {
-
   // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
 
@@ -80,45 +82,40 @@ function Horarios() {
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
-
-    // check if drop spot is valid
     if (!over) {
       alert("Dropped outside the schedule");
       setErro("");
       return;
     }
 
-    // check if theres already a class in the drop spot
+    const [day, start] = over.id.split("-");
     const existingClass = aulasMarcadas.find(
-      (cls) => cls.day === over.id.split("-")[0] && cls.start === over.id.split("-")[1]
+      (cls) => cls.day === day && cls.start === start
     );
+
     if (existingClass) {
       alert("Class already exists in this slot");
       return;
     }
 
-    //routine to add new aula to schedule
     if (active.id.startsWith("disponivel_")) {
-      const [day, start] = over.id.split("-"); // get day and start time from over id
       const newAula = {
         day,
         start,
         subject: active.data.current.aulaInfo.subject,
         location: active.data.current.aulaInfo.location,
+        duration: active.data.current.aulaInfo.duration,
       };
 
-      // Emit the event to the server to add the new class
       socket.emit("add-aula", { newAula });
-      // remove aula from aulasDisponiveis
-      setAulasDisponiveis((prev) => prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id));
 
-    } else if (active.id.startsWith("marcada_")) { //routine to update existing aula in schedule
-      let codAula = active.data.current.aulaInfo.Cod_Aula
-      console.log(codAula)
-      const [newDay, newStart] = over.id.split("-"); // get day and start time from over id
-      socket.emit("update-aula", { codAula, newDay, newStart });
+      setAulasDisponiveis((prev) =>
+        prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id)
+      );
+    } else if (active.id.startsWith("marcada_")) {
+      const codAula = active.data.current.aulaInfo.Cod_Aula;
+      socket.emit("update-aula", { codAula, newDay: day, newStart: start });
     }
-
   };
 
   // Function to add a new class
@@ -146,7 +143,7 @@ function Horarios() {
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="horarios-container">
         <div className="layout">
-          {/* Filters and Add Button */}
+
           <div className="filters-and-buttons">
             <div className="filtros">
               <h3>Filtros</h3>
@@ -188,122 +185,137 @@ function Horarios() {
               </button>
             </div>
           )}
-        
 
-        {/* Show content only if filters are selected */}
-        {filtrosSelecionados ? (
-          <>
-            {/* Popup para adicionar aulas */}
-            {showAddPopup && (
-              <div className="add-popup">
-                <div className="popup-content">
-                  <h3>Adicionar Aula</h3>
-                  <input
-                    type="text"
-                    placeholder="Disciplina"
-                    value={newAula.subject}
-                    onChange={(e) => setNewAula({ ...newAula, subject: e.target.value })}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Localização"
-                    value={newAula.location}
-                    onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Duração (minutos)"
-                    value={newAula.duration}
-                    onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
-                  />
-                  <button onClick={addClass}>Salvar</button>
-                  <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
+          {/* Show content only if filters are selected */}
+          {filtrosSelecionados ? (
+            <>
+              {/* Popup para adicionar aulas */}
+              {showAddPopup && (
+                <div className="add-popup">
+                  <div className="popup-content">
+                    <h3>Adicionar Aula</h3>
+                    <input
+                      type="text"
+                      placeholder="Disciplina"
+                      value={newAula.subject}
+                      onChange={(e) => setNewAula({ ...newAula, subject: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Localização"
+                      value={newAula.location}
+                      onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Duração (minutos)"
+                      value={newAula.duration}
+                      onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
+                    />
+                    <button onClick={addClass}>Salvar</button>
+                    <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
+                    {erro && <div className="error-message">{erro}</div>}
+                  </div>
+                </div>
+              )}
+
+              <div className="conteudo">
+                <div className="timetable-container">
                   {erro && <div className="error-message">{erro}</div>}
+                  <table className="timetable">
+                    <thead>
+                      <tr>
+                        <th>Horas</th>
+                        {diasSemana.map((dia) => (
+                          <th key={dia}>{dia}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {horas.map((hora, index) => {
+                        const horaInicio = hora.split(" - ")[0];
+                        return (
+                          <tr key={index}>
+                            <td className="hora">{hora}</td>
+                            {diasSemana.map((dia) => {
+                              const cellId = `${dia}-${horaInicio}`;
+
+                              // Prevent rendering cell if it's within an already spanned class
+                              const isCellSpanned = aulasMarcadas.some((cls) => {
+                                const classStartIndex = horas.findIndex(h => h.startsWith(cls.start));
+                                const classEndIndex = classStartIndex + (cls.duration / 30);
+                                const currentIndex = index;
+                                return (
+                                  cls.day === dia &&
+                                  currentIndex > classStartIndex &&
+                                  currentIndex < classEndIndex
+                                );
+                              });
+                              if (isCellSpanned) return null;
+
+                              const classItem = aulasMarcadas.find(
+                                (cls) => cls.day === dia && cls.start === horaInicio
+                              );
+
+                              if (classItem) {
+                                const durationBlocks = classItem.duration / 30;
+                                return (
+                                  <td key={cellId} rowSpan={durationBlocks} className="class-cell">
+                                    <Draggable
+                                      id={"marcada_" + classItem.Cod_Aula}
+                                      isBlocked={isBlocked}
+                                      aulaInfo={classItem}
+                                    >
+                                      <div className="class-entry">
+                                        <strong>{classItem.subject}</strong>
+                                        <br />
+                                        <span className="location">{classItem.location}</span>
+                                      </div>
+                                    </Draggable>
+                                  </td>
+                                );
+                              }
+
+                              return (
+                                <Droppable key={cellId} id={cellId} isBlocked={isBlocked} />
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Available Classes */}
+                <div className="aulas-disponiveis">
+                  <h3>Aulas Disponíveis</h3>
+                  {filtrosSelecionados ? (
+                    aulasDisponiveis.length > 0 ? (
+                      aulasDisponiveis.map((aula) => (
+                        <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
+                          <div className="aula-disponivel">
+                            <strong>{aula.subject}</strong>
+                            <br />
+                            <span>{aula.location}</span>
+                          </div>
+                        </Draggable>
+                      ))
+                    ) : (
+                      <p>Nenhuma aula disponível.</p>
+                    )
+                  ) : (
+                    <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
+                  )}
                 </div>
               </div>
-            )}
-
-            {/* Timetable and Available Classes */}
-            <div className="conteudo">
-              <div className="timetable-container">
-                {erro && <div className="error-message">{erro}</div>}
-                <table className="timetable">
-                  <thead>
-                    <tr>
-                      <th>Horas</th>
-                      {diasSemana.map((dia) => (
-                        <th key={dia}>{dia}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {horas.map((hora, index) => (
-                      <tr key={index}>
-                        <td className="hora">{hora}</td>
-                        {diasSemana.map((dia) => {
-                          const classItem = aulasMarcadas.find(
-                            (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
-                          );
-
-                          if (classItem) {
-                            const durationBlocks = classItem.duration / 30;
-                            return (
-                              <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked}>
-                                <Draggable id={"marcada_" + classItem.Cod_Aula} isBlocked={isBlocked} aulaInfo={classItem}>
-                                  <div
-                                    className="class-entry"
-                                    style={{
-                                      gridRow: `span ${durationBlocks}`, // Assuming each grid row represents 30 minutes
-                                    }}
-                                  >
-                                    <strong>{classItem.subject}</strong>
-                                    <br />
-                                    <span className="location">{classItem.location}</span>
-                                  </div>
-                                </Draggable>
-                              </Droppable>
-                            );
-                          }
-
-                          return (
-                            <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} />
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Available Classes */}
-              <div className="aulas-disponiveis">
-                <h3>Aulas Disponíveis</h3>
-                {filtrosSelecionados ? (
-                  aulasDisponiveis.length > 0 ? (
-                    aulasDisponiveis.map((aula) => (
-                      <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
-                        <div className="aula-disponivel">
-                          <strong>{aula.subject}</strong>
-                          <br />
-                          <span>{aula.location}</span>
-                        </div>
-                      </Draggable>
-                    ))
-                  ) : (
-                    <p>Nenhuma aula disponível.</p>
-                  )
-                ) : (
-                  <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
-        )}
+            </>
+          ) : (
+            <p>Por favor, preencha os filtros para visualizar o horário.</p>
+          )}
+        </div>
       </div>
-    </div>
-    </DndContext >
+    </DndContext>
   );
 }
 
