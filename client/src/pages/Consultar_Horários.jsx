@@ -1,97 +1,123 @@
 import React, { useState, useEffect } from "react";
-import { Tabs, Tab, Box, Typography } from "@mui/material";
+import { Box, Select, MenuItem, Typography } from "@mui/material";
 import "../styles/horarios.css";
-import socket from "../utils/socket";
-import Filtros from "../components/horarios/Filtros";
 import Scheduleold from "../components/abas/Schedule";
 
-// Define o componente TabPanel
-function TabPanel({ children, value, index }) {
-  return (
-    <div hidden={value !== index}>
-      {value === index && (
-        <Box className="tab-content">
-          <Typography component="div" className="tab-text">
-            {children}
-          </Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
 function ConsultarHorarios() {
-  const [tabIndex, setTabIndex] = useState(0); // Estado para controlar a aba ativa
   const [aulasMarcadas, setAulasMarcadas] = useState([]); // Estado para armazenar as aulas marcadas
 
-  // Filtros
-  const [escola, setEscola] = useState("");
-  const [curso, setCurso] = useState("");
-  const [ano, setAno] = useState("");
-  const [turma, setTurma] = useState("");
+  // Dropdown options
+  const [turmas, setTurmas] = useState([]);
+  const [docentes, setDocentes] = useState([]);
+  const [salas, setSalas] = useState([]);
 
-  const filtrosSelecionados = escola && curso && ano && turma;
+  // Selected values
+  const [selectedTurma, setSelectedTurma] = useState("");
+  const [selectedDocente, setSelectedDocente] = useState("");
+  const [selectedSala, setSelectedSala] = useState("");
 
-  // Buscar as aulas marcadas quando os filtros são selecionados
+  // Fetch dropdown options on component mount
   useEffect(() => {
-    if (filtrosSelecionados) {
-      socket.emit("get-aulas");
+        fetch("/api/turmas")
+      .then((response) => {
+        console.log("Raw response for turmas:", response);
+        return response.text(); // Log raw text
+      })
+      .then((text) => {
+        console.log("Raw text for turmas:", text);
+        return JSON.parse(text); // Parse manually
+      })
+      .then((data) => setTurmas(data))
+      .catch((error) => console.error("Error fetching turmas:", error));
+    
+    fetch("/api/docentes")
+      .then((response) => {
+        console.log("Raw response for docentes:", response);
+        return response.text(); // Log raw text
+      })
+      .then((text) => {
+        console.log("Raw text for docentes:", text);
+        return JSON.parse(text); // Parse manually
+      })
+      .then((data) => setDocentes(data))
+      .catch((error) => console.error("Error fetching docentes:", error));
+    
+    fetch("/api/aulas")
+      .then((response) => {
+        console.log("Raw response for aulas:", response);
+        return response.text(); // Log raw text
+      })
+      .then((text) => {
+        console.log("Raw text for aulas:", text);
+        return JSON.parse(text); // Parse manually
+      })
+      .then((data) => setSalas(data))
+      .catch((error) => console.error("Error fetching salas:", error));
+  }, []);
 
-      socket.on("update-aulas", (data) => {
-        setAulasMarcadas(data.newAulas); // Atualiza as aulas marcadas
-      });
-
-      return () => {
-        socket.off("update-aulas");
-      };
+  // Fetch aulasMarcadas when a filter is selected
+  useEffect(() => {
+    if (selectedTurma || selectedDocente || selectedSala) {
+      fetch("/api/aulas")
+        .then((response) => response.json())
+        .then((data) => setAulasMarcadas(data))
+        .catch((error) => console.error("Error fetching aulas marcadas:", error));
     }
-  }, [filtrosSelecionados, tabIndex]);
+  }, [selectedTurma, selectedDocente, selectedSala]);
 
   return (
     <div className="horarios-container">
       <div className="layout">
-        {/* Filtros */}
-        <Filtros
-          escola={escola}
-          setEscola={setEscola}
-          curso={curso}
-          setCurso={setCurso}
-          ano={ano}
-          setAno={setAno}
-          turma={turma}
-          setTurma={setTurma}
-        />
+        {/* Dropdowns */}
+        <Box className="dropdowns-container">
+          <Select
+            value={selectedTurma}
+            onChange={(e) => setSelectedTurma(e.target.value)}
+            displayEmpty
+            className="dropdown"
+          >
+            <MenuItem value="">Selecione uma Turma</MenuItem>
+            {turmas.map((turma) => (
+              <MenuItem key={turma.Cod_Turma} value={turma.Cod_Turma}>
+                {`Turma ${turma.Cod_Turma} - Curso ${turma.Cod_Curso}`}
+              </MenuItem>
+            ))}
+          </Select>
 
-        {filtrosSelecionados ? (
-          <>
-            {/* Abas */}
-            <Box className="tabs-container">
-              <Tabs
-                value={tabIndex}
-                onChange={(e, newIndex) => setTabIndex(newIndex)}
-                aria-label="Basic Tabs Example"
-                className="tabs-wrapper"
-                centered
-              >
-                <Tab label="Turmas" />
-                <Tab label="Docentes" />
-                <Tab label="Salas" />
-              </Tabs>
-            </Box>
+          <Select
+            value={selectedDocente}
+            onChange={(e) => setSelectedDocente(e.target.value)}
+            displayEmpty
+            className="dropdown"
+          >
+            <MenuItem value="">Selecione um Docente</MenuItem>
+            {docentes.map((docente) => (
+              <MenuItem key={docente.Cod_Docente} value={docente.Cod_Docente}>
+                {docente.Nome}
+              </MenuItem>
+            ))}
+          </Select>
 
-            {/* Conteúdo das abas */}
-            <TabPanel value={tabIndex} index={0}>
-              <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={true} />
-            </TabPanel>
-            <TabPanel value={tabIndex} index={1}>
-              <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={true} />
-            </TabPanel>
-            <TabPanel value={tabIndex} index={2}>
-              <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={true} />
-            </TabPanel>
-          </>
+          <Select
+            value={selectedSala}
+            onChange={(e) => setSelectedSala(e.target.value)}
+            displayEmpty
+            className="dropdown"
+          >
+            <MenuItem value="">Selecione uma Sala</MenuItem>
+            {salas.map((sala) => (
+              <MenuItem key={sala.Cod_Sala} value={sala.Cod_Sala}>
+                {`Sala ${sala.Cod_Sala}`}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
+
+        {/* Schedule */}
+        {selectedTurma || selectedDocente || selectedSala ? (
+          <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={true} />
         ) : (
-          <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
+          <p>Por favor, selecione uma Turma, Docente ou Sala para acessar o conteúdo.</p>
         )}
       </div>
     </div>

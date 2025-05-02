@@ -27,9 +27,9 @@ createRoot(document.getElementById('root')).render(
     <EscolaCreate/>
     <CursoCreate/>
     <UCCreate/>  */}
-    <Horarios />
-    <AddAulaTest />
-    {/* <ConsultarHorarios /> */}
+    {/* <Horarios /> */}
+    {/* <AddAulaTest /> */}
+    <ConsultarHorarios />
     {/* <HorariosAbas/> */}
   </StrictMode>,
 )
