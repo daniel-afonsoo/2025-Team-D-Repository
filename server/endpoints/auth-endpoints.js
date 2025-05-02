@@ -3,10 +3,16 @@ const express = require('express')
 const router = express.Router()
 const pool = require('../db/connection.js') 
 const bcrypt = require('bcrypt')
+const rateLimit = require('express-rate-limit')
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: 'Demasiadas tentativas de login. Tente novamente mais tarde.'
+})
 
 //FUNCIONA
-router.post('/auth/login', async (req,res) => {
+router.post('/auth/login', authLimiter, async (req,res) => {
     const {email,password} = req.body
     
     try {
