@@ -21,7 +21,7 @@ const horas = Array.from({ length: 31 }, (_, i) => {
 
 
 // Draggable class box
-function Draggable({ id, children, isBlocked, aulaInfo }) {
+function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
     data: { aulaInfo },
@@ -31,6 +31,7 @@ function Draggable({ id, children, isBlocked, aulaInfo }) {
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     cursor: isBlocked ? "not-allowed" : "grab",
+    height: "100%", // Ensure the draggable spans the full height of the cell
   };
 
   return (
@@ -85,16 +86,40 @@ function Horarios() {
     if (!over) {
       alert("Dropped outside the schedule");
       setErro("");
+
+      // Restore the class back to its original position
+      if (active.id.startsWith("marcada_")) {
+        const originalAula = active.data.current.aulaInfo;
+        setAulasMarcadas((prev) => [...prev, originalAula]);
+      }
       return;
     }
 
     const [day, start] = over.id.split("-");
-    const existingClass = aulasMarcadas.find(
-      (cls) => cls.day === day && cls.start === start
-    );
+    const startIndex = horas.findIndex((hora) => hora.startsWith(start));
 
-    if (existingClass) {
-      alert("Class already exists in this slot");
+    const overlappingClass = aulasMarcadas.find((cls) => {
+      if (cls.Cod_Aula === active.data.current.aulaInfo.Cod_Aula) {
+        return false; // Skip checking against itself
+      }
+      const classStartIndex = horas.findIndex((hora) => hora.startsWith(cls.start));
+      const classEndIndex = classStartIndex + cls.duration / 30;
+      return (
+        cls.day === day &&
+        ((startIndex >= classStartIndex && startIndex < classEndIndex) ||
+          (startIndex + active.data.current.aulaInfo.duration / 30 > classStartIndex &&
+            startIndex + active.data.current.aulaInfo.duration / 30 <= classEndIndex))
+      );
+    });
+
+    if (overlappingClass) {
+      alert("Cannot place a class that overlaps with another class. Please choose an empty slot.");
+
+      // Restore the class back to its original position
+      if (active.id.startsWith("marcada_")) {
+        const originalAula = active.data.current.aulaInfo;
+        setAulasMarcadas((prev) => [...prev, originalAula]);
+      }
       return;
     }
 
@@ -220,93 +245,95 @@ function Horarios() {
               )}
 
               <div className="conteudo">
-                <div className="timetable-container">
-                  {erro && <div className="error-message">{erro}</div>}
-                  <table className="timetable">
-                    <thead>
-                      <tr>
-                        <th>Horas</th>
-                        {diasSemana.map((dia) => (
-                          <th key={dia}>{dia}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {horas.map((hora, index) => {
-                        const horaInicio = hora.split(" - ")[0];
-                        return (
-                          <tr key={index}>
-                            <td className="hora">{hora}</td>
-                            {diasSemana.map((dia) => {
-                              const cellId = `${dia}-${horaInicio}`;
+                <div className="timetable-and-available-classes">
+                  <div className="timetable-container">
+                    {erro && <div className="error-message">{erro}</div>}
+                    <table className="timetable">
+                      <thead>
+                        <tr>
+                          <th>Horas</th>
+                          {diasSemana.map((dia) => (
+                            <th key={dia}>{dia}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {horas.map((hora, index) => {
+                          const horaInicio = hora.split(" - ")[0];
+                          return (
+                            <tr key={index}>
+                              <td className="hora">{hora}</td>
+                              {diasSemana.map((dia) => {
+                                const cellId = `${dia}-${horaInicio}`;
 
-                              // Prevent rendering cell if it's within an already spanned class
-                              const isCellSpanned = aulasMarcadas.some((cls) => {
-                                const classStartIndex = horas.findIndex(h => h.startsWith(cls.start));
-                                const classEndIndex = classStartIndex + (cls.duration / 30);
-                                const currentIndex = index;
-                                return (
-                                  cls.day === dia &&
-                                  currentIndex > classStartIndex &&
-                                  currentIndex < classEndIndex
+                                // Prevent rendering cell if it's within an already spanned class
+                                const isCellSpanned = aulasMarcadas.some((cls) => {
+                                  const classStartIndex = horas.findIndex(h => h.startsWith(cls.start));
+                                  const classEndIndex = classStartIndex + (cls.duration / 30);
+                                  const currentIndex = index;
+                                  return (
+                                    cls.day === dia &&
+                                    currentIndex > classStartIndex &&
+                                    currentIndex < classEndIndex
+                                  );
+                                });
+                                if (isCellSpanned) return null;
+
+                                const classItem = aulasMarcadas.find(
+                                  (cls) => cls.day === dia && cls.start === horaInicio
                                 );
-                              });
-                              if (isCellSpanned) return null;
 
-                              const classItem = aulasMarcadas.find(
-                                (cls) => cls.day === dia && cls.start === horaInicio
-                              );
+                                if (classItem) {
+                                  const durationBlocks = classItem.duration / 30;
+                                  return (
+                                    <td key={cellId} rowSpan={durationBlocks} className="class-cell">
+                                      <Draggable
+                                        id={"marcada_" + classItem.Cod_Aula}
+                                        isBlocked={isBlocked}
+                                        aulaInfo={classItem}
+                                      >
+                                        <div className="class-entry">
+                                          <strong>{classItem.subject}</strong>
+                                          <br />
+                                          <span className="location">{classItem.location}</span>
+                                        </div>
+                                      </Draggable>
+                                    </td>
+                                  );
+                                }
 
-                              if (classItem) {
-                                const durationBlocks = classItem.duration / 30;
                                 return (
-                                  <td key={cellId} rowSpan={durationBlocks} className="class-cell">
-                                    <Draggable
-                                      id={"marcada_" + classItem.Cod_Aula}
-                                      isBlocked={isBlocked}
-                                      aulaInfo={classItem}
-                                    >
-                                      <div className="class-entry">
-                                        <strong>{classItem.subject}</strong>
-                                        <br />
-                                        <span className="location">{classItem.location}</span>
-                                      </div>
-                                    </Draggable>
-                                  </td>
+                                  <Droppable key={cellId} id={cellId} isBlocked={isBlocked} />
                                 );
-                              }
+                              })}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
 
-                              return (
-                                <Droppable key={cellId} id={cellId} isBlocked={isBlocked} />
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Available Classes */}
-                <div className="aulas-disponiveis">
-                  <h3>Aulas Disponíveis</h3>
-                  {filtrosSelecionados ? (
-                    aulasDisponiveis.length > 0 ? (
-                      aulasDisponiveis.map((aula) => (
-                        <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
-                          <div className="aula-disponivel">
-                            <strong>{aula.subject}</strong>
-                            <br />
-                            <span>{aula.location}</span>
-                          </div>
-                        </Draggable>
-                      ))
+                  {/* Available Classes */}
+                  <div className="aulas-disponiveis">
+                    <h3>Aulas Disponíveis</h3>
+                    {filtrosSelecionados ? (
+                      aulasDisponiveis.length > 0 ? (
+                        aulasDisponiveis.map((aula) => (
+                          <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
+                            <div className="aula-disponivel">
+                              <strong>{aula.subject}</strong>
+                              <br />
+                              <span>{aula.location}</span>
+                            </div>
+                          </Draggable>
+                        ))
+                      ) : (
+                        <p>Nenhuma aula disponível.</p>
+                      )
                     ) : (
-                      <p>Nenhuma aula disponível.</p>
-                    )
-                  ) : (
-                    <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
-                  )}
+                      <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </>
