@@ -55,8 +55,8 @@ setupSockets(server)
 // starting the server
 server.listen(backendPort, () => {
 
-    logToClient("setup", `Server started successfully`)
-    logToClient("setup", `Server listening on port ${backendPort}`)
+    logToClient("info","Setup Complete", `Server started successfully`)
+    logToClient("info","Server Port", `Server is listening on port ${backendPort}`)
     logToClient("separator", "Easy Schedule IPT - Backend")
 
 })
