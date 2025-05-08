@@ -2,8 +2,8 @@ import React from 'react';
  import { Routes, Route } from 'react-router-dom';
  import Dashboard from '../pages/Dashboard';
  import HorariosESGT from '../pages/HorariosESGT';
- import HorariosESTA from '../pages/HorariosESTT';
- import HorariosESTT from '../pages/HorariosESTA';
+ import HorariosESTA from '../pages/HorariosESTA';
+ import HorariosESTT from '../pages/HorariosESTT';
  
 
  

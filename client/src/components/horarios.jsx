@@ -154,6 +154,7 @@ function Horarios() {
                 <option value="">Escolher Escola</option>
                 <option value="ESTT">ESTT</option>
                 <option value="ESGT">ESGT</option>
+                <option value="ESGT">ESTA</option>
               </select>
               <select onChange={(e) => setCurso(e.target.value)} value={curso}>
                 <option value="">Escolher Curso</option>

@@ -1,9 +1,12 @@
 import React from 'react';
+import Horarios from '../components/horarios'; 
+import Navbar from '../components/navbar';
  
  const HorariosESGT = () => {
    return (
      <div>
-       <h1>Página ESGT</h1>
+       <Navbar /> 
+       <Horarios />
      </div>
    );
  };
