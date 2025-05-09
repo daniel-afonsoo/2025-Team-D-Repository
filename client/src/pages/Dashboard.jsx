@@ -38,7 +38,7 @@ const Dashboard = () => {
       <div className="backoffice-container">
         <button 
           className="botao backoffice" 
-          onClick={() => navigate('/Backoffice')}
+          onClick={() => navigate('/backoffice')}
         >
           Backoffice
         </button>
