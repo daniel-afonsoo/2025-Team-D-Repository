@@ -1,123 +1,76 @@
 import React, { useState, useEffect } from "react";
-import { Box, Select, MenuItem, Typography } from "@mui/material";
-import "../styles/horarios.css";
+import Filtros from "../components/horarios/Filtros";
 import Scheduleold from "../components/abas/Schedule";
+import "../styles/horarios.css"; // Ensure you have a CSS file for styling
 
 function ConsultarHorarios() {
-  const [aulasMarcadas, setAulasMarcadas] = useState([]); // Estado para armazenar as aulas marcadas
+  // State variables for filters
+  const [docente, setDocente] = useState("");
+  const [sala, setSala] = useState("");
+  const [turma, setTurma] = useState("");
+  const [uc, setUc] = useState("");
+  const [curso, setCurso] = useState("");
+  const [ano, setAno] = useState("");
 
-  // Dropdown options
-  const [turmas, setTurmas] = useState([]);
-  const [docentes, setDocentes] = useState([]);
-  const [salas, setSalas] = useState([]);
+  // State variable for fetched schedule
+  const [aulasMarcadas, setAulasMarcadas] = useState([]);
 
-  // Selected values
-  const [selectedTurma, setSelectedTurma] = useState("");
-  const [selectedDocente, setSelectedDocente] = useState("");
-  const [selectedSala, setSelectedSala] = useState("");
-
-  // Fetch dropdown options on component mount
+  // Fetch schedule when filters are applied
   useEffect(() => {
-        fetch("/api/turmas")
-      .then((response) => {
-        console.log("Raw response for turmas:", response);
-        return response.text(); // Log raw text
-      })
-      .then((text) => {
-        console.log("Raw text for turmas:", text);
-        return JSON.parse(text); // Parse manually
-      })
-      .then((data) => setTurmas(data))
-      .catch((error) => console.error("Error fetching turmas:", error));
-    
-    fetch("/api/docentes")
-      .then((response) => {
-        console.log("Raw response for docentes:", response);
-        return response.text(); // Log raw text
-      })
-      .then((text) => {
-        console.log("Raw text for docentes:", text);
-        return JSON.parse(text); // Parse manually
-      })
-      .then((data) => setDocentes(data))
-      .catch((error) => console.error("Error fetching docentes:", error));
-    
-    fetch("/api/aulas")
-      .then((response) => {
-        console.log("Raw response for aulas:", response);
-        return response.text(); // Log raw text
-      })
-      .then((text) => {
-        console.log("Raw text for aulas:", text);
-        return JSON.parse(text); // Parse manually
-      })
-      .then((data) => setSalas(data))
-      .catch((error) => console.error("Error fetching salas:", error));
-  }, []);
+    if (docente || sala || turma || uc || curso || ano) {
+      // Construct query parameters based on selected filters
+      const queryParams = new URLSearchParams({
+        docente,
+        sala,
+        turma,
+        uc,
+        curso,
+        ano,
+      });
 
-  // Fetch aulasMarcadas when a filter is selected
-  useEffect(() => {
-    if (selectedTurma || selectedDocente || selectedSala) {
-      fetch("/api/aulas")
-        .then((response) => response.json())
-        .then((data) => setAulasMarcadas(data))
-        .catch((error) => console.error("Error fetching aulas marcadas:", error));
+      // Fetch aulas from the backend
+      fetch(`/api/aulas?${queryParams.toString()}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Fetched aulas:", data);
+          setAulasMarcadas(data);
+        })
+        .catch((error) => console.error("Error fetching aulas:", error));
     }
-  }, [selectedTurma, selectedDocente, selectedSala]);
+  }, [docente, sala, turma, uc, curso, ano]); // Trigger fetch when any filter changes
 
   return (
     <div className="horarios-container">
-      <div className="layout">
-        {/* Dropdowns */}
-        <Box className="dropdowns-container">
-          <Select
-            value={selectedTurma}
-            onChange={(e) => setSelectedTurma(e.target.value)}
-            displayEmpty
-            className="dropdown"
-          >
-            <MenuItem value="">Selecione uma Turma</MenuItem>
-            {turmas.map((turma) => (
-              <MenuItem key={turma.Cod_Turma} value={turma.Cod_Turma}>
-                {`Turma ${turma.Cod_Turma} - Curso ${turma.Cod_Curso}`}
-              </MenuItem>
-            ))}
-          </Select>
-
-          <Select
-            value={selectedDocente}
-            onChange={(e) => setSelectedDocente(e.target.value)}
-            displayEmpty
-            className="dropdown"
-          >
-            <MenuItem value="">Selecione um Docente</MenuItem>
-            {docentes.map((docente) => (
-              <MenuItem key={docente.Cod_Docente} value={docente.Cod_Docente}>
-                {docente.Nome}
-              </MenuItem>
-            ))}
-          </Select>
-
-          <Select
-            value={selectedSala}
-            onChange={(e) => setSelectedSala(e.target.value)}
-            displayEmpty
-            className="dropdown"
-          >
-            <MenuItem value="">Selecione uma Sala</MenuItem>
-            {salas.map((sala) => (
-              <MenuItem key={sala.Cod_Sala} value={sala.Cod_Sala}>
-                {`Sala ${sala.Cod_Sala}`}
-              </MenuItem>
-            ))}
-          </Select>
-        </Box>
-
-        {/* Schedule */}
-        {selectedTurma || selectedDocente || selectedSala ? (
+      <div className="filtros-container">
+        {/* Use the Filtros component */}
+        <Filtros
+          escola={escola} // Pass escola state
+          setEscola={setEscola}
+          docente={docente}
+          setDocente={setDocente}
+          sala={sala}
+          setSala={setSala}
+          turma={turma}
+          setTurma={setTurma}
+          uc={uc}
+          setUc={setUc}
+          curso={curso}
+          setCurso={setCurso}
+          ano={ano}
+          setAno={setAno}
+        />
+      </div>
+      <div className="schedule-container">
+        {/* Display the schedule */}
+        {aulasMarcadas.length > 0 ? (
           <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={true} />
         ) : (
-          <p>Por favor, selecione uma Turma, Docente ou Sala para acessar o conteúdo.</p>
+          <p className="no-schedule-message">Por favor, selecione filtros para visualizar o horário.</p>
         )}
       </div>
     </div>

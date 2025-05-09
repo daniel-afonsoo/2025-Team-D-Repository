@@ -13,6 +13,7 @@ function AddAulaTest() {
         Dia: "Segunda", // String
         Inicio: "10:00:00", // String
         Fim: "12:00:00", // String
+        Cod_Escola: 1, // Integer (e.g., "Escola A" -> 1)
       };
   
       console.log("Emitting add-aula event with data:", newAula); // Debugging log

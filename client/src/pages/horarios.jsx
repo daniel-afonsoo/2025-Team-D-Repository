@@ -1,156 +1,109 @@
 import React, { useState, useEffect } from "react";
 import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { Tabs, Tab, Box, Typography } from "@mui/material";
 import "../styles/horarios.css";
-import socket, { onUpdateAulas } from "../utils/socket";
+import socket from "../utils/socket";
 import Filtros from "../components/horarios/Filtros";
-import Draggable from "../components/horarios/Draggable";
 import Scheduleold from "../components/abas/Schedule";
 import AddAulaPopup from "../components/abas/AddAulaPopup";
 
-// Define the TabPanel component
-function TabPanel({ children, value, index }) {
-  return (
-    <div hidden={value !== index}>
-      {value === index && (
-        <Box className="tab-content">
-          <Typography component="div" className="tab-text">
-            {children}
-          </Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
 function Horarios() {
-  const [tabIndex, setTabIndex] = useState(0);
   const [aulasMarcadas, setAulasMarcadas] = useState([]);
-  const [aulasDisponiveis, setAulasDisponiveis] = useState([]);
-  const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30 });
+  const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30, day: "", start: "" });
   const [isBlocked, setIsBlocked] = useState(false);
   const [erro, setErro] = useState("");
   const [showAddPopup, setShowAddPopup] = useState(false);
 
-  const [escola, setEscola] = useState("");
+  const [escola, setEscola] = useState("1"); // Add escola state
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
 
   const filtrosSelecionados = escola && curso && ano && turma;
 
-  // Listen for "update-aulas" event
-  useEffect(() => {
-    onUpdateAulas((data) => {
-      console.log("Updating aulasMarcadas with data:", data.newAulas); // Debugging log
-      setAulasMarcadas(data.newAulas);
-    });
-
-    // Cleanup listener on component unmount
-    return () => {
-      socket.off("update-aulas");
-    };
-  }, []);
-
-  // Debugging log for aulasDisponiveis
-  useEffect(() => {
-    console.log("Updated aulasDisponiveis:", aulasDisponiveis);
-  }, [aulasDisponiveis]);
+  console.log("Filtros selecionados:", { escola, curso, ano, turma, filtrosSelecionados });
 
   // Fetch aulas when filters are selected
   useEffect(() => {
     if (filtrosSelecionados) {
-      socket.emit("get-aulas");
-    }
-  }, [filtrosSelecionados, tabIndex]);
-
-  // Fetch unassigned aulas
-  useEffect(() => {
-    if (filtrosSelecionados) {
-      socket.emit("get-unassigned-aulas");
-
-      socket.on("update-unassigned-aulas", (data) => {
-        setAulasDisponiveis(data.unassignedAulas);
-      });
-
-      return () => {
-        socket.off("update-unassigned-aulas");
-      };
+      console.log("Fetching aulas with filters:", { escola, curso, ano, turma });
+      fetch(`/api/aulas?escola=${escola}&curso=${curso}&ano=${ano}&turma=${turma}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Fetched aulas:", data);
+          setAulasMarcadas(
+            data.map((aula) => ({
+              ...aula,
+              day: aula.Dia,
+              start: aula.Inicio,
+              duration: calculateDuration(aula.Inicio, aula.Fim),
+              subject: aula.Cod_Docente,
+              location: aula.Cod_Sala,
+            }))
+          );
+        })
+        .catch((error) => console.error("Error fetching aulas:", error));
     } else {
-      setAulasDisponiveis([]);
+      setAulasMarcadas([]);
     }
   }, [escola, curso, ano, turma]);
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-
-    if (!over) {
-      alert("Dropped outside the schedule");
-      setErro("");
-      return;
-    }
-
-    const existingClass = aulasMarcadas.find(
-      (cls) => cls.day === over.id.split("-")[0] && cls.start === over.id.split("-")[1]
-    );
-    if (existingClass) {
-      alert("Class already exists in this slot");
-      return;
-    }
-
-    if (active.id.startsWith("disponivel_")) {
-      const [day, start] = over.id.split("-");
-      const newAula = {
-        day,
-        start,
-        subject: active.data.current.aulaInfo.subject,
-        location: active.data.current.aulaInfo.location,
-      };
-      console.log("Emitting add-aula event with data:", newAula);
-      socket.emit("add-aula", { newAula });
-      setAulasDisponiveis((prev) => prev.filter((aula) => aula.Cod_Aula !== active.data.current.aulaInfo.Cod_Aula));
-    } else if (active.id.startsWith("marcada_")) {
-      let codAula = active.data.current.aulaInfo.Cod_Aula;
-      const [newDay, newStart] = over.id.split("-");
-      socket.emit("update-aula", { codAula, newDay, newStart });
-    }
+  const calculateDuration = (start, end) => {
+    const [startHour, startMinute] = start.split(":").map(Number);
+    const [endHour, endMinute] = end.split(":").map(Number);
+    return (endHour * 60 + endMinute - (startHour * 60 + startMinute)) / 30; // Duration in 30-minute blocks
   };
 
   const addClass = () => {
-    console.log("addClass function called with newAula:", newAula);
+    if (!newAula.subject || !newAula.location || !newAula.day || !newAula.start) {
+      setErro("Preencha todos os campos para adicionar uma aula.");
+      return;
+    }
 
-    // Emit the new aula to the backend
-    socket.emit("add-aula", { newAula });
+    const aulaData = {
+      Cod_Docente: newAula.subject,
+      Cod_Sala: newAula.location,
+      Cod_Turma: turma,
+      Cod_Uc: "UC001",
+      Cod_Curso: curso,
+      Cod_AnoSemestre: ano,
+      Dia: newAula.day,
+      Inicio: newAula.start,
+      Fim: calculateEndTime(newAula.start, newAula.duration),
+    };
 
-    setAulasDisponiveis((prev) => [
-      ...prev,
-      {
-        id: aulasDisponiveis.length + 1,
-        subject: newAula.subject,
-        location: newAula.location,
-        duration: newAula.duration,
-      },
-    ]);
-    setNewAula({ subject: "", location: "", duration: 30 });
-    setShowAddPopup(false);
+    console.log("Emitting add-aula event with data:", aulaData);
+    socket.emit("add-aula", { newAula: aulaData });
   };
 
   return (
-    <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
+    <DndContext modifiers={[restrictToWindowEdges]}>
       <div className="horarios-container">
         <div className="layout">
+          {/* Filters */}
           <Filtros
-            escola={escola}
-            setEscola={setEscola}
+            escola={escola} // Pass escola state
+            setEscola={setEscola} // Pass setEscola function
+            docente={newAula.subject}
+            setDocente={(value) => setNewAula({ ...newAula, subject: value })}
+            sala={newAula.location}
+            setSala={(value) => setNewAula({ ...newAula, location: value })}
+            turma={turma}
+            setTurma={setTurma}
+            uc={newAula.uc}
+            setUc={(value) => setNewAula({ ...newAula, uc: value })}
             curso={curso}
             setCurso={setCurso}
             ano={ano}
             setAno={setAno}
-            turma={turma}
-            setTurma={setTurma}
           />
 
+          {/* Buttons */}
           {filtrosSelecionados && (
             <div className="filters-and-buttons">
               <button onClick={() => setShowAddPopup(true)} className="add-class-button">
@@ -162,36 +115,14 @@ function Horarios() {
             </div>
           )}
 
-          {filtrosSelecionados ? (
-            <>
-              <Box className="tabs-container">
-                <Tabs
-                  value={tabIndex}
-                  onChange={(e, newIndex) => setTabIndex(newIndex)}
-                  aria-label="Basic Tabs Example"
-                  className="tabs-wrapper"
-                  centered
-                >
-                  <Tab label="Turmas" />
-                  <Tab label="Docentes" />
-                  <Tab label="Salas" />
-                </Tabs>
-              </Box>
-              <TabPanel value={tabIndex} index={0}>
-                <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
-              </TabPanel>
-              <TabPanel value={tabIndex} index={1}>
-                <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
-              </TabPanel>
-              <TabPanel value={tabIndex} index={2}>
-                <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
-              </TabPanel>
-            </>
+          {/* Schedule */}
+          {filtrosSelecionados && aulasMarcadas.length > 0 ? (
+            <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
           ) : (
-            <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
+            <p>Por favor, preencha os filtros para acessar o conteúdo ou aguarde o carregamento.</p>
           )}
 
-          {/* Render the AddAulaPopup component */}
+          {/* Add Aula Popup */}
           {showAddPopup && (
             <AddAulaPopup
               newAula={newAula}
