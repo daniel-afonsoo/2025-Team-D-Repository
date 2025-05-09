@@ -92,7 +92,7 @@ router.get('/aulas', (req, res) => {
     const { escola, curso, ano, turma } = req.query;
 
     let query = `
-        SELECT Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim
+        SELECT Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Cod_Escola
         FROM aula
         WHERE 1=1
     `;
@@ -100,7 +100,13 @@ router.get('/aulas', (req, res) => {
     const params = [];
 
     if (escola) {
-        query += " AND Cod_Curso IN (SELECT Cod_Curso FROM curso WHERE Escola = ?)";
+        query += `
+            AND Cod_Curso IN (
+                SELECT Cod_Curso
+                FROM curso
+                WHERE Cod_Escola = ?
+            )
+        `;
         params.push(escola);
     }
     if (curso) {

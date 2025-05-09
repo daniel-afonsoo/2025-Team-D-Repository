@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Filtros from "../components/horarios/Filtros";
-import Scheduleold from "../components/abas/Schedule";
+import Schedule from "../components/abas/Schedule";
 import "../styles/horarios.css"; // Ensure you have a CSS file for styling
 
 function ConsultarHorarios() {
@@ -68,7 +68,7 @@ function ConsultarHorarios() {
       <div className="schedule-container">
         {/* Display the schedule */}
         {aulasMarcadas.length > 0 ? (
-          <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={true} />
+          <Schedule aulasMarcadas={aulasMarcadas} isBlocked={true} />
         ) : (
           <p className="no-schedule-message">Por favor, selecione filtros para visualizar o horário.</p>
         )}

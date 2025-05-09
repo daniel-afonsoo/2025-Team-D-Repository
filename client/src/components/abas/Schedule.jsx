@@ -15,7 +15,9 @@ const horas = Array.from({ length: 31 }, (_, i) => {
   return `${startHour}:${startMinutes} - ${endHour === 24 ? "00" : endHour}:${endMinutes}`;
 });
 
-function Scheduleold({ aulasMarcadas, isBlocked }) {
+function Schedule({ aulasMarcadas, isBlocked }) {
+  console.log("Rendering Schedule component...");
+  console.log("aulasMarcadas:", aulasMarcadas);
   return (
     <div className="schedule-container">
       <table className="schedule-table">
@@ -80,4 +82,4 @@ function Scheduleold({ aulasMarcadas, isBlocked }) {
   );
 }
 
-export default Scheduleold;
+export default Schedule;

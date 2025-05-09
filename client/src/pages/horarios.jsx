@@ -4,7 +4,7 @@ import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
 import socket from "../utils/socket";
 import Filtros from "../components/horarios/Filtros";
-import Scheduleold from "../components/abas/Schedule";
+import Schedule from "../components/abas/Schedule";
 import AddAulaPopup from "../components/abas/AddAulaPopup";
 
 function Horarios() {
@@ -40,7 +40,7 @@ function Horarios() {
             data.map((aula) => ({
               ...aula,
               day: aula.Dia,
-              start: aula.Inicio,
+              start: aula.Inicio.slice(0, 5), // Remove seconds from the time
               duration: calculateDuration(aula.Inicio, aula.Fim),
               subject: aula.Cod_Docente,
               location: aula.Cod_Sala,
@@ -56,7 +56,7 @@ function Horarios() {
   const calculateDuration = (start, end) => {
     const [startHour, startMinute] = start.split(":").map(Number);
     const [endHour, endMinute] = end.split(":").map(Number);
-    return (endHour * 60 + endMinute - (startHour * 60 + startMinute)) / 30; // Duration in 30-minute blocks
+    return (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
   };
 
   const addClass = () => {
@@ -117,7 +117,7 @@ function Horarios() {
 
           {/* Schedule */}
           {filtrosSelecionados && aulasMarcadas.length > 0 ? (
-            <Scheduleold aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
+            <Schedule aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
           ) : (
             <p>Por favor, preencha os filtros para acessar o conteúdo ou aguarde o carregamento.</p>
           )}
