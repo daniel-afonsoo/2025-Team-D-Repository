@@ -1,11 +1,10 @@
 import React from 'react';
 import Horarios from '../components/horarios'; 
-import Navbar from '../components/navbar';
+
  
  const HorariosESGT = () => {
    return (
      <div>
-       <Navbar /> 
        <Horarios />
      </div>
    );
