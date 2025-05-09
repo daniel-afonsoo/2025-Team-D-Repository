@@ -34,6 +34,15 @@ const Dashboard = () => {
           Horários ESTA
         </button>
       </div>
+      {/* Botão Backoffice centralizado */}
+      <div className="backoffice-container">
+        <button 
+          className="botao backoffice" 
+          onClick={() => navigate('/Backoffice')}
+        >
+          Backoffice
+        </button>
+      </div>
     </div>
   );
 };
