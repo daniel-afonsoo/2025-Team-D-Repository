@@ -28,7 +28,7 @@ const Navbar = () => {
           <Link className='linksToBack' to="/backoffice/unidades-curriculares">Unidades Curriculares</Link>
           <Link className='linksToBack' to="/backoffice/escolas">Escolas</Link>
           <Link className='linksToBack' to="/backoffice/salas">Salas</Link>
-
+          <Link className='linksToBack' to="/backoffice/turmas">Turmas</Link>
         </>
       )}
 

@@ -48,6 +48,13 @@ const Backoffice = () => {
         >
           Salas
         </button>
+        {/* Botão Turas */}
+        <button 
+          className="botao" 
+          onClick={() => navigate('/backoffice/turmas')}
+        >
+          Turmas
+        </button>
       </div>
     </div>
   );
