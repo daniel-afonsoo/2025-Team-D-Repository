@@ -28,6 +28,25 @@ io.on("connection", (socket) => {
     console.log(`A new user has connected. User ID: ${socket.id}`)
 })
 
+
+//routes
+app.use('/', loginRoutes)
+app.use('/', dbRoutes)
+app.use('/', sqlRoutes)
+app.use('/', docenteRoutes)
+app.use('/', salaRoutes)
+app.use('/', escolaRoutes)
+app.use('/', aulaRoutes)
+app.use('/', anosemestreRoutes)
+app.use('/', cursoRoutes)
+app.use('/', ucRouter)
+app.use('/', turmaRoutes)
+app.use('/', filterRoutes)
+
+// setup socket.io
+setupSockets(server)
+
+
 // starting the server
 server.listen(backendPort, () => {
     console.log("\n=============== Easy Schedule IPT - Backend ===============")
