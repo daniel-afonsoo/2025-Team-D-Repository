@@ -93,13 +93,10 @@ const setupSockets = (server) => {
                 // broadcast to all clients update
                 io.emit("update-aulas", { newAulas: schedule })
             } else {
-
                 console.log("Error updating aula: ", codaula)
                 socket.emit("update-aula-error", { message: "Esta aula não pode ser atualizada." })
             }
         });
-
-
     })
 
     // log setup
