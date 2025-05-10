@@ -19,7 +19,6 @@ const horas = Array.from({ length: 31 }, (_, i) => {
   return `${start} - ${end}`;
 });
 
-
 // Draggable class box
 function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -56,9 +55,9 @@ function Droppable({ id, children, isBlocked }) {
   };
 
   return (
-    <td ref={setNodeRef} style={style} className="empty-slot">
+    <div ref={setNodeRef} style={style} className="empty-slot">
       {children}
-    </td>
+    </div>
   );
 }
 
@@ -74,6 +73,9 @@ function Horarios() {
   const [isBlocked, setIsBlocked] = useState(false); // State to block the schedule
   const [erro, setErro] = useState(""); // State for error messages
   const [showAddPopup, setShowAddPopup] = useState(false);
+  const [showEditPopup, setShowEditPopup] = useState(false);
+  const [editingAula, setEditingAula] = useState(null);
+  const [selectedAula, setSelectedAula] = useState(null);
 
   // Filters
   const [escola, setEscola] = useState("");
@@ -81,16 +83,50 @@ function Horarios() {
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
 
+  // Add a search state and input field for filtering available classes
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter available classes based on the search query
+  const filteredAulasDisponiveis = aulasDisponiveis.filter((aula) =>
+    aula.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over) {
       alert("Dropped outside the schedule");
       setErro("");
 
-      // Restore the class back to its original position
+      // Restaurar aula ao estado anterior, se necessário
       if (active.id.startsWith("marcada_")) {
         const originalAula = active.data.current.aulaInfo;
-        setAulasMarcadas((prev) => [...prev, originalAula]);
+        socket.emit("update-aulas", (prev) => [...prev, originalAula]);
+      }
+      return;
+    }
+
+
+    if (over.id === "aulas-disponiveis") {
+      if (active.id.startsWith("marcada_")) {
+        const originalAula = active.data.current.aulaInfo;
+
+        // Adiciona à lista de aulas disponíveis
+        setAulasDisponiveis((prev) => [
+          ...prev,
+          {
+            id: (prev[prev.length - 1]?.id || 0) + 1,
+            subject: originalAula.subject,
+            location: originalAula.location,
+            duration: originalAula.duration,
+          },
+        ]);
+
+        
+        socket.emit("update-aulas", (prev) =>
+          prev.filter((aula) => aula.Cod_Aula !== originalAula.Cod_Aula)
+        );
+      
+        socket.emit("remove-aula", { codAula: originalAula.Cod_Aula }); // Opcional: para manter servidor sincronizado
       }
       return;
     }
@@ -118,7 +154,7 @@ function Horarios() {
       // Restore the class back to its original position
       if (active.id.startsWith("marcada_")) {
         const originalAula = active.data.current.aulaInfo;
-        setAulasMarcadas((prev) => [...prev, originalAula]);
+        socket.emit("update-aulas", ((prev) => [...prev, originalAula]));
       }
       return;
     }
@@ -133,6 +169,7 @@ function Horarios() {
       };
 
       socket.emit("add-aula", { newAula });
+      
 
       setAulasDisponiveis((prev) =>
         prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id)
@@ -141,6 +178,35 @@ function Horarios() {
       const codAula = active.data.current.aulaInfo.Cod_Aula;
       socket.emit("update-aula", { codAula, newDay: day, newStart: start });
     }
+  };
+
+  const openEditPopup = (aula) => {
+    setEditingAula(aula);
+    setShowEditPopup(true);
+  };
+
+  const saveEditedAula = () => {
+    if (editingAula) {
+      socket.emit("update-aula", {
+        codAula: editingAula.Cod_Aula,
+        newSubject: editingAula.subject,
+        newLocation: editingAula.location,
+        newDuration: editingAula.duration,
+      });
+      setShowEditPopup(false);
+      setEditingAula(null);
+    }
+  };
+
+  const deleteAula = (codAula) => {
+    socket.emit("delete-aula", { codAula });
+    setShowEditPopup(false);
+  };
+
+  const handleAulaChange = (event) => {
+    const aulaId = event.target.value;
+    const aula = aulasMarcadas.find((a) => a.Cod_Aula === aulaId);
+    setEditingAula(aula);
   };
 
   // Function to add a new class
@@ -159,6 +225,7 @@ function Horarios() {
     setNewAula({ subject: "", location: "", duration: 30 });
     // clear popup
     setShowAddPopup(false);
+    console.log(aulasDisponiveis);
   }
 
   // Check if all filters are selected
@@ -173,23 +240,24 @@ function Horarios() {
             <div className="filtros">
               <h3>Filtros</h3>
               <select onChange={(e) => setEscola(e.target.value)} value={escola}>
-                <option value="">Escolher Escola</option>
+                <option value="" disabled>Escolher Escola</option>
                 <option value="ESTT">ESTT</option>
                 <option value="ESGT">ESGT</option>
+                <option value="ESGT">ESTA</option>
               </select>
               <select onChange={(e) => setCurso(e.target.value)} value={curso}>
-                <option value="">Escolher Curso</option>
+                <option value="" disabled>Escolher Curso</option>
                 <option value="Engenharia Informática">Engenharia Informática</option>
                 <option value="Gestão">Gestão</option>
               </select>
               <select onChange={(e) => setAno(e.target.value)} value={ano}>
-                <option value="">Escolher Ano</option>
+                <option value="" disabled>Escolher Ano</option>
                 <option value="1">1º Ano</option>
                 <option value="2">2º Ano</option>
                 <option value="3">3º Ano</option>
               </select>
               <select onChange={(e) => setTurma(e.target.value)} value={turma}>
-                <option value="">Escolher Turma</option>
+                <option value="" disabled>Escolher Turma</option>
                 <option value="A">Turma A</option>
                 <option value="B">Turma B</option>
               </select>
@@ -207,6 +275,12 @@ function Horarios() {
                 className="block-btn"
               >
                 {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
+              </button>
+              <button
+                onClick={() => openEditPopup(aulasMarcadas[0])} // Exemplo: abre o popup para a primeira aula marcada
+                className="edit-class-button"
+              >
+                Editar Aula
               </button>
             </div>
           )}
@@ -240,6 +314,54 @@ function Horarios() {
                     <button onClick={addClass}>Salvar</button>
                     <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
                     {erro && <div className="error-message">{erro}</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Popup para editar aulas */}
+              {showEditPopup && (
+                <div className="add-popup">
+                  <div className="popup-content">
+                    <h3>Editar Aula</h3>
+                    <select onChange={handleAulaChange} value={editingAula?.Cod_Aula || ""}>
+                      <option value="" disabled>Selecione uma aula</option>
+                      {aulasMarcadas.map((aula) => (
+                        <option key={aula.Cod_Aula} value={aula.Cod_Aula}>
+                          {aula.subject} - {aula.location}
+                        </option>
+                      ))}
+                    </select>
+                    {editingAula && (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Disciplina"
+                          value={editingAula.subject}
+                          onChange={(e) =>
+                            setEditingAula({ ...editingAula, subject: e.target.value })
+                          }
+                        />
+                        <input
+                          type="text"
+                          placeholder="Localização"
+                          value={editingAula.location}
+                          onChange={(e) =>
+                            setEditingAula({ ...editingAula, location: e.target.value })
+                          }
+                        />
+                        <input
+                          type="number"
+                          placeholder="Duração (minutos)"
+                          value={editingAula.duration}
+                          onChange={(e) =>
+                            setEditingAula({ ...editingAula, duration: parseInt(e.target.value, 10) })
+                          }
+                        />
+                        <button onClick={saveEditedAula}>Salvar</button>
+                        <button onClick={() => deleteAula(editingAula.Cod_Aula)}>Excluir</button>
+                      </>
+                    )}
+                    <button onClick={() => setShowEditPopup(false)}>Cancelar</button>
                   </div>
                 </div>
               )}
@@ -286,7 +408,7 @@ function Horarios() {
                                 if (classItem) {
                                   const durationBlocks = classItem.duration / 30;
                                   return (
-                                    <td key={cellId} rowSpan={durationBlocks} className="class-cell">
+                                    <td key={cellId} rowSpan={durationBlocks} className="class-cell" onContextMenu={(e) => handleRightClick(e, classItem)}>
                                       <Draggable
                                         id={"marcada_" + classItem.Cod_Aula}
                                         isBlocked={isBlocked}
@@ -314,26 +436,36 @@ function Horarios() {
                   </div>
 
                   {/* Available Classes */}
-                  <div className="aulas-disponiveis">
-                    <h3>Aulas Disponíveis</h3>
-                    {filtrosSelecionados ? (
-                      aulasDisponiveis.length > 0 ? (
-                        aulasDisponiveis.map((aula) => (
-                          <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
-                            <div className="aula-disponivel">
-                              <strong>{aula.subject}</strong>
-                              <br />
-                              <span>{aula.location}</span>
-                            </div>
-                          </Draggable>
-                        ))
+                  <Droppable id="aulas-disponiveis" isBlocked={false}>
+                    <div className="aulas-disponiveis">
+                      <h3>Aulas Disponíveis</h3>
+                      <input
+                        type="text"
+                        placeholder="Pesquisar aulas..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                      />
+                      {filtrosSelecionados ? (
+                        filteredAulasDisponiveis.length > 0 ? (
+                          filteredAulasDisponiveis.map((aula) => (
+                            <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
+                              <div className="aula-disponivel">
+                                <strong>{aula.subject}</strong>
+                                <p>{aula.id}</p>
+                                <br />
+                                <span>{aula.location}</span>
+                              </div>
+                            </Draggable>
+                          ))
+                        ) : (
+                          <p>Nenhuma aula disponível.</p>
+                        )
                       ) : (
-                        <p>Nenhuma aula disponível.</p>
-                      )
-                    ) : (
-                      <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
-                    )}
-                  </div>
+                        <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
+                      )}
+                    </div>
+                  </Droppable>
                 </div>
               </div>
             </>

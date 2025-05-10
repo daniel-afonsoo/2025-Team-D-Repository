@@ -87,7 +87,9 @@
 .timetable-container {
   overflow-x: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Change to row for horizontal alignment */
+  gap: 20px; /* Add spacing between timetable and available classes */
+  align-items: flex-start; /* Align items at the top */
 }
 
 .timetable {
@@ -101,8 +103,15 @@
   border: 1px solid #ccc;
   padding: 0;
   text-align: center;
-  width: 200px;
+  width: 150px;
   height: 40px; /* One 30-minute block */
+}
+
+.timetable-and-available-classes {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
 }
 
 .hora {
@@ -146,12 +155,13 @@
 }
 
 .empty-slot {
+  display: table-cell;
   background-color: #fafafa;
   height: 40px;
 }
 
 .aulas-disponiveis {
-  margin-top: 20px;
+  margin-top: 0; /* Remove margin-top to align properly */
   margin-left: 20px;
   flex-shrink: 0;
   width: 300px;
@@ -169,4 +179,29 @@
 .aula-disponivel strong {
   display: block;
   font-size: 14px;
+}
+
+/* Add styles for the search input field */
+.search-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Adicionei estilos para o botão de edição de aulas. */
+.edit-class-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-class-button:hover {
+  background-color: #218838;
 }
