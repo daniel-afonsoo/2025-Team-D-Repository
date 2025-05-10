@@ -1,14 +1,12 @@
 import React from 'react';
-import Horarios from '../components/horarios'; 
+import Horarios from '../components/horarios';
 
+const HorariosESTT = () => {
+  return (
+    <div>
+      <Horarios />
+    </div>
+  );
+};
 
- const HorariosESTT = () => {
-   return (
-     <div>
-    
-       <Horarios />
-     </div>
-   );
- };
- 
- export default HorariosESTT;
+export default HorariosESTT;

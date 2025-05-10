@@ -4,6 +4,7 @@ import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
 import socket from "../utils/socket"; // Import the socket instance
 import { useSocket } from "../utils/useSocket"
+import { useLocation } from 'react-router-dom';
 
 // Define the days of the week
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -61,6 +62,10 @@ function Droppable({ id, children, isBlocked }) {
 // Main Horarios component
 function Horarios() {
 
+  const location = useLocation();
+  const path = location.pathname;
+  console.log("Path:" , path)
+
   // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
 
@@ -72,11 +77,26 @@ function Horarios() {
   const [erro, setErro] = useState(""); // State for error messages
   const [showAddPopup, setShowAddPopup] = useState(false);
 
+  let escolaPath
+  if (path === "/horariosESTT") {
+    escolaPath = "ESTT"
+  } else if (path === "/horariosESGT") {
+    escolaPath = "ESGT"
+  } else if (path === "/horariosESTA") {
+    escolaPath = "ESTA"
+  } else {
+    escolaPath = ""
+  }
+  console.log(escolaPath)
+
   // Filters
-  const [escola, setEscola] = useState("");
+  const [escola, setEscola] = useState(escolaPath);
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
+
+  console.log(escola)
+  
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -154,7 +174,7 @@ function Horarios() {
                 <option value="">Escolher Escola</option>
                 <option value="ESTT">ESTT</option>
                 <option value="ESGT">ESGT</option>
-                <option value="ESGT">ESTA</option>
+                <option value="ESTA">ESTA</option>
               </select>
               <select onChange={(e) => setCurso(e.target.value)} value={curso}>
                 <option value="">Escolher Curso</option>
@@ -189,121 +209,121 @@ function Horarios() {
               </button>
             </div>
           )}
-        
 
-        {/* Show content only if filters are selected */}
-        {filtrosSelecionados ? (
-          <>
-            {/* Popup para adicionar aulas */}
-            {showAddPopup && (
-              <div className="add-popup">
-                <div className="popup-content">
-                  <h3>Adicionar Aula</h3>
-                  <input
-                    type="text"
-                    placeholder="Disciplina"
-                    value={newAula.subject}
-                    onChange={(e) => setNewAula({ ...newAula, subject: e.target.value })}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Localização"
-                    value={newAula.location}
-                    onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Duração (minutos)"
-                    value={newAula.duration}
-                    onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
-                  />
-                  <button onClick={addClass}>Salvar</button>
-                  <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
+
+          {/* Show content only if filters are selected */}
+          {filtrosSelecionados ? (
+            <>
+              {/* Popup para adicionar aulas */}
+              {showAddPopup && (
+                <div className="add-popup">
+                  <div className="popup-content">
+                    <h3>Adicionar Aula</h3>
+                    <input
+                      type="text"
+                      placeholder="Disciplina"
+                      value={newAula.subject}
+                      onChange={(e) => setNewAula({ ...newAula, subject: e.target.value })}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Localização"
+                      value={newAula.location}
+                      onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Duração (minutos)"
+                      value={newAula.duration}
+                      onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
+                    />
+                    <button onClick={addClass}>Salvar</button>
+                    <button onClick={() => setShowAddPopup(false)}>Cancelar</button>
+                    {erro && <div className="error-message">{erro}</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Timetable and Available Classes */}
+              <div className="conteudo">
+                <div className="timetable-container">
                   {erro && <div className="error-message">{erro}</div>}
+                  <table className="timetable">
+                    <thead>
+                      <tr>
+                        <th>Horas</th>
+                        {diasSemana.map((dia) => (
+                          <th key={dia}>{dia}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {horas.map((hora, index) => (
+                        <tr key={index}>
+                          <td className="hora">{hora}</td>
+                          {diasSemana.map((dia) => {
+                            const classItem = aulasMarcadas.find(
+                              (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
+                            );
+
+                            if (classItem) {
+                              const durationBlocks = classItem.duration / 30;
+                              return (
+                                <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked}>
+                                  <Draggable id={"marcada_" + classItem.Cod_Aula} isBlocked={isBlocked} aulaInfo={classItem}>
+                                    <div
+                                      className="class-entry"
+                                      style={{
+                                        gridRow: `span ${durationBlocks}`, // Assuming each grid row represents 30 minutes
+                                      }}
+                                    >
+                                      <strong>{classItem.subject}</strong>
+                                      <br />
+                                      <span className="location">{classItem.location}</span>
+                                    </div>
+                                  </Draggable>
+                                </Droppable>
+                              );
+                            }
+
+                            return (
+                              <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} />
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Available Classes */}
+                <div className="aulas-disponiveis">
+                  <h3>Aulas Disponíveis</h3>
+                  {filtrosSelecionados ? (
+                    aulasDisponiveis.length > 0 ? (
+                      aulasDisponiveis.map((aula) => (
+                        <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
+                          <div className="aula-disponivel">
+                            <strong>{aula.subject}</strong>
+                            <br />
+                            <span>{aula.location}</span>
+                          </div>
+                        </Draggable>
+                      ))
+                    ) : (
+                      <p>Nenhuma aula disponível.</p>
+                    )
+                  ) : (
+                    <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
+                  )}
                 </div>
               </div>
-            )}
-
-            {/* Timetable and Available Classes */}
-            <div className="conteudo">
-              <div className="timetable-container">
-                {erro && <div className="error-message">{erro}</div>}
-                <table className="timetable">
-                  <thead>
-                    <tr>
-                      <th>Horas</th>
-                      {diasSemana.map((dia) => (
-                        <th key={dia}>{dia}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {horas.map((hora, index) => (
-                      <tr key={index}>
-                        <td className="hora">{hora}</td>
-                        {diasSemana.map((dia) => {
-                          const classItem = aulasMarcadas.find(
-                            (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
-                          );
-
-                          if (classItem) {
-                            const durationBlocks = classItem.duration / 30;
-                            return (
-                              <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked}>
-                                <Draggable id={"marcada_" + classItem.Cod_Aula} isBlocked={isBlocked} aulaInfo={classItem}>
-                                  <div
-                                    className="class-entry"
-                                    style={{
-                                      gridRow: `span ${durationBlocks}`, // Assuming each grid row represents 30 minutes
-                                    }}
-                                  >
-                                    <strong>{classItem.subject}</strong>
-                                    <br />
-                                    <span className="location">{classItem.location}</span>
-                                  </div>
-                                </Draggable>
-                              </Droppable>
-                            );
-                          }
-
-                          return (
-                            <Droppable id={`${dia}-${hora.split(" - ")[0]}`} isBlocked={isBlocked} />
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Available Classes */}
-              <div className="aulas-disponiveis">
-                <h3>Aulas Disponíveis</h3>
-                {filtrosSelecionados ? (
-                  aulasDisponiveis.length > 0 ? (
-                    aulasDisponiveis.map((aula) => (
-                      <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
-                        <div className="aula-disponivel">
-                          <strong>{aula.subject}</strong>
-                          <br />
-                          <span>{aula.location}</span>
-                        </div>
-                      </Draggable>
-                    ))
-                  ) : (
-                    <p>Nenhuma aula disponível.</p>
-                  )
-                ) : (
-                  <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
-        )}
+            </>
+          ) : (
+            <p>Por favor, preencha os filtros para acessar o conteúdo.</p>
+          )}
+        </div>
       </div>
-    </div>
     </DndContext >
   );
 }

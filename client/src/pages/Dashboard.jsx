@@ -13,7 +13,7 @@ const Dashboard = () => {
         {/* Botão Horários ESGT */}
         <button 
           className="botao" 
-          onClick={() => navigate('/HorariosESGT')}
+          onClick={() => navigate('/horariosESGT')}
         >
           Horários ESGT
         </button>
@@ -21,7 +21,7 @@ const Dashboard = () => {
         {/* Botão Horários ESTT */}
         <button 
           className="botao" 
-          onClick={() => navigate('/HorariosESTT')}
+          onClick={() => navigate('/horariosESTT')}
         >
           Horários ESTT
         </button>
@@ -29,7 +29,7 @@ const Dashboard = () => {
         {/* Botão Horários ESTA */}
         <button 
           className="botao" 
-          onClick={() => navigate('/HorariosESTA')}
+          onClick={() => navigate('/horariosESTA')}
         >
           Horários ESTA
         </button>

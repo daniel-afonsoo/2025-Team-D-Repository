@@ -19,9 +19,9 @@ const Router = () => {
       <Route path="/backoffice" element={<BackOffice />} />
 
       {/* Rotas para as páginas */}
-      <Route path="/HorariosESGT" element={<HorariosESGT />} />
-      <Route path="/HorariosESTA" element={<HorariosESTA />} />
-      <Route path="/HorariosESTT" element={<HorariosESTT />} />
+      <Route path="/horariosESGT" element={<HorariosESGT />} />
+      <Route path="/horariosESTA" element={<HorariosESTA />} />
+      <Route path="/horariosESTT" element={<HorariosESTT />} />
 
       <Route path="/backoffice/docentes" element={<Data_Pages />} />
       <Route path="/backoffice/cursos" element={<Data_Pages />} />
