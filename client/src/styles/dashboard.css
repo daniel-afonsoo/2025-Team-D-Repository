@@ -16,10 +16,12 @@
 }
 
 .botoes-container {
-  display: flex;
-  justify-content: center; /* Centraliza os botões horizontalmente */
-  gap: 40px; /* Espaço entre os botões */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 0px; 
+  justify-items: center; 
 }
+
 
 .botao {
   font-size: 30px;
@@ -32,10 +34,32 @@
   max-width: 100%;
   max-height: 100%;
   cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.linksEdit {
+  font-weight: bold;
+  font-size: 20px;
+  font-family: "Titillium Web", sans-serif;
+  text-decoration: none;
+  color: #436626;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  margin-top: 200px;
+}
+
+.linksEdit:hover {
+  color: #ffffff;
+  background-color: #436626;
+  transform: scale(1.1);
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .backoffice-container {
-  margin-top: 40px; /* Adiciona espaço vertical acima do botão Backoffice */
+  margin-top: 70px; /* Adiciona espaço vertical acima do botão Backoffice */
 }
 
 .backoffice {

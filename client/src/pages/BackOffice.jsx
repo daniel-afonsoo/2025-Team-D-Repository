@@ -1,5 +1,5 @@
 import React from 'react';
-import "../styles/dashboard-backoffice.css";
+import "../styles/backoffice.css";
 import { useNavigate } from 'react-router-dom';
 
 const Backoffice = () => {
