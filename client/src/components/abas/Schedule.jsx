@@ -3,10 +3,10 @@ import "../../styles/schedule.css";
 import Droppable from "../horarios/Droppable";
 import Draggable from "../horarios/Draggable";
 
-// Days of the week
+// Dias da semana
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-// Generate time slots (from 8:30 to 24:00)
+// Gera blocos vazios do horário desde 08:00h até 24:00h
 const horas = Array.from({ length: 31 }, (_, i) => {
   const startHour = 8 + Math.floor((i + 1) / 2);
   const startMinutes = i % 2 === 0 ? "30" : "00";
@@ -15,6 +15,7 @@ const horas = Array.from({ length: 31 }, (_, i) => {
   return `${startHour}:${startMinutes} - ${endHour === 24 ? "00" : endHour}:${endMinutes}`;
 });
 
+// Mostra o horário das aulas marcadas
 function Schedule({ aulasMarcadas, isBlocked }) {
   console.log("Rendering Schedule component...");
   console.log("aulasMarcadas:", aulasMarcadas);

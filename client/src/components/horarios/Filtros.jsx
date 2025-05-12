@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma, setTurma, uc, setUc, curso, setCurso, ano, setAno }) {
+function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma, setTurma, uc, setUc, curso, setCurso, ano, setAno, onFiltersChange }) {
   const [docentes, setDocentes] = useState([]);
   const [salas, setSalas] = useState([]);
   const [turmas, setTurmas] = useState([]);
@@ -46,6 +46,16 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
       .then((data) => setAnos(data))
       .catch((error) => console.error("Error fetching anos:", error));
   }, []);
+
+  // Trigger the query whenever any filter changes
+  useEffect(() => {
+    console.log("onFiltersChange prop:", onFiltersChange);
+    if (typeof onFiltersChange === "function") {
+      onFiltersChange({ escola, docente, sala, turma, uc, curso, ano });
+    } else {
+      console.error("onFiltersChange is not a function");
+    }
+  }, [escola, docente, sala, turma, uc, curso, ano, onFiltersChange]);
 
   return (
     <div className="filters-and-buttons">
