@@ -52,7 +52,7 @@ const setupSockets = (server) => {
             let valid = true
             if (valid) {  // always true for now, add validation logic later (post to database)
                 //add id to new aula
-                let newId = schedule.length + 1
+                let newId = schedule[schedule.length - 1].Cod_Aula + 1   
                 data.newAula.Cod_Aula = newId
                 schedule.push(data.newAula) // add to server schedule
                 console.log("Aula added: ", data.newAula)
