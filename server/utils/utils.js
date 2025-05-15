@@ -8,7 +8,7 @@ function formatAulaRow(row) {
         turma: row.Cod_Turma,
         subject: row.Cod_Uc,
         course: row.Cod_Curso,
-        anoSem: row.AnoSemestre,
+        anoSem: row.Cod_AnoSemestre,
         day: row.Dia,
         start: row.Inicio,
         end: row.Fim,
@@ -21,7 +21,7 @@ const addAulaToDB = async (aula) => {
     const query = `
         INSERT INTO aula (
             Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc,
-            Cod_Curso, AnoSemestre, Dia, Inicio, Fim, Duration
+            Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const values = [

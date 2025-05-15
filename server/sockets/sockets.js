@@ -63,14 +63,15 @@ const setupSockets = (server) => {
                 data.newAula.turma = 1;
                 data.newAula.course = 1;
                 data.newAula.anoSem = 1;
+                data.newAula.end = "14:00";
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 
  
-                schedule.push(data.newAula);
                 await addAulaToDB(data.newAula);
+                schedule.push(data.newAula);
 
                 console.log("Aula added: ", data.newAula);
                 io.emit("update-aulas", { newAulas: schedule });
