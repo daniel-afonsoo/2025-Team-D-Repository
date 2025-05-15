@@ -1,5 +1,8 @@
 // imports
 const { Server } = require('socket.io');
+const { setSocketIOInstance, logToClient, getBufferedLogs } = require('../utils/logger'); // import logger instance
+const pool = require('../db/connection.js'); 
+const { formatAulaRow } = require('../utils/utils.js'); 
 
 const setupSockets = (server) => {
     const io = new Server(server, {
@@ -8,30 +11,31 @@ const setupSockets = (server) => {
         }
     })
 
-    let schedule = [ // get initial data for DB
-        // Segunda classes
-        { Cod_Aula: 1, day: "Segunda", start: "10:00", end: "12:00", subject: "Análise Matemática I", location: "Sala B255" },
-        { Cod_Aula: 2, day: "Segunda", start: "13:00", end: "15:00", subject: "Álgebra", location: "Sala B257" },
-        { Cod_Aula: 3, day: "Segunda", start: "15:30", end: "17:00", subject: "Redes de Dados I", location: "Sala I157" },
-        // terça classes
-        { Cod_Aula: 4, day: "Terça", start: "09:00", end: "11:00", subject: "Gestão", location: "Sala O120" },
-        { Cod_Aula: 5, day: "Terça", start: "11:30", end: "13:00", subject: "Química", location: "Sala Q255" },
-        { Cod_Aula: 6, day: "Terça", start: "15:30", end: "17:00", subject: "Materiais", location: "Sala H105" },
-        // Quarta classes
-        { Cod_Aula: 7, day: "Quarta", start: "10:00", end: "12:00", subject: "Design", location: "Sala H120 " },
-        { Cod_Aula: 8, day: "Quarta", start: "14:30", end: "16:00", subject: "Impressão", location: "Sala H180" },
-        // thursday classes
-        { Cod_Aula: 9, day: "Quinta", start: "09:00", end: "11:00", subject: "GP", location: "Sala B155" },
-        { Cod_Aula: 10, day: "Quinta", start: "15:30", end: "17:00", subject: "DEVOPS", location: "Sala I180" },
-        // friday classes
-        { Cod_Aula: 11, day: "Sexta", start: "09:00", end: "11:00", subject: "Estatística", location: "Sala G132" },
-        // saturday classes
-        { Cod_Aula: 12, day: "Sábado", start: "09:00", end: "11:00", subject: "Artes", location: "Sala J130" },
-        { Cod_Aula: 13, day: "Sábado", start: "11:30", end: "13:00", subject: "História", location: "Sala G180" },
-        { Cod_Aula: 14, day: "Sábado", start: "13:30", end: "15:00", subject: "Introdução á Engenharia", location: "Sala Q255" },
-    ];
+    setSocketIOInstance(io); // set the socket.io instance in the logger
+
+    // array to hold the schedule data
+    let schedule = [];
+
+    (async () => {
+        logToClient("setup", "Loading registered classes from database...");
+
+        try {
+            const [rows] = await pool.promise().query("SELECT * FROM aula");
+            schedule = rows.map(formatAulaRow);
+            logToClient("setup", "Finished loading classes from database.");
+        } catch (err) {
+            console.error(err);
+            logToClient("error",`Failed to Load Classes (${err.code})`, `Could not load classses from database. Check database connection.`);
+        }
+    })();
 
     io.on("connection", (socket) => {
+
+        // Send buffered logs to newly connected client
+        getBufferedLogs().forEach(log => {
+            socket.emit('console-log', log);
+        });
+
         // log new connection
         console.log(`New socket connection. Socket id: ${socket.id}`)
 
@@ -48,7 +52,7 @@ const setupSockets = (server) => {
             let valid = true
             if (valid) {  // always true for now, add validation logic later (post to database)
                 //add id to new aula
-                let newId = schedule.length + 1
+                let newId = schedule[schedule.length - 1].Cod_Aula + 1   
                 data.newAula.Cod_Aula = newId
                 schedule.push(data.newAula) // add to server schedule
                 console.log("Aula added: ", data.newAula)
@@ -89,18 +93,14 @@ const setupSockets = (server) => {
                 // broadcast to all clients update
                 io.emit("update-aulas", { newAulas: schedule })
             } else {
-
                 console.log("Error updating aula: ", codaula)
                 socket.emit("update-aula-error", { message: "Esta aula não pode ser atualizada." })
             }
         });
-
-
     })
 
-
     // log setup
-    console.log("Socket.io server setup complete. ")
+    logToClient("setup", "Socket.io setup complete");
 
 }
 

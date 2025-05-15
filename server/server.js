@@ -13,6 +13,7 @@ const aulaRoutes = require('./endpoints/aula-endpoints')
 const anosemestreRoutes = require('./endpoints/anosemestre-endpoints')
 const cursoRoutes = require('./endpoints/curso-endpoints')
 const ucRouter = require('./endpoints/uc-endpoint.js')
+const {logToClient} = require('./utils/logger');
 
 const loginRoutes = require('./endpoints/auth-endpoints')
 const dbRoutes = require('./endpoints/database-endpoints')
@@ -32,11 +33,14 @@ const filterRoutes = require('./endpoints/filter-endpoints.js')
 const app = express()
 const backendPort = 5170
 
+logToClient("setup", `Starting server...`)
 app.use(cors())
 app.use(express.json()) // enable json parsing
 
 // setup http server
+logToClient("setup", `Setting up HTTP server...`)
 const server = http.createServer(app)
+logToClient("setup", `HTTP server setup complete`)
 
 // base endpoint
 app.get("/", (req, res) => {
@@ -51,6 +55,7 @@ io.on("connection", (socket) => {
 })
 
 //routes
+logToClient("setup", `Setting up routes...`)
 app.use('/', loginRoutes)
 app.use('/', dbRoutes)
 app.use('/', sqlRoutes)
@@ -64,11 +69,17 @@ app.use('/', ucRouter)
 app.use('/', turmaRoutes)
 app.use('/', filterRoutes)
 
+logToClient("setup", `Routes setup complete`)
+
 // setup socket.io
+logToClient("setup", `Setting up Sockets...`)
 setupSockets(server)
 
 // starting the server
 server.listen(backendPort, () => {
-    console.log("\n=============== Easy Schedule IPT - Backend ===============")
-    console.log(`Server started. Listening on port ${backendPort}.`)
+
+    logToClient("info","Setup Complete", `Server started successfully`)
+    logToClient("info","Server Port", `Server is listening on port ${backendPort}`)
+    logToClient("separator", "Easy Schedule IPT - Backend")
+
 })
