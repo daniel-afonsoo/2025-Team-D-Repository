@@ -1,0 +1,333 @@
+.horarios-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.instituicao-selector {
+  margin-bottom: 15px;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column; /* Garante que a tabela fique abaixo dos filtros e botões */
+
+  width: 100%;
+}
+
+.filtros {
+  display: flex;
+  flex-direction: row; /* Alinha os filtros em linha horizontal */
+  gap: 10px;
+  width: auto; /* Ajusta a largura para caber os elementos */
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filtros h3 {
+  text-align: center;
+  margin: 0; /* Remove default margins */
+  padding: 0;
+}
+
+.filtros select {
+  display: block;
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 200px;
+}
+
+.filters-and-buttons {
+  display: flex;
+  flex-direction: row; /* Align filters, add button, and lock button horizontally */
+  gap: 10px; /* Add spacing between elements */
+  align-items: center; /* Align them vertically */
+  margin-bottom: 20px; /* Add spacing below the container */
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: row; /* Align buttons horizontally */
+   /* Add spacing between buttons */
+}
+
+/* Adjust layout to place "Aulas Disponíveis" to the right of the timetable */
+.conteudo {
+  display: flex; /* Align timetable and available classes horizontally */
+  flex-direction: row;
+  gap: 20px;/* Add spacing between timetable and available classes */
+}
+
+.timetable-container {
+  flex: 3; /* Allocate more space to the timetable */
+  margin: 0; /* Remove unnecessary margins */
+  text-align: left; /* Ensure content is aligned to the left */
+}
+
+/* Improved table styling */
+.timetable {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+  font-size: 16px;
+  background-color: #f9f9f9; /* Light background for the table */
+  border: 1px solid #ddd; /* Subtle border for the table */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow for a modern look */
+  table-layout: fixed; /* Ensure consistent column widths */
+}
+
+.timetable th {
+  background-color: #4CAF50; /* Green header background */
+  color: white; /* White text for contrast */
+  padding: 12px; /* Add padding for better spacing */
+  text-align: center; /* Center align header text */
+  font-weight: bold;
+  border: 1px solid #ddd; /* Border between header cells */
+}
+
+.timetable td {
+  border: 1px solid #ddd; /* Border between cells */
+  text-align: center; /* Center align cell text */
+  padding: 10px; /* Add padding for better spacing */
+  word-wrap: break-word; /* Ensure text wraps within cells */
+}
+
+.timetable tr:nth-child(even) {
+  background-color: #f2f2f2; /* Alternate row background for readability */
+}
+
+.timetable tr:hover {
+  background-color: #ddd; /* Highlight row on hover */
+}
+
+.timetable .hora {
+  background-color: #e0f7fa; /* Light blue background for time column */
+  font-weight: bold;
+  color: #00796b; /* Darker blue-green text */
+}
+
+.empty-slot {
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
+.empty-slot.lightgreen {
+  background-color: lightgreen !important;
+}
+
+.aulas {
+  flex: 1;
+  border: 1px solid black;
+  padding: 10px;
+  background-color: #f9f9f9;
+  margin-top: 0;
+}
+
+.aulas h3 {
+  text-align: center;
+}
+
+.aula {
+  background-color: #90ee90; /* Verde claro */
+  padding: 12px;
+  margin: 8px 0;
+  cursor: grab;
+  text-align: center;
+  border: 2px solid #006400; /* Borda verde escuro */
+  border-radius: 8px; /* Bordas arredondadas */
+  font-weight: bold;
+  color: #004d00; /* Texto verde escuro */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+}
+
+.aula:hover {
+  background-color: #32cd32; /* Verde mais vibrante ao passar o mouse */
+  color: white; /* Texto branco para contraste */
+}
+
+.block-btn {
+  margin-bottom: 15px;
+  padding: 10px 20px;
+  background-color: #32cd32; /* Verde vibrante */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.block-btn:hover {
+  background-color: #228b22; /* Verde mais escuro ao passar o mouse */
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.mensagem-filtros {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.nova-aula {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.nova-aula h3 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;/* Espaçamento entre os inputs */
+}
+
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.actions-container select,
+.actions-container button {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.actions-container button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.actions-container button:hover {
+  background-color: #0056b3;
+}
+
+
+
+/* Popup para editar e adicionar aulas */
+.popup-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.popup-content h3 {
+  margin-bottom: 10px;
+}
+
+.popup-content input {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.popup-content button {
+  padding: 10px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popup-content button:hover {
+  background-color: #0056b3;
+}
+
+.popup-content button:last-child {
+  background-color: #dc3545;
+}
+
+.popup-content button:last-child:hover {
+  background-color: #a71d2a;
+}
+
+/* Botão para abrir o popup de adicionar aulas */
+.add-buttons {
+  margin-bottom: 20px;
+  flex-direction: row;
+}
+
+.add-class-button {
+  padding: 10px 20px;
+  margin-bottom: 15px;
+  color: white;
+  background-color: #32cd32; /* Verde vibrante */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: bold; /* Garante que o texto fica na mesma linha */
+}
+
+.add-class-button button:hover {
+  background-color: #228b22; /* Verde mais escuro ao passar o mouse */
+}
+
+/* Popup para adicionar aulas */
+.add-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.class-entry {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: lightblue;
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  overflow: hidden;
+  height: 100%; /* Ensure it spans the correct height */
+}
+
+.class-entry strong {
+  font-size: 16px;
+}
+
+.class-entry .location {
+  font-size: 12px;
+  color: gray;
+}
+
+.aulas-disponiveis {
+  flex: 1; /* Allocate less space to available classes */
+  display: flex;
+  flex-direction: column; /* Add spacing between available classes */
+}
+
+.aulas-disponiveis h3 {
+  text-align: center;
+}

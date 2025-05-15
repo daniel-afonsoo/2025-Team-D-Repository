@@ -1,0 +1,24 @@
+
+/* Estiliza a borda inferior das abas */
+.tabs-container {
+    border-bottom: 3px solid #ddd; /* Cor do divisor */
+    margin-top: 8px; 
+  }
+  
+  /* Espaçamento interno do conteúdo da aba */
+  .tab-content {
+    padding: 24px;
+  }
+  
+  /* Centraliza as abas */
+  .tabs-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* Estiliza a tipografia dentro das abas */
+  .tab-text {
+    font-size: 1rem;
+    color: #333; /* Cor do texto */
+  }
+  
