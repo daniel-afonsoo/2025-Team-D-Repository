@@ -6,7 +6,8 @@ function formatAulaRow(row) {
         start: row.Inicio,
         end: row.Fim,
         subject: row.Cod_Uc,
-        location: row.Cod_Sala
+        location: row.Cod_Sala,
+        duration: row.Duration
     };
 }
 

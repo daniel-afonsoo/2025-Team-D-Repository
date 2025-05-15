@@ -22,6 +22,7 @@ const setupSockets = (server) => {
         try {
             const [rows] = await pool.promise().query("SELECT * FROM aula");
             schedule = rows.map(formatAulaRow);
+            console.log("Classes loaded from database: ", schedule);
             logToClient("setup", "Finished loading classes from database.");
         } catch (err) {
             console.error(err);
@@ -44,6 +45,7 @@ const setupSockets = (server) => {
 
         // send server aulas state to client
         socket.emit("update-aulas", { newAulas: schedule })
+        console.log("novo cliente")
         console.log(`Data sent ${schedule}`)
 
         // add aula to server
