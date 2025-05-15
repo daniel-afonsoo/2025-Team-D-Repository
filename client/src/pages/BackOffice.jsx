@@ -1,12 +1,14 @@
 import React from 'react';
 import "../styles/backoffice.css";
 import { useNavigate } from 'react-router-dom';
+import ConsoleViewer from '../components/backoffice/ConsoleViewer';
 
 const Backoffice = () => {
   const navigate = useNavigate();
 
   return (
     <div className="area">
+      <ConsoleViewer />
       <h1 className="titulo">BackOffice</h1>
       <div className="botoes-container">
         {/* Botão Docentes */}
