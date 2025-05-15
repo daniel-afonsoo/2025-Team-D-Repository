@@ -45,8 +45,8 @@ const setupSockets = (server) => {
 
         // send server aulas state to client
         socket.emit("update-aulas", { newAulas: schedule })
-        console.log("novo cliente")
-        console.log(`Data sent ${schedule}`)
+        console.log("Enviadas pela primeira vez")
+        
 
         // add aula to server
         socket.on("add-aula", (data) => {
@@ -98,6 +98,11 @@ const setupSockets = (server) => {
                 console.log("Error updating aula: ", codaula)
                 socket.emit("update-aula-error", { message: "Esta aula não pode ser atualizada." })
             }
+        });
+
+        socket.on("refresh-aulas", () => {
+            socket.emit("update-aulas", { newAulas: schedule });
+            console.log("Aulas refreshed: ")
         });
     })
 
