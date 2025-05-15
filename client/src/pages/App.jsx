@@ -1,36 +1,16 @@
-// imports
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { useSocket } from '../utils/useSocket'
+import React from 'react';
+import Navbar from '../components/Navbar.jsx'
+ import { BrowserRouter as Router } from 'react-router-dom'; // Importar o BrowserRouter
+ import RouterConfig from '../routes/routes'; // Importar o arquivo de rotas
+ import Horario from './Horario.jsx';
 
-function App() {
-  // base endpoint message
-  const [baseMessage, setBaseMessage] = useState("fethcing server's base endpoint...")
-  const { socketMsg } = useSocket()
-
-  // fetch base endpoint message
-  useEffect(() => {
-    axios.get('http://localhost:5170/')
-      .then(res => {
-        setBaseMessage(res.data.message)
-
-      })
-      .catch(err => {
-        console.log("Error: Fetch to base endpoint. " + err)
-        setBaseMessage("Error: Fetch to base endpoint.")
-      })
-    
-  }, [])
-
+ function App() {
   return (
-    <>
-      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley" target="_blank">
-        <h1>Eazy Schedule IPT</h1>
-      </a>
-      <h3>{baseMessage}</h3>
-      <h3>{socketMsg}</h3>
-    </>
-  );
-}
+    <Router> {/* Envolver toda a aplicação com BrowserRouter */}
+       <Navbar />
+       <RouterConfig /> {/* Renderizar as rotas configuradas */}
+     </Router>
+   );
+ }
 
-export default App;
+ export default App;

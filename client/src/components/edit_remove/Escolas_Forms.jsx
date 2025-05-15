@@ -1,13 +1,15 @@
 // Importações de pacotes, estilos, imagens e componentes
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "../../styles/edit_remove_Forms.css";
 import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
-import ModalEdicao from './EditModal'; 
+import ModalEdicao from './EditModal';
+
 
 // Componente principal para listar, editar e remover escolas
-const Curso_edit_remove = () => {
+const Curso_edit_remove = ({ filtro }) => {
   // Estados para controlar dados, modais e campos de edição
   const [dados, setDados] = useState([]);
   const [modalAberta, setModalAberta] = useState(false);
@@ -17,17 +19,22 @@ const Curso_edit_remove = () => {
   const [editarCampos, setEditarCampos] = useState({});
 
   // Título do modal de edição
-  const [tituloModal, setTituloModal] = useState('Editar Escola'); 
+  const [tituloModal, setTituloModal] = useState('Editar Escola');
 
   // Simula os dados ao iniciar o componente
   useEffect(() => {
     const dadosSimulados = [
-      { id: 1, nome: "Escola Superior de Gestão de Tomar", abreviatura: "ESGT"},
-      { id: 2, nome: "Escola Superior de Técnologia de Tomar", abreviatura: "ESTT"},
-      { id: 3, nome: "Escola Superior de Técnologia de Abrantes", abreviatura: "ESTA"},
+      { id: 1, nome: "Escola Superior de Gestão de Tomar", abreviatura: "ESGT" },
+      { id: 2, nome: "Escola Superior de Técnologia de Tomar", abreviatura: "ESTT" },
+      { id: 3, nome: "Escola Superior de Técnologia de Abrantes", abreviatura: "ESTA" },
     ];
     setDados(dadosSimulados);
   }, []);
+
+  const dadosFiltrados = dados.filter((escola) =>
+    escola.nome.toLowerCase().includes(filtro.toLowerCase()) ||
+    escola.abreviatura.toLowerCase().includes(filtro.toLowerCase())
+  );
 
   // Abre o modal de confirmação de remoção
   const abrirModal = (id) => {
@@ -53,7 +60,7 @@ const Curso_edit_remove = () => {
   const abrirModalEdicao = (item) => {
     setEditarItemId(item.id);
     setEditarCampos(item);
-    setTituloModal('Editar Escola');  
+    setTituloModal('Editar Escola');
     setModalEdicaoAberta(true);
   };
 
@@ -78,9 +85,10 @@ const Curso_edit_remove = () => {
 
   // Renderização dos cartões e modais
   return (
+
     <div className="lista-container">
       <div className="lista">
-        {dados.map((item) => (
+        {dadosFiltrados.map((item) => (
           <div key={item.id} className="card">
             <div className="card-info">
               <h3>{item.nome}</h3>
@@ -108,7 +116,7 @@ const Curso_edit_remove = () => {
         onChange={handleChange}
         campos={editarCampos}
         onSave={confirmarEdicao}
-        titulo={tituloModal} 
+        titulo={tituloModal}
       />
     </div>
   );

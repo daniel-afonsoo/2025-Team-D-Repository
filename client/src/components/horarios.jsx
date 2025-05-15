@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
-import socket from "../utils/socket";
-import { useSocket } from "../utils/useSocket";
+import socket from "../utils/socket"; // Import the socket instance
+import { useSocket } from "../utils/useSocket"
+import { useLocation } from 'react-router-dom';
+
 
 // Days of the week
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -63,6 +65,11 @@ function Droppable({ id, children, isBlocked }) {
 
 // Main component
 function Horarios() {
+
+  const location = useLocation();
+  const path = location.pathname;
+  console.log("Path:" , path)
+
   // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
 
@@ -77,12 +84,24 @@ function Horarios() {
   const [editingAula, setEditingAula] = useState(null);
   const [selectedAula, setSelectedAula] = useState(null);
 
+  let escolaPath
+  if (path === "/horariosESTT") {
+    escolaPath = "ESTT"
+  } else if (path === "/horariosESGT") {
+    escolaPath = "ESGT"
+  } else if (path === "/horariosESTA") {
+    escolaPath = "ESTA"
+  } else {
+    escolaPath = ""
+  }
+  console.log(escolaPath)
+
   // Filters
-  const [escola, setEscola] = useState("");
+  const [escola, setEscola] = useState(escolaPath);
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
-
+  
   // Add a search state and input field for filtering available classes
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -243,7 +262,8 @@ function Horarios() {
                 <option value="" disabled>Escolher Escola</option>
                 <option value="ESTT">ESTT</option>
                 <option value="ESGT">ESGT</option>
-                <option value="ESGT">ESTA</option>
+                <option value="ESTA">ESTA</option>
+
               </select>
               <select onChange={(e) => setCurso(e.target.value)} value={curso}>
                 <option value="" disabled>Escolher Curso</option>
