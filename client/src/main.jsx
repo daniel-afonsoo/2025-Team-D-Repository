@@ -11,6 +11,7 @@ import  UcEdit from './components/edit_remove/UC_edit_remove.jsx'
 import  SalaEdit from './components/edit_remove/Sala_edit_remove.jsx'
 import  Horarios from './components/horarios.jsx'
 import Login from './pages/Login.jsx'
+import ConsoleViewer from './components/backoffice/ConsoleViewer.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -24,6 +25,6 @@ createRoot(document.getElementById('root')).render(
     <EscolaCreate/>
     <CursoCreate/>
     <UCCreate/>  */}
-    <Horarios /> 
+    <ConsoleViewer/>
   </StrictMode>,
 )
