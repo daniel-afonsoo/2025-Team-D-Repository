@@ -26,7 +26,7 @@
 .add-class-button,
 .block-btn {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #436626;
   border: none;
   color: white;
   border-radius: 4px;
@@ -35,7 +35,7 @@
 
 .add-class-button:hover,
 .block-btn:hover {
-  background-color: #0056b3;
+  background-color: #658c46;
 }
 
 .add-popup {
@@ -68,7 +68,7 @@
 
 .popup-content button {
   padding: 8px;
-  background-color: #007bff;
+  background-color: #436626;
   border: none;
   color: white;
   border-radius: 4px;
@@ -76,7 +76,7 @@
 }
 
 .popup-content button:hover {
-  background-color: #0056b3;
+  background-color: #658c46;
 }
 
 .error-message {
@@ -123,13 +123,13 @@
 }
 
 .class-cell {
-  background-color: #00bfff;
+  background-color: #658c46;
   padding: 0;
   vertical-align: top;
 }
 
 .class-cell:hover .class-entry {
-  background-color: #003d80; /* Darker shade for hover */
+  background-color: #4e782c; /* Darker shade for hover */
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for emphasis */
   z-index: 1; /* Ensure it appears above other elements */
@@ -137,7 +137,7 @@
 }
 
 .class-entry {
-  background-color: #00bfff;
+  background-color: #5f8d3b;
   color: white;
   display: flex;
   flex-direction: column;
@@ -195,7 +195,7 @@
 /* Adicionei estilos para o botão de edição de aulas. */
 .edit-class-button {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #658c46;
   border: none;
   color: white;
   border-radius: 4px;
