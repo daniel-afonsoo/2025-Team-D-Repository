@@ -15,6 +15,20 @@ const cursoRoutes = require('./endpoints/curso-endpoints')
 const ucRouter = require('./endpoints/uc-endpoint.js')
 const {logToClient} = require('./utils/logger');
 
+const loginRoutes = require('./endpoints/auth-endpoints')
+const dbRoutes = require('./endpoints/database-endpoints')
+const sqlRoutes = require('./endpoints/sqlgen-endpoints')
+const docenteRoutes = require('./endpoints/docentes-endpoints')
+const salaRoutes = require('./endpoints/sala-endpoints')
+const escolaRoutes = require('./endpoints/escola-endpoints')
+const aulaRoutes = require('./endpoints/aula-endpoints')
+const anosemestreRoutes = require('./endpoints/anosemestre-endpoints')
+const cursoRoutes = require('./endpoints/curso-endpoints')
+const ucRouter = require('./endpoints/uc-endpoint.js')
+const turmaRoutes = require('./endpoints/turma-endpoints.js')
+const filterRoutes = require('./endpoints/filter-endpoints.js')
+
+
 // express instance & server port
 const app = express()
 const backendPort = 5170
@@ -34,6 +48,12 @@ app.get("/", (req, res) => {
     res.json({ message: "Hello from the server's backend!" });
 });
 
+
+// socket.io connection event
+io.on("connection", (socket) => {
+    console.log(`A new user has connected. User ID: ${socket.id}`)
+})
+
 //routes
 logToClient("setup", `Setting up routes...`)
 app.use('/', loginRoutes)
@@ -41,11 +61,14 @@ app.use('/', dbRoutes)
 app.use('/', sqlRoutes)
 app.use('/', docenteRoutes)
 app.use('/', salaRoutes)
-app.use('/',escolaRoutes)
+app.use('/', escolaRoutes)
 app.use('/', aulaRoutes)
 app.use('/', anosemestreRoutes)
 app.use('/', cursoRoutes)
 app.use('/', ucRouter)
+app.use('/', turmaRoutes)
+app.use('/', filterRoutes)
+
 logToClient("setup", `Routes setup complete`)
 
 // setup socket.io
