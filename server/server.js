@@ -55,7 +55,7 @@ app.use('/', anosemestreRoutes)
 app.use('/', cursoRoutes)
 app.use('/', ucRouter)
 app.use('/', turmaRoutes)
-
+app.use('/', filterRoutes)
 
 // setup socket.io
 setupSockets(server)
