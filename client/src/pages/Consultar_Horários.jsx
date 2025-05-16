@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Filtros from "../components/horarios/Filtros";
 import Schedule from "../components/abas/Schedule";
 
@@ -13,19 +13,17 @@ function ConsultarHorarios() {
   const [aulasMarcadas, setAulasMarcadas] = useState([]);
 
   // Function to handle filter changes
-  const onFiltersChange = useCallback((filters) => {
-    console.log("Filters changed:", filters);
+const onFiltersChange = useCallback((filters) => {
+  console.log("Filters changed:", filters);
 
-    const queryParams = new URLSearchParams({
-      escola: filters.escola || "",
-      docente: filters.docente || "",
-      sala: filters.sala || "",
-      turma: filters.turma || "",
-      uc: filters.uc || "",
-      curso: filters.curso || "",
-      ano: filters.ano || "",
-    });
+  // Only include non-empty filters
+  const queryParams = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) queryParams.append(key, value);
+  });
 
+  // Only fetch if at least one filter is selected
+  if ([filters.escola, filters.docente, filters.sala, filters.turma, filters.uc, filters.curso, filters.ano].some(Boolean)) {
     fetch(`/api/aulas?${queryParams.toString()}`)
       .then((response) => response.json())
       .then((data) => {
@@ -33,7 +31,10 @@ function ConsultarHorarios() {
         setAulasMarcadas(data);
       })
       .catch((error) => console.error("Error fetching aulas:", error));
-  }, []);
+  } else {
+    setAulasMarcadas([]); // Clear the schedule if no filters are selected
+  }
+}, []);
 
   return (
     <div className="horarios-container">

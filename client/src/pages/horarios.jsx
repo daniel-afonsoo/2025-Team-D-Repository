@@ -117,7 +117,7 @@ function Horarios() {
 
           {/* Schedule */}
           {filtrosSelecionados && aulasMarcadas.length > 0 ? (
-            <Schedule aulasMarcadas={aulasMarcadas} isBlocked={isBlocked} />
+            <Schedule aulasMarcadas={aulasMarcadas} isBlocked={true} />
           ) : (
             <p>Por favor, preencha os filtros para acessar o conteúdo ou aguarde o carregamento.</p>
           )}

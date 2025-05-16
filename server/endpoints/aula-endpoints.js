@@ -3,16 +3,53 @@ const router = express.Router()
 const pool = require('../db/connection.js')
 
 //FUNCIONA
-router.get('/getAula',(req,res)=>{
-    const query = "SELECT * FROM aula"
-    pool.query(query,(err,rows)=>{
-        if(err){
-            console.log(err)
-            return res.status(500).json({error: 'Internal Server Error'})
+router.get('/api/aulas', (req, res) => {
+    const filters = [];
+    const values = [];
+
+    if (req.query.escola && req.query.escola !== "") {
+        filters.push('Cod_Escola = ?');
+        values.push(Number(req.query.escola));
+    }
+    if (req.query.docente && req.query.docente !== "") {
+        filters.push('Cod_Docente = ?');
+        values.push(Number(req.query.docente));
+    }
+    if (req.query.sala && req.query.sala !== "") {
+        filters.push('Cod_Sala = ?');
+        values.push(Number(req.query.sala));
+    }
+    if (req.query.turma && req.query.turma !== "") {
+        filters.push('Cod_Turma = ?');
+        values.push(Number(req.query.turma));
+    }
+    if (req.query.uc && req.query.uc !== "") {
+        filters.push('Cod_Uc = ?');
+        values.push(Number(req.query.uc));
+    }
+    if (req.query.curso && req.query.curso !== "") {
+        filters.push('Cod_Curso = ?');
+        values.push(Number(req.query.curso));
+    }
+    if (req.query.ano && req.query.ano !== "") {
+        filters.push('Cod_AnoSemestre = ?');
+        values.push(Number(req.query.ano));
+    }
+
+    if (filters.length === 0) {
+        return res.json([]);
+    }
+
+    let query = "SELECT * FROM aula WHERE " + filters.join(" AND ");
+
+    pool.query(query, values, (err, rows) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
-        res.json(rows)
-    })
-})
+        res.json(rows);
+    });
+});
 
 //FUNCIONA
 router.post('/createAula', async (req, res) => {

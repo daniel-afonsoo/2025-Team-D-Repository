@@ -35,12 +35,20 @@ function Schedule({ aulasMarcadas, isBlocked }) {
             <tr key={index}>
               <td className="hora">{hora}</td>
               {diasSemana.map((dia) => {
+                // Get start time in "HH:MM" format
+                const startTime = hora.split(" - ")[0] + ":00";
+                // Find aula that matches this day and start time
                 const classItem = aulasMarcadas.find(
-                  (cls) => cls.day === dia && cls.start === hora.split(" - ")[0]
+                  (cls) => cls.Dia === dia && cls.Inicio === startTime
                 );
 
                 if (classItem) {
-                  const durationBlocks = classItem.duration / 30;
+                  // Calculate duration in 30-min blocks
+                  const [startHour, startMin] = classItem.Inicio.split(":").map(Number);
+                  const [endHour, endMin] = classItem.Fim.split(":").map(Number);
+                  const durationMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                  const durationBlocks = durationMinutes / 30;
+
                   return (
                     <Droppable
                       id={`${dia}-${hora.split(" - ")[0]}`}
@@ -55,12 +63,12 @@ function Schedule({ aulasMarcadas, isBlocked }) {
                         <div
                           className="class-entry"
                           style={{
-                            gridRow: `span ${durationBlocks}`, // Assuming each grid row represents 30 minutes
+                            gridRow: `span ${durationBlocks}`,
                           }}
                         >
-                          <strong>{classItem.subject}</strong>
+                          <strong>UC: {classItem.Cod_Uc}</strong>
                           <br />
-                          <span className="location">{classItem.location}</span>
+                          <span className="location">Sala: {classItem.Cod_Sala}</span>
                         </div>
                       </Draggable>
                     </Droppable>

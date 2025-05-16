@@ -41,8 +41,8 @@ const setupSockets = (server) => {
         socket.emit("connection-ack-alert", "Real-time connection established.");
 
         // send server aulas state to client
-        socket.emit("update-aulas", { newAulas: schedule });
-        console.log(`Data sent ${schedule}`);
+        //socket.emit("update-aulas", { newAulas: schedule });
+        //console.log(`Data sent ${schedule}`);
 
         // handle request for assigned classes
         socket.on("get-aulas", () => {
