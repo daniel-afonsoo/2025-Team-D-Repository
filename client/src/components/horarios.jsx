@@ -82,7 +82,6 @@ function Horarios() {
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editingAula, setEditingAula] = useState(null);
-  const [selectedAula, setSelectedAula] = useState(null);
 
   let escolaPath
   if (path === "/horariosESTT") {
