@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
@@ -82,7 +82,6 @@ function Horarios() {
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editingAula, setEditingAula] = useState(null);
-  const [selectedAula, setSelectedAula] = useState(null);
 
   let escolaPath
   if (path === "/horariosESTT") {
@@ -249,6 +248,10 @@ function Horarios() {
 
   // Check if all filters are selected
   const filtrosSelecionados = escola && curso && ano && turma;
+
+  useEffect(() => {
+    socket.emit("refresh-aulas");
+  }, []);
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
