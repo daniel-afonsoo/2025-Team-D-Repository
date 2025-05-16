@@ -14,17 +14,6 @@ const anosemestreRoutes = require('./endpoints/anosemestre-endpoints')
 const cursoRoutes = require('./endpoints/curso-endpoints')
 const ucRouter = require('./endpoints/uc-endpoint.js')
 const {logToClient} = require('./utils/logger');
-
-const loginRoutes = require('./endpoints/auth-endpoints')
-const dbRoutes = require('./endpoints/database-endpoints')
-const sqlRoutes = require('./endpoints/sqlgen-endpoints')
-const docenteRoutes = require('./endpoints/docentes-endpoints')
-const salaRoutes = require('./endpoints/sala-endpoints')
-const escolaRoutes = require('./endpoints/escola-endpoints')
-const aulaRoutes = require('./endpoints/aula-endpoints')
-const anosemestreRoutes = require('./endpoints/anosemestre-endpoints')
-const cursoRoutes = require('./endpoints/curso-endpoints')
-const ucRouter = require('./endpoints/uc-endpoint.js')
 const turmaRoutes = require('./endpoints/turma-endpoints.js')
 const filterRoutes = require('./endpoints/filter-endpoints.js')
 
@@ -48,11 +37,6 @@ app.get("/", (req, res) => {
     res.json({ message: "Hello from the server's backend!" });
 });
 
-
-// socket.io connection event
-io.on("connection", (socket) => {
-    console.log(`A new user has connected. User ID: ${socket.id}`)
-})
 
 //routes
 logToClient("setup", `Setting up routes...`)
