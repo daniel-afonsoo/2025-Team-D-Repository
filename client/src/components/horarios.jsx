@@ -22,7 +22,7 @@ const horas = Array.from({ length: 31 }, (_, i) => {
 });
 
 // Draggable class box
-function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
+function Draggable({ id, children, isBlocked, aulaInfo }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
     data: { aulaInfo },
@@ -96,7 +96,7 @@ function Horarios() {
   console.log(escolaPath)
 
   // Filters
-  const [escola, setEscola] = useState(escolaPath);
+  const [semestre, setSemestre] = useState(escolaPath);
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
@@ -135,6 +135,7 @@ function Horarios() {
             id: (prev[prev.length - 1]?.id || 0) + 1,
             subject: originalAula.subject,
             location: originalAula.location,
+            teacher: originalAula.teacher,
             duration: originalAula.duration,
           },
         ]);
@@ -183,6 +184,7 @@ function Horarios() {
         start,
         subject: active.data.current.aulaInfo.subject,
         location: active.data.current.aulaInfo.location,
+        teacher: active.data.current.aulaInfo.teacher,
         duration: active.data.current.aulaInfo.duration,
       };
 
@@ -209,6 +211,7 @@ function Horarios() {
         codAula: editingAula.Cod_Aula,
         newSubject: editingAula.subject,
         newLocation: editingAula.location,
+        newTeacher: editingAula.teacher,
         newDuration: editingAula.duration,
       });
       setShowEditPopup(false);
@@ -236,18 +239,19 @@ function Horarios() {
         id: aulasDisponiveis.length + 1,
         subject: newAula.subject,
         location: newAula.location,
+        teacher: newAula.teacher,
         duration: newAula.duration,
       },
     ]);
     // clear newAula
-    setNewAula({ subject: "", location: "", duration: 30 });
+    setNewAula({ subject: "", location: "", teacher: "", duration: 30 });
     // clear popup
     setShowAddPopup(false);
     console.log(aulasDisponiveis);
   }
 
   // Check if all filters are selected
-  const filtrosSelecionados = escola && curso && ano && turma;
+  const filtrosSelecionados = semestre && curso && ano && turma;
 
   useEffect(() => {
     socket.emit("refresh-aulas");
@@ -261,12 +265,10 @@ function Horarios() {
           <div className="filters-and-buttons">
             <div className="filtros">
               <h3>Filtros</h3>
-              <select onChange={(e) => setEscola(e.target.value)} value={escola}>
-                <option value="" disabled>Escolher Escola</option>
-                <option value="ESTT">ESTT</option>
-                <option value="ESGT">ESGT</option>
-                <option value="ESTA">ESTA</option>
-
+              <select onChange={(e) => setSemestre(e.target.value)} value={semestre}>
+                <option value="" disabled>Escolher Semestre</option>
+                <option value="1º Semestre">1º Semestre</option>
+                <option value="2º Semestre">2º Semestre</option>
               </select>
               <select onChange={(e) => setCurso(e.target.value)} value={curso}>
                 <option value="" disabled>Escolher Curso</option>
@@ -329,7 +331,14 @@ function Horarios() {
                       onChange={(e) => setNewAula({ ...newAula, location: e.target.value })}
                     />
                     <input
+                      type="text"
+                      placeholder="Docente"
+                      value={newAula.teacher}
+                      onChange={(e) => setNewAula({ ...newAula, teacher: e.target.value })}
+                    />
+                    <input
                       type="number"
+                      step="30"
                       placeholder="Duração (minutos)"
                       value={newAula.duration}
                       onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
@@ -459,36 +468,32 @@ function Horarios() {
                   </div>
 
                   {/* Available Classes */}
-                  <Droppable id="aulas-disponiveis" isBlocked={false}>
-                    <div className="aulas-disponiveis">
-                      <h3>Aulas Disponíveis</h3>
-                      <input
-                        type="text"
-                        placeholder="Pesquisar aulas..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-input"
-                      />
-                      {filtrosSelecionados ? (
-                        filteredAulasDisponiveis.length > 0 ? (
-                          filteredAulasDisponiveis.map((aula) => (
-                            <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
-                              <div className="aula-disponivel">
-                                <strong>{aula.subject}</strong>
-                                <p>{aula.id}</p>
-                                <br />
-                                <span>{aula.location}</span>
-                              </div>
-                            </Draggable>
-                          ))
-                        ) : (
-                          <p>Nenhuma aula disponível.</p>
-                        )
+                  <div className="aulas-disponiveis">
+                    <h3>Aulas Disponíveis</h3>
+                    <input
+                      type="text"
+                      placeholder="Pesquisar aulas..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="search-input"
+                    />
+                    <Droppable id="aulas-disponiveis" isBlocked={false}>
+                      {filteredAulasDisponiveis.length > 0 ? (
+                        filteredAulasDisponiveis.map((aula) => (
+                          <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>
+                            <div className="aula-disponivel">
+                              <strong>{aula.subject}</strong>
+                              <p>{aula.id}</p>
+                              <br />
+                              <span>{aula.location}</span>
+                            </div>
+                          </Draggable>
+                        ))
                       ) : (
-                        <p>Por favor, preencha os filtros para acessar as aulas disponíveis.</p>
+                        <p>Nenhuma aula disponível.</p>
                       )}
-                    </div>
-                  </Droppable>
+                    </Droppable>
+                  </div>
                 </div>
               </div>
             </>
