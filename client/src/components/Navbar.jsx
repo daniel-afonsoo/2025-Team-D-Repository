@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/navbar.css'
 import { useLocation, Link } from 'react-router-dom';
-import logo from '../images/ipt_logo.jpg';
+import logo from '../images/ipt_logo_branco.svg';
 
 
 const Navbar = () => {
@@ -15,7 +15,7 @@ const Navbar = () => {
     <div className="navbar">
       <div className="navbar-left">
         <a href="https://www.ipt.pt" target="_blank" rel="noopener noreferrer" style={{ cursor: 'default' }}>
-          <img src={logo} alt="Logo IPT" className="logo" />
+          <img src={logo} alt="Logo IPT" className="logo" style={{ width: "200px", height: "auto" }} />
         </a>
 
         {!(path === "/") && (
