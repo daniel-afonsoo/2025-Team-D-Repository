@@ -3,13 +3,15 @@ import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
 import socket from "../utils/socket"; // Import the socket instance
-import { useSocket } from "../utils/useSocket"
+import { useSocket } from "../utils/useSocket";
 import { useLocation } from 'react-router-dom';
-
+import { jsPDF } from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
+import * as XLSX from "xlsx";
+import Papa from "papaparse";
 
 // Days of the week
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-
 // Generate time slots from 08:30 to 24:00 in 30-minute intervals
 const horas = Array.from({ length: 31 }, (_, i) => {
   const hour = 8 + Math.floor(i / 2); // The start hour
@@ -28,13 +30,11 @@ function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
     data: { aulaInfo },
     disabled: isBlocked,
   });
-
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     cursor: isBlocked ? "not-allowed" : "grab",
     height: "100%", // Ensure the draggable spans the full height of the cell
   };
-
   return (
     <div
       ref={setNodeRef}
@@ -51,11 +51,9 @@ function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
 // Droppable cell
 function Droppable({ id, children, isBlocked }) {
   const { isOver, setNodeRef } = useDroppable({ id });
-
   const style = {
     backgroundColor: isOver && !isBlocked ? "lightblue" : undefined,
   };
-
   return (
     <div ref={setNodeRef} style={style} className="empty-slot">
       {children}
@@ -65,42 +63,35 @@ function Droppable({ id, children, isBlocked }) {
 
 // Main component
 function Horarios() {
-
   const location = useLocation();
   const path = location.pathname;
-  console.log("Path:" , path)
-
+  console.log("Path:", path);
   // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
-
   // aulas disponíveis
   const [aulasDisponiveis, setAulasDisponiveis] = useState([]); // Lista de aulas disponiveis
   const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30 });
-
   const [isBlocked, setIsBlocked] = useState(false); // State to block the schedule
   const [erro, setErro] = useState(""); // State for error messages
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editingAula, setEditingAula] = useState(null);
-
-  let escolaPath
+  let escolaPath;
   if (path === "/horariosESTT") {
-    escolaPath = "ESTT"
+    escolaPath = "ESTT";
   } else if (path === "/horariosESGT") {
-    escolaPath = "ESGT"
+    escolaPath = "ESGT";
   } else if (path === "/horariosESTA") {
-    escolaPath = "ESTA"
+    escolaPath = "ESTA";
   } else {
-    escolaPath = ""
+    escolaPath = "";
   }
-  console.log(escolaPath)
-
+  console.log(escolaPath);
   // Filters
   const [escola, setEscola] = useState(escolaPath);
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
-  
   // Add a search state and input field for filtering available classes
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -109,94 +100,100 @@ function Horarios() {
     aula.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (!over) {
-      alert("Dropped outside the schedule");
-      setErro("");
+ const calculateEndTime = (startTime, duration) => {
+  const [hours, minutes] = startTime.split(":").map(Number);
+  const totalMinutes = hours * 60 + minutes + duration;
+  const endHours = Math.floor(totalMinutes / 60);
+  const endMinutes = totalMinutes % 60;
+  return `${endHours.toString().padStart(2, "0")}:${endMinutes.toString().padStart(2, "0")}`;
+};
 
-      // Restaurar aula ao estado anterior, se necessário
-      if (active.id.startsWith("marcada_")) {
-        const originalAula = active.data.current.aulaInfo;
-        socket.emit("update-aulas", (prev) => [...prev, originalAula]);
-      }
-      return;
+// Gerar código único (simulação simples)
+let nextCode = 1;
+const generateUniqueCode = () => nextCode++;
+
+const handleDragEnd = (event) => {
+  const { active, over } = event;
+
+  if (!over) {
+    alert("Dropped outside the schedule");
+    if (active.id.startsWith("marcada_")) {
+      const originalAula = active.data.current.aulaInfo;
+      socket.emit("update-aulas", (prev) => [...prev, originalAula]);
     }
+    return;
+  }
 
-
-    if (over.id === "aulas-disponiveis") {
-      if (active.id.startsWith("marcada_")) {
-        const originalAula = active.data.current.aulaInfo;
-
-        // Adiciona à lista de aulas disponíveis
-        setAulasDisponiveis((prev) => [
-          ...prev,
-          {
-            id: (prev[prev.length - 1]?.id || 0) + 1,
-            subject: originalAula.subject,
-            location: originalAula.location,
-            duration: originalAula.duration,
-          },
-        ]);
-
-        
-        socket.emit("update-aulas", (prev) =>
-          prev.filter((aula) => aula.Cod_Aula !== originalAula.Cod_Aula)
-        );
-      
-        socket.emit("remove-aula", { codAula: originalAula.Cod_Aula }); // Opcional: para manter servidor sincronizado
-      }
-      return;
+  if (over.id === "aulas-disponiveis") {
+    if (active.id.startsWith("marcada_")) {
+      const originalAula = active.data.current.aulaInfo;
+      setAulasDisponiveis((prev) => [
+        ...prev,
+        {
+          id: (prev[prev.length - 1]?.id || 0) + 1,
+          subject: originalAula.subject,
+          location: originalAula.location,
+          duration: originalAula.duration,
+        },
+      ]);
+      socket.emit("remove-aula", { codAula: originalAula.Cod_Aula });
     }
+    return;
+  }
 
-    const [day, start] = over.id.split("-");
-    const startIndex = horas.findIndex((hora) => hora.startsWith(start));
+  const [day, start] = over.id.split("-");
+  const startIndex = horas.findIndex((hora) => hora.startsWith(start));
 
-    const overlappingClass = aulasMarcadas.find((cls) => {
-      if (cls.Cod_Aula === active.data.current.aulaInfo.Cod_Aula) {
-        return false; // Skip checking against itself
-      }
-      const classStartIndex = horas.findIndex((hora) => hora.startsWith(cls.start));
-      const classEndIndex = classStartIndex + cls.duration / 30;
-      return (
-        cls.day === day &&
-        ((startIndex >= classStartIndex && startIndex < classEndIndex) ||
-          (startIndex + active.data.current.aulaInfo.duration / 30 > classStartIndex &&
-            startIndex + active.data.current.aulaInfo.duration / 30 <= classEndIndex))
-      );
-    });
+  // Verificar sobreposição
+  const overlappingClass = aulasMarcadas.some((cls) => {
+    if (cls.Cod_Aula === active.data.current?.aulaInfo?.Cod_Aula) return false;
+    
+    const classStartIndex = horas.findIndex((h) => h.startsWith(cls.start));
+    const classEndIndex = classStartIndex + cls.duration / 30;
+    
+    return (
+      cls.day === day &&
+      ((startIndex >= classStartIndex && startIndex < classEndIndex) ||
+        (startIndex + active.data.current.aulaInfo.duration / 30 > classStartIndex &&
+          startIndex + active.data.current.aulaInfo.duration / 30 <= classEndIndex))
+    );
+  });
 
-    if (overlappingClass) {
-      alert("Cannot place a class that overlaps with another class. Please choose an empty slot.");
-
-      // Restore the class back to its original position
-      if (active.id.startsWith("marcada_")) {
-        const originalAula = active.data.current.aulaInfo;
-        socket.emit("update-aulas", ((prev) => [...prev, originalAula]));
-      }
-      return;
+  if (overlappingClass) {
+    alert("Sobreposição detectada!");
+    if (active.id.startsWith("marcada_")) {
+      socket.emit("update-aulas", (prev) => [...prev, active.data.current.aulaInfo]);
     }
+    return;
+  }
 
-    if (active.id.startsWith("disponivel_")) {
-      const newAula = {
-        day,
-        start,
-        subject: active.data.current.aulaInfo.subject,
-        location: active.data.current.aulaInfo.location,
-        duration: active.data.current.aulaInfo.duration,
-      };
+  // Adicionar nova aula
+  if (active.id.startsWith("disponivel_")) {
+    const aulaInfo = active.data.current.aulaInfo;
+    const newAula = {
+      Cod_Aula: generateUniqueCode(), // Código único
+      day,
+      start,
+      end: calculateEndTime(start, aulaInfo.duration), // Calcula horário final
+      subject: aulaInfo.subject,
+      location: aulaInfo.location,
+      duration: aulaInfo.duration,
+    };
+    socket.emit("add-aula", { newAula });
+    setAulasDisponiveis((prev) => prev.filter((a) => a.id !== aulaInfo.id));
 
-      socket.emit("add-aula", { newAula });
-      
-
-      setAulasDisponiveis((prev) =>
-        prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id)
-      );
-    } else if (active.id.startsWith("marcada_")) {
-      const codAula = active.data.current.aulaInfo.Cod_Aula;
-      socket.emit("update-aula", { codAula, newDay: day, newStart: start });
-    }
-  };
+  // Atualizar aula existente
+  } else if (active.id.startsWith("marcada_")) {
+    const aulaInfo = active.data.current.aulaInfo;
+    const updatedAula = {
+      ...aulaInfo,
+      day,
+      start,
+      end: calculateEndTime(start, aulaInfo.duration), // Atualiza horário final
+    };
+    socket.emit("update-aula", updatedAula);
+  }
+};
 
   const openEditPopup = (aula) => {
     setEditingAula(aula);
@@ -244,7 +241,7 @@ function Horarios() {
     // clear popup
     setShowAddPopup(false);
     console.log(aulasDisponiveis);
-  }
+  };
 
   // Check if all filters are selected
   const filtrosSelecionados = escola && curso && ano && turma;
@@ -253,11 +250,87 @@ function Horarios() {
     socket.emit("refresh-aulas");
   }, []);
 
+  const exportToPdf = () => {
+  const doc = new jsPDF();
+
+  // Convert the timetable data to a format suitable for PDF
+  const tableData = [];
+  tableData.push(["Horas", ...diasSemana]); // Header row
+
+  horas.forEach((hora, index) => {
+    const horaInicio = hora.split(" - ")[0];
+    const row = [hora];
+
+    diasSemana.forEach((dia) => {
+      const classItem = aulasMarcadas.find(
+        (cls) => cls.day === dia && cls.start === horaInicio
+      );
+
+      if (classItem) {
+        row.push(`${classItem.subject}\n${classItem.location}`);
+      } else {
+        row.push("");
+      }
+    });
+
+    tableData.push(row);
+  });
+
+  // Add the table to the PDF
+
+  autoTable(doc, {  head: [tableData[0]], // Header row
+    body: tableData.slice(1), // Data rows
+    theme: "grid",
+    styles: { overflow: "linebreak" }, })
+  
+
+  // Save the PDF
+  doc.save("horario.pdf");
+};
+
+const exportToExcel = () => {
+  const ws = XLSX.utils.json_to_sheet(aulasMarcadas.map(aula => ({
+    Cod_Aula: aula.Cod_Aula,
+    day: aula.day,
+    start: aula.start,
+    end: aula.end,
+    subject: aula.subject,
+    location: aula.location,
+    duration: aula.duration
+  })));
+  
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Horario");
+  XLSX.writeFile(wb, "horario.xlsx");
+};
+
+  // Export to CSV
+  const exportToCsv = () => {
+    const csvData = aulasMarcadas.map((aula) => ({
+      Dia: aula.day,
+      Hora: aula.start,
+      Disciplina: aula.subject,
+      Localizacao: aula.location,
+      Duracao: aula.duration,
+    }));
+
+    const csvContent = Papa.unparse(csvData);
+
+    // Create a downloadable CSV file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "horario.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
       <div className="horarios-container">
         <div className="layout">
-
           <div className="filters-and-buttons">
             <div className="filtros">
               <h3>Filtros</h3>
@@ -266,7 +339,6 @@ function Horarios() {
                 <option value="ESTT">ESTT</option>
                 <option value="ESGT">ESGT</option>
                 <option value="ESTA">ESTA</option>
-
               </select>
               <select onChange={(e) => setCurso(e.target.value)} value={curso}>
                 <option value="" disabled>Escolher Curso</option>
@@ -286,7 +358,6 @@ function Horarios() {
               </select>
             </div>
           </div>
-
           {/* Conditionally render buttons when filters are selected */}
           {filtrosSelecionados && (
             <div className="filters-and-buttons">
@@ -300,14 +371,23 @@ function Horarios() {
                 {isBlocked ? "Desbloquear Horário" : "Bloquear Horário"}
               </button>
               <button
-                onClick={() => openEditPopup(aulasMarcadas[0])} // Exemplo: abre o popup para a primeira aula marcada
+                onClick={() => openEditPopup(aulasMarcadas[0])} // Example: opens popup for the first marked class
                 className="edit-class-button"
               >
                 Editar Aula
               </button>
+              {/* Add export buttons */}
+              <button onClick={exportToPdf} className="export-btn">
+                Exportar para PDF
+              </button>
+              <button onClick={exportToExcel} className="export-btn">
+                Exportar para Excel
+              </button>
+              <button onClick={exportToCsv} className="export-btn">
+                Exportar para CSV
+              </button>
             </div>
           )}
-
           {/* Show content only if filters are selected */}
           {filtrosSelecionados ? (
             <>
@@ -340,7 +420,6 @@ function Horarios() {
                   </div>
                 </div>
               )}
-
               {/* Popup para editar aulas */}
               {showEditPopup && (
                 <div className="add-popup">
@@ -388,7 +467,6 @@ function Horarios() {
                   </div>
                 </div>
               )}
-
               <div className="conteudo">
                 <div className="timetable-and-available-classes">
                   <div className="timetable-container">
@@ -410,7 +488,6 @@ function Horarios() {
                               <td className="hora">{hora}</td>
                               {diasSemana.map((dia) => {
                                 const cellId = `${dia}-${horaInicio}`;
-
                                 // Prevent rendering cell if it's within an already spanned class
                                 const isCellSpanned = aulasMarcadas.some((cls) => {
                                   const classStartIndex = horas.findIndex(h => h.startsWith(cls.start));
@@ -423,15 +500,13 @@ function Horarios() {
                                   );
                                 });
                                 if (isCellSpanned) return null;
-
                                 const classItem = aulasMarcadas.find(
                                   (cls) => cls.day === dia && cls.start === horaInicio
                                 );
-
                                 if (classItem) {
                                   const durationBlocks = classItem.duration / 30;
                                   return (
-                                    <td key={cellId} rowSpan={durationBlocks} className="class-cell" onContextMenu={(e) => handleRightClick(e, classItem)}>
+                                    <td key={cellId} rowSpan={durationBlocks} className="class-cell">
                                       <Draggable
                                         id={"marcada_" + classItem.Cod_Aula}
                                         isBlocked={isBlocked}
@@ -446,7 +521,6 @@ function Horarios() {
                                     </td>
                                   );
                                 }
-
                                 return (
                                   <Droppable key={cellId} id={cellId} isBlocked={isBlocked} />
                                 );
@@ -457,7 +531,6 @@ function Horarios() {
                       </tbody>
                     </table>
                   </div>
-
                   {/* Available Classes */}
                   <Droppable id="aulas-disponiveis" isBlocked={false}>
                     <div className="aulas-disponiveis">
