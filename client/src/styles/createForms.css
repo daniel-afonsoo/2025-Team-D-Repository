@@ -17,20 +17,25 @@
 }
 
 .createIdentifier{
-    background-color: #5BC604;
+    background-color: #3e8802;
     background-repeat: no-repeat;
-    opacity: 0.6;
+    opacity: 1;
     background-position: center;
     background-size: 100%;
     color: white;
-
+    font-size: 25px;
+    font-family: 'Times New Roman', Times, serif;
+    opacity: 0.6;
 }
 
 .create_input_field{
     position: relative;
     margin-bottom: 20px;
     text-align: left;
-    
+    font-size: 20px;
+    font-weight: bold;
+    color: #3e8802;
+    font-family: 'Times New Roman', Times, serif;
 }
 
 .textbox_input{
@@ -43,6 +48,8 @@
     border-radius: 0;
     -webkit-transition: border-color .25s ease, box-shadow .25s ease;
     transition: border-color .25s ease, box-shadow .25s ease;
+    font-size: 20px;
+    font-family: 'Times New Roman', Times, serif;
 }
 
 .input_dropdown{

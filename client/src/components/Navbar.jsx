@@ -2,7 +2,7 @@ import React from 'react';
 import '../styles/navbar.css'
 import { useLocation, Link } from 'react-router-dom';
 import logo from '../images/ipt_logo_branco.svg';
-
+import { FaHome } from 'react-icons/fa';
 
 const Navbar = () => {
 
@@ -18,9 +18,9 @@ const Navbar = () => {
           <img src={logo} alt="Logo IPT" className="logo" style={{ width: "200px", height: "auto" }} />
         </a>
 
-        {!(path === "/") && (
+        {!(path === "/" || path === "/login") && (
           <>
-            <Link className='linksNavBar' to="/">Dashboard</Link>
+            <Link className='linksNavBar' to="/"> <FaHome size={35} color="#fff" /></Link>
           </>
         )}
 
@@ -44,25 +44,25 @@ const Navbar = () => {
 
         {path.startsWith('/horariosESTT') && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESTT</h1>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }}>Horários ESTT</h1>
           </>
         )}
 
         {path.startsWith('/horariosESTA') && (
           <>
-            <h1 className='linksNavBars' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESTA</h1>
+            <h1 className='linksNavBars' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }}>Horários ESTA</h1>
           </>
         )}
 
         {path.startsWith('/horariosESGT') && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESGT</h1>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif"}}>Horários ESGT</h1>
           </>
         )}
 
-        {(path === "/") && (
+        {(path === "/" || path === "/login") && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários Instituto Politécnico de Tomar</h1>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif"}}>Horários Instituto Politécnico de Tomar</h1>
           </>
         )}
 

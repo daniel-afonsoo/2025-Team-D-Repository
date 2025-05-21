@@ -63,7 +63,7 @@
 }
 
 .backoffice-container_dashboard {
-  margin-top: 70px; /* Adiciona espaço vertical acima do botão Backoffice */
+  margin-top: 70px; 
 }
 
 .botao_backoffice_dashboard {
@@ -78,7 +78,7 @@
   max-height: 100%;
   cursor: pointer;
   margin-bottom: 20px;
-  display: inline-block; /* Para centralizar horizontalmente */
+  display: inline-block; 
 }
 
 .dashboard-background {
@@ -101,11 +101,11 @@
   text-align: center;
   color: white;
 
-  background-color: rgba(255, 255, 255, 0.8); /* branco com transparência */
+  background-color: rgba(255, 255, 255, 0.8); 
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   max-width: 800px;
   margin: 150px auto;
-  backdrop-filter: blur(5px); /* efeito vidro fosco */
+  backdrop-filter: blur(5px); 
 }

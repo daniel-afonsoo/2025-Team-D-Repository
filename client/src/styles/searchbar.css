@@ -18,11 +18,12 @@
     color: white;
     padding: 10px 20px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
     border-radius: 8px;
     border: none;
     cursor: pointer;
     margin-top: 17px; 
+    font-family: 'Times New Roman', Times, serif;
   }
   
   .botao-create:hover {

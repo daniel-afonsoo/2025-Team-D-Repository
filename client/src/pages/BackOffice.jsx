@@ -1,13 +1,18 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import "../styles/backoffice.css";
 import { useNavigate } from 'react-router-dom';
 import ConsoleViewer from '../components/backoffice/ConsoleViewer';
+import ipt_background from '../images/background_ipt_logo.svg'
 
 const Backoffice = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <div className="area_backoffice">
+    <div className="area_backoffice" style={{ backgroundImage: `url(${ipt_background})` }}>
       <h1 className="titulo_backoffice">BackOffice</h1>
       <ConsoleViewer />
       <div className="botoes-container_backoffice">

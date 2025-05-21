@@ -71,11 +71,11 @@ const SalaCreate = () => {
                         <p><b>Criar Sala</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome/Número da Sala</font></label>
+                        <label><font>Nome/Número da Sala</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Escolas da Sala</font></label>
+                        <label><font>Escolas da Sala</font></label>
                         {escola.map((escola, index) => (
                             <select
                                 key={index}

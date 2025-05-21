@@ -77,19 +77,19 @@ const TurmaCreate = () => {
                         <p><b>Criar Turma</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Turma</font></label>
+                        <label><font>Turma</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Código Curso</font></label>
+                        <label><font>Código Curso</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={codCurso} onChange={(e) => setCodCurso(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Ano</font></label>
+                        <label><font>Ano</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={ano} onChange={(e) => setAno(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Escola da Turma</font></label>
+                        <label><font>Escola da Turma</font></label>
                         {escola.map((escola, index) => (
                             <select
                                 key={index}

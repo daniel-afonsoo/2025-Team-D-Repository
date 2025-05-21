@@ -82,19 +82,19 @@ const CursoCreate = () => {
                         <p><b>Criar Curso</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome do Curso</font></label>
+                        <label><font>Nome do Curso</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Abreviatura do curso</font></label>
+                        <label><font>Abreviatura do curso</font></label>
                         <input className='textbox_input' type="text" name="abrt" required="" value={abreviatura} onChange={(e) => setAbreviatura(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Código do Curso</font></label>
+                        <label><font>Código do Curso</font></label>
                         <input className='textbox_input' type="number" name="CodCurso" required="" value={codCurso} onChange={(e) => setCodCurso(e.target.value)} />
                     </div>
-                    <div className="create_input_field">
-                        <label><font color="#75c734">Escolas do Curso</font></label>
+                    <div className="create_input_field" style={{ fontWeight: 'bold' }}>
+                        <label><font>Escolas do Curso</font></label>
                         {escola.map((escola, index) => (
                             <select
                                 key={index}

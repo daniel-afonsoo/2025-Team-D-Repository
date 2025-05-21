@@ -6,7 +6,7 @@ import Data_Pages from '../pages/Data_Pages.jsx';
 import HorariosESGT from '../pages/HorariosESGT';
 import HorariosESTA from '../pages/HorariosESTA';
 import HorariosESTT from '../pages/HorariosESTT';
-
+import Login from '../pages/Login.jsx'
 
 
 
@@ -17,6 +17,8 @@ const Router = () => {
       {/* Rota inicial */}
       <Route path="/" element={<Dashboard />} />
       <Route path="/backoffice" element={<BackOffice />} />
+
+      <Route path="/login" element={<Login />} />
 
       {/* Rotas para as páginas */}
       <Route path="/horariosESGT" element={<HorariosESGT />} />

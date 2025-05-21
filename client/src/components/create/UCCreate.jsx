@@ -78,19 +78,19 @@ const UCCreate = () => {
                         <p><b>Criar Unidade Curricular</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome da UC</font></label>
+                        <label><font>Nome da UC</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Código da UC</font></label>
+                        <label><font>Código da UC</font></label>
                         <input className='textbox_input' type="number" name="codUc" required="" value={codUC} onChange={(e) => setCodUC(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Horas Totais</font></label>
+                        <label><font>Horas Totais</font></label>
                         <input className='textbox_input' type="number" name="horas" required="" value={horas} onChange={(e) => setHoras(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Cursos da UC</font></label>
+                        <label><font>Cursos da UC</font></label>
                         {curso.map((escola, index) => (
                             <select
                                 key={index}

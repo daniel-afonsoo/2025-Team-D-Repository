@@ -60,15 +60,15 @@ const EscolaCreate = () => {
                         <p><b>Criar Escola</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome da Escola</font></label>
+                        <label><font>Nome da Escola</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Abreviatura da Escola</font></label>
+                        <label><font>Abreviatura da Escola</font></label>
                         <input className='textbox_input' type="text" name="abtr" required="" value={abreviatura} onChange={(e) => setAbreviatura(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Localidade da Escola</font></label>
+                        <label><font>Localidade da Escola</font></label>
                         <input className='textbox_input' type="text" name="localidade" required="" value={localidade} onChange={(e) => setLocalidade(e.target.value)} />
                     </div>
                     <button className="botao_create" type='submit' >Criar</button>

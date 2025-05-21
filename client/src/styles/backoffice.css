@@ -1,16 +1,65 @@
 .area_backoffice {
   text-align: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.backoffice-background{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  z-index: 0;
+  transition: background-image 1s ease-in-out;
 }
 
 .titulo_backoffice {
-  font-family: "Titillium Web", sans-serif;
-  font-size: 40px;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 30px;
+
+  background: rgba(0, 0, 0, 0.5);
+  display: inline-block;
+  padding: 0.5em 1.2em;
+  border-radius: 12px;
+
+  animation: glowColor 4s ease-in-out infinite alternate;
 }
+
+@keyframes glowColor {
+  0% {
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #75c734,
+      0 0 20px #75c734,
+      0 0 30px #75c734,
+      0 0 40px #75c734;
+  }
+  100% {
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #ff7b00, 
+      0 0 20px #ff7b00,
+      0 0 30px #ff7b00,
+      0 0 40px #ff7b00;
+  }
+}
+
 
 .botoes-container_backoffice {
   display: flex;
-  justify-content: center; /* Centraliza os botões horizontalmente */
-  gap: 40px; /* Espaço entre os botões */
+  justify-content: center; 
+  gap: 40px; 
   margin-top: 30px;
 }
 
