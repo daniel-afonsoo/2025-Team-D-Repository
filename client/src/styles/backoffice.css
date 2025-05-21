@@ -1,24 +1,17 @@
-.area {
+.area_backoffice {
   text-align: center;
-  margin-top: 10%;
 }
 
-.titulo {
-  margin-bottom: 50px;
+.titulo_backoffice {
   font-family: "Titillium Web", sans-serif;
   font-size: 40px;
 }
 
-.destaque {
-  font-weight: bold;
-  font-family: "Titillium Web", sans-serif;
-  font-size: 40px;
-}
-
-.botoes-container {
+.botoes-container_backoffice {
   display: flex;
   justify-content: center; /* Centraliza os botões horizontalmente */
   gap: 40px; /* Espaço entre os botões */
+  margin-top: 30px;
 }
 
 
@@ -38,16 +31,3 @@
 
 
 
-.backoffice-container {
-  margin-top: 70px; /* Adiciona espaço vertical acima do botão Backoffice */
-}
-
-.backoffice {
-  font-size: 30px;
-  text-align: center;
-  font-family: "Courier New", Courier, monospace;
-  border-radius: 12px;
-  font-weight: bold;
-  text-shadow: 0 0 3px #FFF;
-  display: inline-block; /* Para centralizar horizontalmente */
-}

@@ -7,10 +7,10 @@ const Backoffice = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="area">
+    <div className="area_backoffice">
+      <h1 className="titulo_backoffice">BackOffice</h1>
       <ConsoleViewer />
-      <h1 className="titulo">BackOffice</h1>
-      <div className="botoes-container">
+      <div className="botoes-container_backoffice">
         {/* Botão Docentes */}
         <button 
           className="botao" 

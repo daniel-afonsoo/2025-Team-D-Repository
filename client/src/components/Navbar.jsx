@@ -27,37 +27,46 @@ const Navbar = () => {
 
       </div>
 
-      {/* Links adicionais para o backoffice */}
-      {path.startsWith('/backoffice') && (
-        <>
+      <div className='navbar-center'>
+        {/* Links adicionais para o backoffice */}
+        {path.startsWith('/backoffice') && (
+          <>
 
-          <Link className='linksNavBar' to="/backoffice">BackOffice</Link>
-          <Link className='linksNavBar' to="/backoffice/docentes">Docentes</Link>
-          <Link className='linksNavBar' to="/backoffice/cursos">Cursos</Link>
-          <Link className='linksNavBar' to="/backoffice/unidades-curriculares">Unidades Curriculares</Link>
-          <Link className='linksNavBar' to="/backoffice/escolas">Escolas</Link>
-          <Link className='linksNavBar' to="/backoffice/salas">Salas</Link>
-          <Link className='linksNavBar' to="/backoffice/turmas">Turmas</Link>
-        </>
-      )}
+            <Link className='linksNavBar' to="/backoffice">BackOffice</Link>
+            <Link className='linksNavBar' to="/backoffice/docentes">Docentes</Link>
+            <Link className='linksNavBar' to="/backoffice/cursos">Cursos</Link>
+            <Link className='linksNavBar' to="/backoffice/unidades-curriculares">Unidades Curriculares</Link>
+            <Link className='linksNavBar' to="/backoffice/escolas">Escolas</Link>
+            <Link className='linksNavBar' to="/backoffice/salas">Salas</Link>
+            <Link className='linksNavBar' to="/backoffice/turmas">Turmas</Link>
+          </>
+        )}
 
-      {path.startsWith('/horariosESTT') && (
-        <>
-          <Link className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESTT</Link>
-        </>
-      )}
+        {path.startsWith('/horariosESTT') && (
+          <>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESTT</h1>
+          </>
+        )}
 
-      {path.startsWith('/horariosESTA') && (
-        <>
-          <Link className='linksNavBar' style={{ cursor: 'default', fontSize: '30px'  }}>Horários ESTA</Link>
-        </>
-      )}
+        {path.startsWith('/horariosESTA') && (
+          <>
+            <h1 className='linksNavBars' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESTA</h1>
+          </>
+        )}
 
-      {path.startsWith('/horariosESGT') && (
-        <>
-          <Link className='linksNavBar' style={{ cursor: 'default', fontSize: '30px'  }}>Horários ESGT</Link>
-        </>
-      )}
+        {path.startsWith('/horariosESGT') && (
+          <>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários ESGT</h1>
+          </>
+        )}
+
+        {(path === "/") && (
+          <>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px' }}>Horários Instituto Politécnico de Tomar</h1>
+          </>
+        )}
+
+      </div>
 
       <div className="navbar-right">
 
