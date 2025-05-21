@@ -392,9 +392,6 @@ const exportToExcel = async () => {
               <button onClick={exportToExcel} className="export-btn">
                 Exportar para Excel
               </button>
-              <button onClick={exportToCsv} className="export-btn">
-                Exportar para CSV
-              </button>
             </div>
           )}
           {/* Show content only if filters are selected */}
