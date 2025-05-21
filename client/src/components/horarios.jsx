@@ -2,58 +2,46 @@ import React, { useState, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
-import socket from "../utils/socket"; // Import the socket instance
+import socket from "../utils/socket";
 import { useSocket } from "../utils/useSocket";
 import { useLocation } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
-import * as XLSX from "xlsx";
-import Papa from "papaparse";
+import ExcelJS from "exceljs";
 
-// Days of the week
+
+// Dias da semana
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-// Generate time slots from 08:30 to 24:00 in 30-minute intervals
+// Gera intervalos de 08:00 a 23:30 (31 blocos de 30min)
 const horas = Array.from({ length: 31 }, (_, i) => {
-  const hour = 8 + Math.floor(i / 2); // The start hour
-  const minutes = i % 2 === 0 ? "00" : "30"; // Alternates between 00 and 30 minutes
-  const start = `${hour.toString().padStart(2, "0")}:${minutes}`; // Format start time
-  const endHour = minutes === "30" ? hour + 1 : hour; // End hour is the next hour if start is :30
-  const endMinutes = minutes === "30" ? "00" : "30"; // End minutes is 00 if start is :30
-  const end = `${endHour.toString().padStart(2, "0")}:${endMinutes}`; // Format end time
+  const hour = 8 + Math.floor(i / 2);
+  const minutes = i % 2 === 0 ? "00" : "30";
+  const start = `${hour.toString().padStart(2, "0")}:${minutes}`;
+  const endHour = minutes === "30" ? hour + 1 : hour;
+  const endMinutes = minutes === "30" ? "00" : "30";
+  const end = `${endHour.toString().padStart(2, "0")}:${endMinutes}`;
   return `${start} - ${end}`;
 });
 
-// Draggable class box
-function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-    data: { aulaInfo },
-    disabled: isBlocked,
-  });
+// Draggable component
+function Draggable({ id, children, isBlocked, aulaInfo }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id, data: { aulaInfo }, disabled: isBlocked });
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     cursor: isBlocked ? "not-allowed" : "grab",
-    height: "100%", // Ensure the draggable spans the full height of the cell
+    height: "100%",
   };
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className="aula"
-    >
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="aula">
       {children}
     </div>
   );
 }
 
-// Droppable cell
+// Droppable component
 function Droppable({ id, children, isBlocked }) {
   const { isOver, setNodeRef } = useDroppable({ id });
-  const style = {
-    backgroundColor: isOver && !isBlocked ? "lightblue" : undefined,
-  };
+  const style = { backgroundColor: isOver && !isBlocked ? "lightblue" : undefined };
   return (
     <div ref={setNodeRef} style={style} className="empty-slot">
       {children}
@@ -61,271 +49,292 @@ function Droppable({ id, children, isBlocked }) {
   );
 }
 
-// Main component
-function Horarios() {
+ function Horarios() {
   const location = useLocation();
   const path = location.pathname;
-  console.log("Path:", path);
-  // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
-  // aulas disponíveis
-  const [aulasDisponiveis, setAulasDisponiveis] = useState([]); // Lista de aulas disponiveis
+
+  // Disponíveis e estado geral
+  const [aulasDisponiveis, setAulasDisponiveis] = useState([]);
   const [newAula, setNewAula] = useState({ subject: "", location: "", duration: 30 });
-  const [isBlocked, setIsBlocked] = useState(false); // State to block the schedule
-  const [erro, setErro] = useState(""); // State for error messages
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [erro, setErro] = useState("");
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editingAula, setEditingAula] = useState(null);
-  let escolaPath;
-  if (path === "/horariosESTT") {
-    escolaPath = "ESTT";
-  } else if (path === "/horariosESGT") {
-    escolaPath = "ESGT";
-  } else if (path === "/horariosESTA") {
-    escolaPath = "ESTA";
-  } else {
-    escolaPath = "";
-  }
-  console.log(escolaPath);
-  // Filters
+
+  // Definição de filtros
+  let escolaPath = '';
+  if (path.includes('horariosESTT')) escolaPath = 'ESTT';
+  else if (path.includes('horariosESGT')) escolaPath = 'ESGT';
+  else if (path.includes('horariosESTA')) escolaPath = 'ESTA';
+
   const [escola, setEscola] = useState(escolaPath);
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
-  // Add a search state and input field for filtering available classes
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter available classes based on the search query
-  const filteredAulasDisponiveis = aulasDisponiveis.filter((aula) =>
-    aula.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  // Verifica se todos os filtros foram preenchidos
+  const filtrosSelecionados = escola && curso && ano && turma;
+
+  const filteredAulasDisponiveis = aulasDisponiveis.filter(a =>
+    a.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
- const calculateEndTime = (startTime, duration) => {
-  const [hours, minutes] = startTime.split(":").map(Number);
-  const totalMinutes = hours * 60 + minutes + duration;
-  const endHours = Math.floor(totalMinutes / 60);
-  const endMinutes = totalMinutes % 60;
-  return `${endHours.toString().padStart(2, "0")}:${endMinutes.toString().padStart(2, "0")}`;
-};
+  // Gera código único simples
+  let nextCode = 1;
+  const generateUniqueCode = () => nextCode++;
 
-// Gerar código único (simulação simples)
-let nextCode = 1;
-const generateUniqueCode = () => nextCode++;
-
-const handleDragEnd = (event) => {
-  const { active, over } = event;
-
-  if (!over) {
-    alert("Dropped outside the schedule");
-    if (active.id.startsWith("marcada_")) {
-      const originalAula = active.data.current.aulaInfo;
-      socket.emit("update-aulas", (prev) => [...prev, originalAula]);
-    }
-    return;
-  }
-
-  if (over.id === "aulas-disponiveis") {
-    if (active.id.startsWith("marcada_")) {
-      const originalAula = active.data.current.aulaInfo;
-      setAulasDisponiveis((prev) => [
-        ...prev,
-        {
-          id: (prev[prev.length - 1]?.id || 0) + 1,
-          subject: originalAula.subject,
-          location: originalAula.location,
-          duration: originalAula.duration,
-        },
-      ]);
-      socket.emit("remove-aula", { codAula: originalAula.Cod_Aula });
-    }
-    return;
-  }
-
-  const [day, start] = over.id.split("-");
-  const startIndex = horas.findIndex((hora) => hora.startsWith(start));
-
-  // Verificar sobreposição
-  const overlappingClass = aulasMarcadas.some((cls) => {
-    if (cls.Cod_Aula === active.data.current?.aulaInfo?.Cod_Aula) return false;
-    
-    const classStartIndex = horas.findIndex((h) => h.startsWith(cls.start));
-    const classEndIndex = classStartIndex + cls.duration / 30;
-    
-    return (
-      cls.day === day &&
-      ((startIndex >= classStartIndex && startIndex < classEndIndex) ||
-        (startIndex + active.data.current.aulaInfo.duration / 30 > classStartIndex &&
-          startIndex + active.data.current.aulaInfo.duration / 30 <= classEndIndex))
-    );
-  });
-
-  if (overlappingClass) {
-    alert("Sobreposição detectada!");
-    if (active.id.startsWith("marcada_")) {
-      socket.emit("update-aulas", (prev) => [...prev, active.data.current.aulaInfo]);
-    }
-    return;
-  }
-
-  // Adicionar nova aula
-  if (active.id.startsWith("disponivel_")) {
-    const aulaInfo = active.data.current.aulaInfo;
-    const newAula = {
-      Cod_Aula: generateUniqueCode(), // Código único
-      day,
-      start,
-      end: calculateEndTime(start, aulaInfo.duration), // Calcula horário final
-      subject: aulaInfo.subject,
-      location: aulaInfo.location,
-      duration: aulaInfo.duration,
-    };
-    socket.emit("add-aula", { newAula });
-    setAulasDisponiveis((prev) => prev.filter((a) => a.id !== aulaInfo.id));
-
-  // Atualizar aula existente
-  } else if (active.id.startsWith("marcada_")) {
-    const aulaInfo = active.data.current.aulaInfo;
-    const updatedAula = {
-      ...aulaInfo,
-      day,
-      start,
-      end: calculateEndTime(start, aulaInfo.duration), // Atualiza horário final
-    };
-    socket.emit("update-aula", updatedAula);
-  }
-};
-
-  const openEditPopup = (aula) => {
-    setEditingAula(aula);
-    setShowEditPopup(true);
+  // Calcula horário final a partir do início e duração
+  const calculateEndTime = (startTime, duration) => {
+    const [h, m] = startTime.split(":").map(Number);
+    const total = h * 60 + m + duration;
+    const eh = Math.floor(total / 60);
+    const em = total % 60;
+    return `${eh.toString().padStart(2,"0")}:${em.toString().padStart(2,"0")}`;
   };
 
+  // Drag & Drop
+  const handleDragEnd = ({ active, over }) => {
+    if (!over) return;
+    const [day, start] = over.id.split('-');
+    const startIndex = horas.findIndex(h => h.startsWith(start));
+
+    // Verifica sobreposição
+    const overlap = aulasMarcadas.some(cls => {
+      if (cls.Cod_Aula === active.data.current?.aulaInfo?.Cod_Aula) return false;
+      const si = horas.findIndex(h => h.startsWith(cls.start));
+      const blocks = cls.duration / 30;
+      return (cls.day === day && startIndex < si + blocks && startIndex + active.data.current.aulaInfo.duration/30 > si);
+    });
+    if (overlap) { alert('Sobreposição detectada!'); return; }
+
+    // Se vier de disponível para marcado
+    if (active.id.startsWith('disponivel_')) {
+      const a = active.data.current.aulaInfo;
+      const nova = {
+        Cod_Aula: generateUniqueCode(),
+        day,
+        start,
+        end: calculateEndTime(start, a.duration),
+        subject: a.subject,
+        location: a.location,
+        duration: a.duration
+      };
+      socket.emit('add-aula', { newAula: nova });
+      setAulasDisponiveis(prev => prev.filter(x => x.id !== a.id));
+
+    // Se for reorganizar aula marcada
+    } else if (active.id.startsWith('marcada_')) {
+      const a = active.data.current.aulaInfo;
+      const upd = { ...a, day, start, end: calculateEndTime(start, a.duration) };
+      socket.emit('update-aula', upd);
+    }
+  };
+
+  // Funções de popup
+  const addClass = () => {
+    setAulasDisponiveis(prev => [...prev, { id: prev.length+1, ...newAula }]);
+    setNewAula({ subject: "", location: "", duration: 30 });
+    setShowAddPopup(false);
+  };
+  const openEditPopup = (aula) => { setEditingAula(aula); setShowEditPopup(true); };
+  const handleAulaChange = (e) => {
+    const cod = +e.target.value;
+    const sel = aulasMarcadas.find(a => a.Cod_Aula === cod);
+    setEditingAula(sel);
+  };
   const saveEditedAula = () => {
-    if (editingAula) {
-      socket.emit("update-aula", {
-        codAula: editingAula.Cod_Aula,
-        newSubject: editingAula.subject,
-        newLocation: editingAula.location,
-        newDuration: editingAula.duration,
-      });
-      setShowEditPopup(false);
-      setEditingAula(null);
-    }
+    socket.emit('update-aula', editingAula);
+    setShowEditPopup(false);
   };
-
-  const deleteAula = (codAula) => {
-    socket.emit("delete-aula", { codAula });
+  const deleteAula = (cod) => {
+    socket.emit('delete-aula', { codAula: cod });
     setShowEditPopup(false);
   };
 
-  const handleAulaChange = (event) => {
-    const aulaId = event.target.value;
-    const aula = aulasMarcadas.find((a) => a.Cod_Aula === aulaId);
-    setEditingAula(aula);
-  };
-
-  // Function to add a new class
-  const addClass = () => {
-    // add newAula to disponiveis
-    setAulasDisponiveis((prev) => [
-      ...prev,
-      {
-        id: aulasDisponiveis.length + 1,
-        subject: newAula.subject,
-        location: newAula.location,
-        duration: newAula.duration,
-      },
-    ]);
-    // clear newAula
-    setNewAula({ subject: "", location: "", duration: 30 });
-    // clear popup
-    setShowAddPopup(false);
-    console.log(aulasDisponiveis);
-  };
-
-  // Check if all filters are selected
-  const filtrosSelecionados = escola && curso && ano && turma;
-
-  useEffect(() => {
-    socket.emit("refresh-aulas");
-  }, []);
+  useEffect(() => { socket.emit('refresh-aulas'); }, []);
 
   const exportToPdf = () => {
   const doc = new jsPDF();
-
-  // Convert the timetable data to a format suitable for PDF
-  const tableData = [];
-  tableData.push(["Horas", ...diasSemana]); // Header row
+  const head = [['Horas', ...diasSemana]];
+  const body = [];
+  const skip = Array(diasSemana.length).fill(0);
 
   horas.forEach((hora, index) => {
-    const horaInicio = hora.split(" - ")[0];
+    const [start] = hora.split(' - ');
     const row = [hora];
 
-    diasSemana.forEach((dia) => {
-      const classItem = aulasMarcadas.find(
-        (cls) => cls.day === dia && cls.start === horaInicio
+    diasSemana.forEach((dia, di) => {
+      if (skip[di] > 0) {
+        skip[di]--; // Ignora células mescladas
+        return;
+      }
+
+      const aula = aulasMarcadas.find(a => 
+        a.day === dia && 
+        horas.findIndex(h => h.startsWith(a.start)) === index
       );
 
-      if (classItem) {
-        row.push(`${classItem.subject}\n${classItem.location}`);
+      if (aula) {
+        const duracaoBlocos = aula.duration / 30;
+        row.push({
+          content: `${aula.subject}\n${aula.location}`,
+          rowSpan: duracaoBlocos,
+          styles: {
+             fillColor: '#007bff',
+             textColor: '#ffffff',
+             fontStyle: 'bold',
+             fontSize: duracaoBlocos === 1 ? 7 : 8,
+             cellPadding: duracaoBlocos === 1 ? 3 : 4.2,
+             lineHeight: 1.2,
+             minCellHeight: duracaoBlocos === 1 ? 3 : 7, // Tamanho menor para aulas de 30 minutos
+             halign: 'center',
+             valign: 'middle'
+          }
+        });
+        skip[di] = duracaoBlocos - 1;
       } else {
-        row.push("");
+        // Células vazias como slots individuais
+        row.push({
+          content: '',
+          styles: {
+            fillColor: false, // Sem cor
+            lineColor: [0, 0, 0], // Borda preta
+            lineWidth: 0.1
+          }
+        });
       }
     });
 
-    tableData.push(row);
+    body.push(row);
   });
 
-  // Add the table to the PDF
+  autoTable(doc, {
+    head,
+    body,
+    theme: 'grid',
+    styles: { 
+      fontSize: 8,
+      cellPadding: 2,
+      lineColor: [0, 0, 0], // Bordas pretas para todas as células
+      lineWidth: 0.1
+    },
+    margin: { top: 20 },
+    didParseCell: (data) => {
+      if (data.row.index > 0) {
+        if (data.cell.raw.rowSpan) {
+          data.cell.rowSpan = data.cell.raw.rowSpan;
+          data.cell.content = data.cell.raw.content;
+          data.cell.styles = data.cell.raw.styles;
+        }
+        // Força bordas em todas as células
+        data.cell.styles.lineColor = [0, 0, 0];
+        data.cell.styles.lineWidth = 0.1;
+      }
+    }
+  });
 
-  autoTable(doc, {  head: [tableData[0]], // Header row
-    body: tableData.slice(1), // Data rows
-    theme: "grid",
-    styles: { overflow: "linebreak" }, })
-  
-
-  // Save the PDF
-  doc.save("horario.pdf");
+  doc.save('horario.pdf');
 };
 
-const exportToExcel = () => {
-  const ws = XLSX.utils.json_to_sheet(aulasMarcadas.map(aula => ({
-    Cod_Aula: aula.Cod_Aula,
-    day: aula.day,
-    start: aula.start,
-    end: aula.end,
-    subject: aula.subject,
-    location: aula.location,
-    duration: aula.duration
-  })));
-  
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Horario");
-  XLSX.writeFile(wb, "horario.xlsx");
+
+const exportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Horário", {
+    properties: { defaultRowHeight: 40 },
+    views:      [{ showGridLines: true }],
+  });
+
+  // 1) Define colunas
+  worksheet.columns = [
+    { header: "Horas", key: "Horas", width: 20 },
+    ...diasSemana.map(dia => ({ header: dia, key: dia, width: 20 }))
+  ];
+
+  // 2) Estiliza cabeçalho (borda incluída)
+  worksheet.getRow(1).eachCell(cell => {
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD3D3D3" } };
+    cell.font = { bold: true };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+  });
+
+  // 3) Preenche linhas
+  horas.forEach((hora, idx) => {
+    const [start] = hora.split(" - ");
+    const rowData = { Horas: hora };
+    diasSemana.forEach(dia => {
+      const aula = aulasMarcadas.find(a => a.day === dia && a.start === start);
+      rowData[dia] = aula ? `${aula.subject}\n${aula.location}` : "";
+    });
+    worksheet.addRow(rowData);
+  });
+
+  // 4) Mescla e estiliza blocos de aula
+  horas.forEach((hora, idx) => {
+    const [start] = hora.split(" - ");
+    diasSemana.forEach((dia, di) => {
+      const aula = aulasMarcadas.find(a => a.day === dia && a.start === start);
+      if (!aula) return;
+      const blocks = aula.duration / 30;
+      const startRow = idx + 2;       // Excel row index (1-based + cabeçalho)
+      const col = di + 2;              // coluna (1 = Horas, +1 por ser 1-based)
+      const endRow = startRow + blocks - 1;
+
+      // mescla
+      worksheet.mergeCells(startRow, col, endRow, col);
+
+      // aplica estilos em todas as células do merge
+      for (let r = startRow; r <= endRow; r++) {
+        const cell = worksheet.getCell(r, col);
+        cell.alignment = { wrapText: true, vertical: "middle", horizontal: "center" };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF007BFF" } };
+        cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        worksheet.getRow(r).height = 40;
+      }
+    });
+  });
+
+  // 5) Garante bordas nas células vazias
+  worksheet.eachRow(row => {
+    row.eachCell(cell => {
+      if (!cell.border) {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      }
+    });
+  });
+
+  // 6) Exporta
+  const buf = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buf], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "horario.xlsx";
+  link.click();
 };
 
-  // Export to CSV
-  const exportToCsv = () => {
-    const csvData = aulasMarcadas.map((aula) => ({
-      Dia: aula.day,
-      Hora: aula.start,
-      Disciplina: aula.subject,
-      Localizacao: aula.location,
-      Duracao: aula.duration,
-    }));
+  
 
-    const csvContent = Papa.unparse(csvData);
-
-    // Create a downloadable CSV file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "horario.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
