@@ -1,22 +1,22 @@
-.formulario{
-    padding: 20px;
-    max-width: 300px;
-    margin: auto;
-    max-height: 100%;
-    border-radius: 4px;
-    box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.3);
-    margin-top: 10px;
-    text-align: center;
+.formulario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+
     font-family: "Titillium Web", sans-serif;
 }
 
-.forms{
+.forms {
     display: block;
     margin-top: 0em;
-    unicode-bidi: isolate;
 }
 
-.createIdentifier{
+.createIdentifier {
     background-color: #3e8802;
     background-repeat: no-repeat;
     opacity: 1;
@@ -28,7 +28,7 @@
     opacity: 0.6;
 }
 
-.create_input_field{
+.create_input_field {
     position: relative;
     margin-bottom: 20px;
     text-align: left;
@@ -38,7 +38,7 @@
     font-family: 'Times New Roman', Times, serif;
 }
 
-.textbox_input{
+.textbox_input {
     font-size: medium;
     width: 100%;
     height: 100%;
@@ -52,7 +52,7 @@
     font-family: 'Times New Roman', Times, serif;
 }
 
-.input_dropdown{
+.input_dropdown {
     font-size: medium;
     width: 100%;
     height: 100%;
@@ -65,12 +65,10 @@
     transition: border-color .25s ease, box-shadow .25s ease;
 }
 
-.botao_create{
+.botao_create {
     font-size: 15px;
     text-align: center;
-    font-family: "Courier New", Courier, monospace;
     border-radius: 12px;
-    font-weight: bold;
     text-shadow: 0 0 3px #FFF;
     display: block;
     max-width: 100%;
@@ -79,5 +77,17 @@
     top: 0;
     bottom: 0;
     left: 0;
+    padding: 12px 24px;
+    border: none;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
 
+}
+
+.botao_create:hover {
+    background-color: #82C748;
 }

@@ -1,7 +1,7 @@
 import React  from 'react';
 import "../styles/dashboard.css";
 import { useNavigate, Link } from 'react-router-dom'; // Importe useNavigate
-import ipt_background from '../images/background_ipt_logo.svg'
+import ipt_background from '../images/novo_backgound_logo_ipt.svg'
 
 
 const Dashboard = () => {
@@ -23,17 +23,17 @@ const Dashboard = () => {
 
         <div className="botoes-container">
           <div>
-            <button className="botao" onClick={() => navigate('/horariosESGT')}>Horários ESGT</button>
+            <button className="botao_dashboard" onClick={() => navigate('/horariosESGT')}>Horários ESGT</button>
             <Link className='linksEdit' to="/horariosESGT">Editar Horário</Link>
           </div>
 
           <div>
-            <button className="botao" onClick={() => navigate('/horariosESTT')}>Horários ESTT</button>
+            <button className="botao_dashboard" onClick={() => navigate('/horariosESTT')}>Horários ESTT</button>
             <Link className='linksEdit' to="/horariosESTT">Editar Horário</Link>
           </div>
 
           <div>
-            <button className="botao" onClick={() => navigate('/horariosESTA')}>Horários ESTA</button>
+            <button className="botao_dashboard" onClick={() => navigate('/horariosESTA')}>Horários ESTA</button>
             <Link className='linksEdit' to="/horariosESTA">Editar Horário</Link>
           </div>
         </div>

@@ -50,7 +50,7 @@ const Navbar = () => {
 
         {path.startsWith('/horariosESTA') && (
           <>
-            <h1 className='linksNavBars' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }}>Horários ESTA</h1>
+            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }}>Horários ESTA</h1>
           </>
         )}
 
