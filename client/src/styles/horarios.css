@@ -2,7 +2,14 @@
 
 .horarios-container {
   padding: 20px;
-  overflow-x: auto;
+  overflow: visible; /* Permite que o dragOverlay vá além dos limites */
+  position: relative; /* Necessário para posicionamento absoluto dos overlays */
+}
+
+.drag-overlay {
+  position: fixed; /* Importantíssimo */
+  z-index: 9999;
+  pointer-events: none;
 }
 
 .layout {
@@ -132,7 +139,7 @@
   background-color: #003d80; /* Darker shade for hover */
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for emphasis */
-  z-index: 1; /* Ensure it appears above other elements */
+   /* Ensure it appears above other elements */
   position: relative; /* Required for z-index to work */
 }
 
@@ -161,10 +168,13 @@
 }
 
 .aulas-disponiveis {
-  margin-top: 0; /* Remove margin-top to align properly */
-  margin-left: 20px;
-  flex-shrink: 0;
-  width: 300px;
+  min-height: 200px; /* Garante que o drop é possível mesmo se estiver vazio */
+  border: 2px dashed #007bff; /* Visibilidade clara da zona de drop */
+  background-color: #f0f8ff; /* Cor de fundo para distinguir a área */
+  padding: 10px;
+  border-radius: 8px;
+  position: relative; /* Torna o stacking previsível */
+  z-index: 10;
 }
 
 .aula-disponivel {

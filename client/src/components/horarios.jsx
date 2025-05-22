@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
-import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import { restrictToParentElement, restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
 import socket from "../utils/socket"; // Import the socket instance
 import { useSocket } from "../utils/useSocket"
@@ -20,6 +20,28 @@ const horas = Array.from({ length: 31 }, (_, i) => {
   const end = `${endHour.toString().padStart(2, "0")}:${endMinutes}`; // Format end time
   return `${start} - ${end}`;
 });
+
+function restrictToTableBounds(tableSelector = '.timetable-container') {
+  return ({ transform, activeNodeRect }) => {
+    const table = document.querySelector(tableSelector);
+    if (!table || !activeNodeRect) return transform;
+
+    const tableRect = table.getBoundingClientRect();
+
+    let x = transform.x;
+    let y = transform.y;
+
+    // Limitar à esquerda e ao topo
+    x = Math.max(x, tableRect.left - activeNodeRect.left);
+    y = Math.max(y, tableRect.top - activeNodeRect.top);
+
+    // Limitar à direita e em baixo
+    x = Math.min(x, tableRect.right - activeNodeRect.right);
+    y = Math.min(y, tableRect.bottom - activeNodeRect.bottom);
+
+    return { ...transform, x, y };
+  };
+}
 
 // Draggable class box
 function Draggable({ id, children, isBlocked, aulaInfo }) {
@@ -57,9 +79,9 @@ function Droppable({ id, children, isBlocked }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="empty-slot">
+    <td ref={setNodeRef} style={style} className="empty-slot">
       {children}
-    </div>
+    </td>
   );
 }
 
@@ -68,7 +90,17 @@ function Horarios() {
 
   const location = useLocation();
   const path = location.pathname;
-  console.log("Path:" , path)
+  console.log("Path:", path)
+
+  // Estado para armazenar o ID do item ativo
+const [activeId, setActiveId] = useState(null);
+
+// Função que será chamada quando o arrasto começar
+const handleDragStart = (event) => {
+  setActiveId(event.active.id); // Guarda o ID do item arrastado
+};
+
+
 
   // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
@@ -100,7 +132,7 @@ function Horarios() {
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
-  
+
   // Add a search state and input field for filtering available classes
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -140,11 +172,11 @@ function Horarios() {
           },
         ]);
 
-        
+
         socket.emit("update-aulas", (prev) =>
           prev.filter((aula) => aula.Cod_Aula !== originalAula.Cod_Aula)
         );
-      
+
         socket.emit("remove-aula", { codAula: originalAula.Cod_Aula }); // Opcional: para manter servidor sincronizado
       }
       return;
@@ -189,7 +221,7 @@ function Horarios() {
       };
 
       socket.emit("add-aula", { newAula });
-      
+
 
       setAulasDisponiveis((prev) =>
         prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id)
@@ -258,7 +290,12 @@ function Horarios() {
   }, []);
 
   return (
-    <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
+    <DndContext
+      modifiers={[restrictToTableBounds(), restrictToWindowEdges]}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+
       <div className="horarios-container">
         <div className="layout">
 
