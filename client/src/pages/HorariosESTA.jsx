@@ -6,7 +6,7 @@ import Horarios from '../components/horarios';
  const HorariosESTA = () => {
    return (
      <div>
-        <Horarios />
+        <Horarios escola={2}/>
      </div>
    );
  };

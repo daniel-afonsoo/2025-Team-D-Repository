@@ -4,7 +4,7 @@ import Horarios from '../components/horarios';
 const HorariosESTT = () => {
   return (
     <div>
-      <Horarios />
+      <Horarios escola={1} />
     </div>
   );
 };
