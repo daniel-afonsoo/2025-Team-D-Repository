@@ -18,6 +18,16 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+.modal-content h3 {
+    font-size: 1.7rem;
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+}
+
 .modal-buttons {
     margin-top: 15px;
     display: flex;
@@ -28,7 +38,8 @@
 .confirmar {
     background: #dc3545;
     color: white;
-    padding: 8px 12px;
+    font-size: 1.2rem;
+    padding: 0.6rem 1rem;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -37,7 +48,8 @@
 .cancelar {
     background: #ccc;
     color: black;
-    padding: 8px 12px;
+    font-size: 1.2rem;
+    padding: 0.6rem 1rem;
     border: none;
     border-radius: 5px;
     cursor: pointer;

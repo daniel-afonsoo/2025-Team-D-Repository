@@ -6,6 +6,8 @@ import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal';
 
+import { TbEdit, TbTrash  } from "react-icons/tb";
+
 // Componente principal para listar, editar e remover salas
 const Turma_Forms = ({ filtro }) => {
     // Estados para controlar dados, modais e campos de edição
@@ -90,14 +92,14 @@ const Turma_Forms = ({ filtro }) => {
                     <div key={item.id} className="card">
                         <div className="card-info">
                             <h3>{item.nome}</h3>
-                            <p>Código de Curso: {item.codCurso}</p>
-                            <p>Ano da Turma {item.nome}: {item.ano}</p>
-                            <p>Escola: {item.escola}</p>
+                            <p><b>Código de Curso:</b> {item.codCurso}</p>
+                            <p><b>Ano da Turma</b>: {item.ano}º Ano</p>
+                            <p><b>Escola:</b> {item.escola}</p>
                             <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                                <img src={pencil} alt="Editar" width="20" height="20" />
+                                <TbEdit size={25}/>
                             </button>
                             <button className='btRemove' onClick={() => abrirModal(item.id)}>
-                                <img src={bin} alt="Remover" width="20" height="20" />
+                                <TbTrash size={25}/>
                             </button>
                         </div>
                     </div>
@@ -105,6 +107,7 @@ const Turma_Forms = ({ filtro }) => {
             </div>
 
             <ConfirmacaoModal
+                itemToRemove={`"${dados.find(item => item.id === idParaRemover)?.codCurso} - ${dados.find(item => item.id === idParaRemover)?.ano}º ano  Turma ${dados.find(item => item.id === idParaRemover)?.nome}"`}
                 isOpen={modalAberta}
                 onClose={fecharModal}
                 onConfirm={confirmarRemocao}

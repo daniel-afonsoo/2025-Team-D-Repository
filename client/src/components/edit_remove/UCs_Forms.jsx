@@ -6,6 +6,8 @@ import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal';
 
+import { TbEdit, TbTrash  } from "react-icons/tb";
+
 // Componente principal para listar, editar e remover unidades curriculares
 const UCs_edit_remove = ({ filtro }) => {
   // Estados para controlar dados, modais e campos de edição
@@ -89,13 +91,13 @@ const UCs_edit_remove = ({ filtro }) => {
           <div key={item.id} className="card">
             <div className="card-info">
               <h3>{item.nome}</h3>
-              <p>Horas: {item.horas}</p>
-              <p>Código do Curso: {item.codCurso}</p>
+              <p><b>Horas:</b> {item.horas}</p>
+              <p><b>Código do Curso:</b> {item.codCurso}</p>
               <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                <img src={pencil} alt="Editar" width="20" height="20" />
+                <TbEdit size={25}/>
               </button>
               <button className='btRemove' onClick={() => abrirModal(item.id)}>
-                <img src={bin} alt="Remover" width="20" height="20" />
+                <TbTrash size={25}/>
               </button>
             </div>
           </div>
@@ -103,6 +105,7 @@ const UCs_edit_remove = ({ filtro }) => {
       </div>
 
       <ConfirmacaoModal
+        itemToRemove={`"${dados.find(item => item.id === idParaRemover)?.codCurso} - ${dados.find(item => item.id === idParaRemover)?.nome}"`}
         isOpen={modalAberta}
         onClose={fecharModal}
         onConfirm={confirmarRemocao}

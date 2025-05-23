@@ -7,6 +7,8 @@ import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal'; 
 
+import { TbUserEdit, TbTrash } from "react-icons/tb";
+
 
 // Componente principal que permite listar, editar e remover docentes
 const Docente_edit_remove = ({ filtro }) => {
@@ -93,13 +95,15 @@ const Docente_edit_remove = ({ filtro }) => {
           <div key={item.id} className="card">
             <div className="card-info">
               <h3>{item.nome}</h3>
-              <p>Email: {item.email}</p>
-              <p>Password: {item.password}</p>
+              <p><b>Email:</b> {item.email}</p>
+              <p><b>Password:</b> {item.password}</p>
               <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                <img src={pencil} alt="Editar" width="20" height="20" />
+                {/* <img src={pencil} alt="Editar" width="20" height="20" /> */}
+                <TbUserEdit size={25}/>
               </button>
               <button className='btRemove' onClick={() => abrirModal(item.id)}>
-                <img src={bin} alt="Remover" width="20" height="20" />
+                {/* <img src={bin} alt="Remover" width="20" height="20" /> */}
+                <TbTrash size={25}/>
               </button>
             </div>
           </div>
@@ -107,6 +111,7 @@ const Docente_edit_remove = ({ filtro }) => {
       </div>
 
       <ConfirmacaoModal
+        itemToRemove={`"${idParaRemover ? dados.find(item => item.id === idParaRemover).nome : ''}"`}
         isOpen={modalAberta}
         onClose={fecharModal}
         onConfirm={confirmarRemocao}

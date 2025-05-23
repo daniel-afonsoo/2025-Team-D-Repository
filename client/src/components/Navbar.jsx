@@ -9,7 +9,12 @@ const Navbar = () => {
   const location = useLocation();
   const path = location.pathname;
 
+  const h1Style = { cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }
 
+
+  const getSelectedClass = (currentPath) => {
+    return path.endsWith(currentPath) ? 'linksNavBarSelected' : 'linksNavBar';
+  }
 
   return (
     <div className="navbar">
@@ -29,40 +34,46 @@ const Navbar = () => {
 
       <div className='navbar-center'>
         {/* Links adicionais para o backoffice */}
-        {path.startsWith('/backoffice') && (
+        {path === ('/backoffice') && (
+          <>
+            <h1 className='linksNavBar' style={h1Style} >Painel de Administração</h1>
+          </>
+        )}
+
+        {path.startsWith('/backoffice/') && (
           <>
 
-            <Link className='linksNavBar' to="/backoffice">BackOffice</Link>
-            <Link className='linksNavBar' to="/backoffice/docentes">Docentes</Link>
-            <Link className='linksNavBar' to="/backoffice/cursos">Cursos</Link>
-            <Link className='linksNavBar' to="/backoffice/unidades-curriculares">Unidades Curriculares</Link>
-            <Link className='linksNavBar' to="/backoffice/escolas">Escolas</Link>
-            <Link className='linksNavBar' to="/backoffice/salas">Salas</Link>
-            <Link className='linksNavBar' to="/backoffice/turmas">Turmas</Link>
+            <Link className='linksNavBar' to="/backoffice">Backoffice</Link>
+            <Link className={getSelectedClass("/docentes")} to="/backoffice/docentes">Docentes</Link>
+            <Link className={getSelectedClass("/cursos")} to="/backoffice/cursos">Cursos</Link>
+            <Link className={getSelectedClass("/unidades-curriculares")} to="/backoffice/unidades-curriculares">Unidades Curriculares</Link>
+            <Link className={getSelectedClass("escolas")} to="/backoffice/escolas">Escolas</Link>
+            <Link className={getSelectedClass("salas")} to="/backoffice/salas">Salas</Link>
+            <Link className={getSelectedClass("turmas")} to="/backoffice/turmas">Turmas</Link>
           </>
         )}
 
         {path.startsWith('/horariosESTT') && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }}>Horários ESTT</h1>
+            <h1 className='linksNavBar' style={h1Style}>Horários ESTT</h1>
           </>
         )}
 
         {path.startsWith('/horariosESTA') && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif" }}>Horários ESTA</h1>
+            <h1 className='linksNavBar' style={h1Style}>Horários ESTA</h1>
           </>
         )}
 
         {path.startsWith('/horariosESGT') && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif"}}>Horários ESGT</h1>
+            <h1 className='linksNavBar' style={h1Style}>Horários ESGT</h1>
           </>
         )}
 
         {(path === "/" || path === "/login") && (
           <>
-            <h1 className='linksNavBar' style={{ cursor: 'default', fontSize: '30px', fontFamily: "'Times New Roman', Times, serif"}}>Horários Instituto Politécnico de Tomar</h1>
+            <h1 className='linksNavBar' style={h1Style}>Horários Instituto Politécnico de Tomar</h1>
           </>
         )}
 

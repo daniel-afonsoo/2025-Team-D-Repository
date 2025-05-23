@@ -1,6 +1,8 @@
 import React from 'react';
 import "../../styles/editModal.css";
 
+import { VscCheck, VscChromeClose } from "react-icons/vsc";
+
 // Componente de modal de edição genérico
 const ModalEdicao = ({ isOpen, onClose, onSave, campos, onChange, titulo }) => {
   // Se o modal não estiver aberto, não renderiza nada
@@ -30,8 +32,8 @@ const ModalEdicao = ({ isOpen, onClose, onSave, campos, onChange, titulo }) => {
         ))}
 
         <div className="modal-buttons">
-          <button className="btSave" onClick={onSave}>Salvar</button>
-          <button className="btRemove" onClick={onClose}>Cancelar</button>
+          <button className="btSave" onClick={onSave}><VscCheck size={30}/></button>
+          <button className="btSave" onClick={onClose}><VscChromeClose size={30}/></button>
         </div>
       </div>
     </div>

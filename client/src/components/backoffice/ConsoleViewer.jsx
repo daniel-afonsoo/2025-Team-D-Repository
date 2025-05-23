@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import socket from '../../utils/socket'
 import '../../styles/ConsoleViewer.css'; 
 
+import { TbTerminal2 } from "react-icons/tb";
+
 const ConsoleViewer = () => {
   const [logs, setLogs] = useState([]);
   const scrollRef = useRef(null);
@@ -36,7 +38,10 @@ const ConsoleViewer = () => {
 
   return (
     <div className="console-container">
-      <div className="console-header"> Backend Console - Live</div>
+      <div className="console-header"> 
+        <TbTerminal2 size={35} color='#bbb'/>
+        Server Console - Live Feed
+      </div>
       <div className="console-logs">
         {logs.map(([message, level], idx) => (
           <div key={idx} className="console-line" style={{ color: getColorForLevel(level)}}>{message}</div>
