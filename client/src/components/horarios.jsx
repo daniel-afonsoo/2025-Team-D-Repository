@@ -44,7 +44,7 @@ function restrictToTableBounds(tableSelector = '.timetable-container') {
 }
 
 // Draggable class box
-function Draggable({ id, children, isBlocked, aulaInfo }) {
+function Draggable({ id, children, isBlocked, aulaInfo, onMoveToDisponiveis }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
     data: { aulaInfo },
@@ -55,6 +55,7 @@ function Draggable({ id, children, isBlocked, aulaInfo }) {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     cursor: isBlocked ? "not-allowed" : "grab",
     height: "100%", // Ensure the draggable spans the full height of the cell
+    position: "relative"
   };
 
   return (
@@ -66,17 +67,45 @@ function Draggable({ id, children, isBlocked, aulaInfo }) {
       className="aula"
     >
       {children}
+      {/* Só mostra o botão se for uma aula marcada */}
+      {onMoveToDisponiveis && (
+        <button
+          className="move-to-disponiveis-btn"
+          title="Mover para Aulas Disponíveis"
+          onMouseDown={e => e.stopPropagation()} // impede drag
+          onClick={e => {
+            e.stopPropagation();
+            onMoveToDisponiveis(aulaInfo);
+          }}
+        >
+          &rarr;
+        </button>
+      )}
     </div>
   );
 }
 
 // Droppable cell
-function Droppable({ id, children, isBlocked }) {
+function Droppable({ id, children, isBlocked, as = "td" }) {
   const { isOver, setNodeRef } = useDroppable({ id });
 
   const style = {
     backgroundColor: isOver && !isBlocked ? "lightblue" : undefined,
+    minHeight: as === "div" ? 60 : undefined,
+    width: as === "div" ? "100%" : undefined,
+    display: as === "div" ? "flex" : undefined,
+    flexDirection: as === "div" ? "column" : undefined,
+    gap: as === "div" ? "8px" : undefined,
+    padding: as === "div" ? "8px 0" : undefined,
   };
+
+  if (as === "div") {
+    return (
+      <div ref={setNodeRef} style={style} className="aulas-disponiveis-droppable">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <td ref={setNodeRef} style={style} className="empty-slot">
@@ -93,14 +122,12 @@ function Horarios() {
   console.log("Path:", path)
 
   // Estado para armazenar o ID do item ativo
-const [activeId, setActiveId] = useState(null);
+  const [activeId, setActiveId] = useState(null);
 
-// Função que será chamada quando o arrasto começar
-const handleDragStart = (event) => {
-  setActiveId(event.active.id); // Guarda o ID do item arrastado
-};
-
-
+  // Função que será chamada quando o arrasto começar
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id); // Guarda o ID do item arrastado
+  };
 
   // lista das aulas marcadas
   const { aulasMarcadas } = useSocket();
@@ -138,7 +165,7 @@ const handleDragStart = (event) => {
 
   // Filter available classes based on the search query
   const filteredAulasDisponiveis = aulasDisponiveis.filter((aula) =>
-    aula.subject.toLowerCase().includes(searchQuery.toLowerCase())
+    String(aula.subject).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDragEnd = (event) => {
@@ -478,17 +505,31 @@ const handleDragStart = (event) => {
                                   const durationBlocks = classItem.duration / 30;
                                   return (
                                     <td key={cellId} rowSpan={durationBlocks} className="class-cell" onContextMenu={(e) => handleRightClick(e, classItem)}>
-                                      <Draggable
-                                        id={"marcada_" + classItem.Cod_Aula}
-                                        isBlocked={isBlocked}
-                                        aulaInfo={classItem}
-                                      >
-                                        <div className="class-entry">
-                                          <strong>{classItem.subject}</strong>
-                                          <br />
-                                          <span className="location">{classItem.location}</span>
-                                        </div>
-                                      </Draggable>
+                                      <div className="class-cell-flex">
+                                        <Draggable
+                                          id={"marcada_" + classItem.Cod_Aula}
+                                          isBlocked={isBlocked}
+                                          aulaInfo={classItem}
+                                        >
+                                          <div className="class-entry">
+                                            <strong>{classItem.subject}</strong>
+                                            <br />
+                                            <span className="location">{classItem.location}</span>
+                                          </div>
+                                        </Draggable>
+                                        <button
+                                          className="move-to-disponiveis-btn"
+                                          title="Mover para Aulas Disponíveis"
+                                          onClick={() => {
+                                            // Remove do servidor
+                                            socket.emit("remove-aula", { codAula: classItem.Cod_Aula });
+                                            // Adiciona localmente às disponíveis
+                                            setAulasDisponiveis((prev) => [...prev, classItem]);
+                                          }}
+                                        >
+                                          &rarr;
+                                        </button>
+                                      </div>
                                     </td>
                                   );
                                 }
@@ -514,7 +555,7 @@ const handleDragStart = (event) => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="search-input"
                     />
-                    <Droppable id="aulas-disponiveis" isBlocked={false}>
+                    <Droppable id="aulas-disponiveis" isBlocked={false} as="div">
                       {filteredAulasDisponiveis.length > 0 ? (
                         filteredAulasDisponiveis.map((aula) => (
                           <Draggable key={aula.id} id={"disponivel_" + aula.id} isBlocked={isBlocked} aulaInfo={aula}>

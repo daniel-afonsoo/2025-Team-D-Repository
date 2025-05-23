@@ -135,6 +135,13 @@
   vertical-align: top;
 }
 
+.class-cell-flex {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  height: 100%;
+}
+
 .class-cell:hover .class-entry {
   background-color: #003d80; /* Darker shade for hover */
   color: white;
@@ -151,9 +158,11 @@
   padding: 8px;
   cursor: grab;
   border-radius: 6px;
+  width: 100%;
   height: 100%; /* Ensure it spans the full height of the cell */
   box-sizing: border-box; /* Include padding in height calculation */
   overflow: hidden;
+  flex: 1;
 }
 
 .class-entry .location {
@@ -165,16 +174,6 @@
   display: table-cell;
   background-color: #fafafa;
   height: 40px;
-}
-
-.aulas-disponiveis {
-  min-height: 200px; /* Garante que o drop é possível mesmo se estiver vazio */
-  border: 2px dashed #007bff; /* Visibilidade clara da zona de drop */
-  background-color: #f0f8ff; /* Cor de fundo para distinguir a área */
-  padding: 10px;
-  border-radius: 8px;
-  position: relative; /* Torna o stacking previsível */
-  z-index: 10;
 }
 
 .aula-disponivel {
@@ -214,4 +213,38 @@
 
 .edit-class-button:hover {
   background-color: #218838;
+}
+
+/* Botão para mover aula para as aulas disponíveis */
+.move-to-disponiveis-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ff0000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background 0.2s;
+}
+
+.move-to-disponiveis-btn:hover {
+  background: #f04949;
+}
+
+.aulas-disponiveis-droppable {
+  min-height: 60px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
 }
