@@ -42,6 +42,13 @@ const Backoffice = () => {
 
       <div className="container_back">
         <h2>Exportar Aulas</h2>
+        <div>
+          {/* Button for interacting with export functions */}
+          {/* <h5 style={{color:"#fff"}}>Exportar aulas para:</h5>
+          <button onClick={() => exportToPdf(aulas)}>PDF</button>
+          <button onClick={() => exportToExcel(aulas)}>Excel</button> */}
+
+        </div>
       </div>
 
     </div>
