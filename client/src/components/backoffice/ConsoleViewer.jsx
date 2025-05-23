@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import socket from '../../utils/socket'
-import '../../styles/ConsoleViewer.css'; 
+import '../../styles/ConsoleViewer.css';
 
 import { TbTerminal2 } from "react-icons/tb";
 
@@ -14,6 +14,9 @@ const ConsoleViewer = () => {
     };
 
     socket.on('console-log', handler);
+   
+    setLogs([]);
+    socket.emit("refresh-logs");
 
     return () => {
       socket.off('console-log', handler);
@@ -27,7 +30,7 @@ const ConsoleViewer = () => {
 
   const getColorForLevel = (level) => {
     switch (level) {
-      case 'info': return '#00FF00'; 
+      case 'info': return '#00FF00';
       case 'error': return '#FF0000';
       case 'warn': return '#FFA500';
       case 'debug': return '#00FFFF';
@@ -38,13 +41,13 @@ const ConsoleViewer = () => {
 
   return (
     <div className="console-container">
-      <div className="console-header"> 
-        <TbTerminal2 size={35} color='#bbb'/>
+      <div className="console-header">
+        <TbTerminal2 size={35} color='#bbb' />
         Server Console - Live Feed
       </div>
       <div className="console-logs">
         {logs.map(([message, level], idx) => (
-          <div key={idx} className="console-line" style={{ color: getColorForLevel(level)}}>{message}</div>
+          <div key={idx} className="console-line" style={{ color: getColorForLevel(level) }}>{message}</div>
         ))}
         <div ref={scrollRef} />
       </div>

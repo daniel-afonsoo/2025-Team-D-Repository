@@ -1,8 +1,8 @@
 // imports
 const { Server } = require('socket.io');
 const { setSocketIOInstance, logToClient, getBufferedLogs } = require('../utils/logger'); // import logger instance
-const pool = require('../db/connection.js'); 
-const { formatAulaRow, addAulaToDB, removeAulaFromDB, updateAulaInDB } = require('../utils/utils.js'); 
+const pool = require('../db/connection.js');
+const { formatAulaRow, addAulaToDB, removeAulaFromDB, updateAulaInDB } = require('../utils/utils.js');
 
 const setupSockets = (server) => {
     const io = new Server(server, {
@@ -26,7 +26,7 @@ const setupSockets = (server) => {
             logToClient("setup", "Finished loading classes from database.");
         } catch (err) {
             console.error(err);
-            logToClient("error",`Failed to Load Classes (${err.code})`, `Could not load classses from database. Check database connection.`);
+            logToClient("error", `Failed to Load Classes (${err.code})`, `Could not load classses from database. Check database connection.`);
         }
     })();
 
@@ -46,7 +46,14 @@ const setupSockets = (server) => {
         // send server aulas state to client
         socket.emit("update-aulas", { newAulas: schedule })
         console.log("Enviadas pela primeira vez")
-        
+
+        socket.on("refresh-logs", () => {
+            console.log(`Refreshing logs for socket ${socket.id}`);
+            getBufferedLogs().forEach(log => {
+                socket.emit('console-log', log);
+            });
+        });
+
 
         // Add aula
         socket.on("add-aula", async (data) => {
@@ -58,7 +65,7 @@ const setupSockets = (server) => {
                 /////////////////////// ADDING STATIC DATA ON MISSING FIELDS FOR TESTING ///////////////////////
                 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-                data.newAula.docente = 1;
+                data.newAula.docente = 77;
                 data.newAula.location = 1;
                 data.newAula.turma = 1;
                 data.newAula.course = 1;
@@ -68,8 +75,8 @@ const setupSockets = (server) => {
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 ////////////////////////////////////////////////////////////////////////////////////////////////
-                
- 
+
+
                 await addAulaToDB(data.newAula);
                 schedule.push(data.newAula);
 
