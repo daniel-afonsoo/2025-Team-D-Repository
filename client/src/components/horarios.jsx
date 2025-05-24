@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import Draggable from "./horarios_components/draggable";
+import Droppable from "./horarios_components/droppable";
+import { handleDragEnd } from "./horarios_components/handleDragEnd";
+
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import "../styles/horarios.css";
@@ -20,50 +24,6 @@ const horas = Array.from({ length: 31 }, (_, i) => {
   return `${start} - ${end}`;
 });
 
-// Draggable class box
-function Draggable({ id, children, isBlocked, aulaInfo, durationBlocks }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-    data: { aulaInfo },
-    disabled: isBlocked,
-  });
-
-  const style = {
-    transform: transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      : undefined,
-    cursor: isBlocked ? "not-allowed" : "grab",
-    height: "100%", // Ensure the draggable spans the full height of the cell
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className="aula"
-    >
-      {children}
-    </div>
-  );
-}
-
-// Droppable cell
-function Droppable({ id, children, isBlocked }) {
-  const { isOver, setNodeRef } = useDroppable({ id });
-
-  const style = {
-    backgroundColor: isOver && !isBlocked ? "lightblue" : undefined,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className="empty-slot">
-      {children}
-    </div>
-  );
-}
-
 // Main component
 function Horarios(props) {
   const location = useLocation();
@@ -82,11 +42,44 @@ function Horarios(props) {
     docentes: [],
   });
 
+  // Funções para se conseguir ir buscar os nomes através dos códigos
+  const getNomeCurso = (codCurso) => {
+    const curso = dropdownFilters.cursos.find((c) => c.Cod_Curso == codCurso);
+    return curso ? curso.Nome : codCurso;
+  };
+
+  const getNomeUC = (codUC) => {
+    const uc = dropdownFilters.ucs.find((u) => u.Cod_Uc == codUC);
+    return uc ? uc.Nome : codUC;
+  };
+
+  const getNomeSala = (codSala) => {
+    const sala = dropdownFilters.salas.find((s) => s.Cod_Sala == codSala);
+    return sala ? sala.Nome : codSala;
+  };
+
+  const getNomeDocente = (codDocente) => {
+    const docente = dropdownFilters.docentes.find(
+      (d) => d.Cod_Docente == codDocente
+    );
+    return docente ? docente.Nome : codDocente;
+  };
+
+  const getNomeTurma = (codTurma) => {
+    const turma = dropdownFilters.turmas.find((t) => t.Cod_Turma == codTurma);
+    return turma ? turma.Turma_Abv : codTurma;
+  };
+
   // aulas disponíveis
   const [aulasDisponiveis, setAulasDisponiveis] = useState([]); // Lista de aulas disponiveis
   const [newAula, setNewAula] = useState({
     subject: "",
     location: "",
+    docente: "",
+    semestre: "",
+    ano: "",
+    curso: "",
+    turma: "",
     duration: 30,
   });
 
@@ -102,18 +95,26 @@ function Horarios(props) {
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
   const [turma, setTurma] = useState("");
+  const [uc, setUc] = useState("");
+  const [sala, setSala] = useState("");
+  const [docente, setDocente] = useState("");
 
   // Add a search state and input field for filtering available classes
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter available classes based on the search query
   const filteredAulasDisponiveis = aulasDisponiveis.filter((aula) =>
-    aula.subject.toLowerCase().includes(searchQuery.toLowerCase())
+    getNomeUC(aula.subject).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const cursoSelecionado = dropdownFilters.cursos.find(
     (c) => c.Cod_Curso == curso
   );
+
+  const ucDisponiveis = dropdownFilters.ucs.filter(
+    (ucObj) => ucObj.Cod_Curso == curso
+  );
+
   const duracaoCurso = cursoSelecionado ? Number(cursoSelecionado.Duracao) : 0;
 
   const anosPossiveis =
@@ -130,98 +131,6 @@ function Horarios(props) {
       turmaObj.Cod_Curso == curso &&
       turmaObj.AnoTurma == ano
   );
-
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (!over) {
-      alert("Dropped outside the schedule");
-      setErro("");
-
-      // Restaurar aula ao estado anterior, se necessário
-      if (active.id.startsWith("marcada_")) {
-        const originalAula = active.data.current.aulaInfo;
-        socket.emit("update-aulas", (prev) => [...prev, originalAula]);
-      }
-      return;
-    }
-
-    if (over.id === "aulas-disponiveis") {
-      if (active.id.startsWith("marcada_")) {
-        const originalAula = active.data.current.aulaInfo;
-
-        // Adiciona à lista de aulas disponíveis
-        setAulasDisponiveis((prev) => [
-          ...prev,
-          {
-            id: (prev[prev.length - 1]?.id || 0) + 1,
-            subject: originalAula.subject,
-            location: originalAula.location,
-            duration: originalAula.duration,
-          },
-        ]);
-
-        socket.emit("update-aulas", (prev) =>
-          prev.filter((aula) => aula.Cod_Aula !== originalAula.Cod_Aula)
-        );
-
-        socket.emit("remove-aula", { codAula: originalAula.Cod_Aula }); // Opcional: para manter servidor sincronizado
-      }
-      return;
-    }
-
-    const [day, start] = over.id.split("-");
-    const startIndex = horas.findIndex((hora) => hora.startsWith(start));
-
-    const overlappingClass = aulasMarcadas.find((cls) => {
-      if (cls.Cod_Aula === active.data.current.aulaInfo.Cod_Aula) {
-        return false; // Skip checking against itself
-      }
-      const classStartIndex = horas.findIndex((hora) =>
-        hora.startsWith(cls.start)
-      );
-      const classEndIndex = classStartIndex + cls.duration / 30;
-      return (
-        cls.day === day &&
-        ((startIndex >= classStartIndex && startIndex < classEndIndex) ||
-          (startIndex + active.data.current.aulaInfo.duration / 30 >
-            classStartIndex &&
-            startIndex + active.data.current.aulaInfo.duration / 30 <=
-              classEndIndex))
-      );
-    });
-
-    if (overlappingClass) {
-      alert(
-        "Cannot place a class that overlaps with another class. Please choose an empty slot."
-      );
-
-      // Restore the class back to its original position
-      if (active.id.startsWith("marcada_")) {
-        const originalAula = active.data.current.aulaInfo;
-        socket.emit("update-aulas", (prev) => [...prev, originalAula]);
-      }
-      return;
-    }
-
-    if (active.id.startsWith("disponivel_")) {
-      const newAula = {
-        day,
-        start,
-        subject: active.data.current.aulaInfo.subject,
-        location: active.data.current.aulaInfo.location,
-        duration: active.data.current.aulaInfo.duration,
-      };
-
-      socket.emit("add-aula", { newAula });
-
-      setAulasDisponiveis((prev) =>
-        prev.filter((aula) => aula.id !== active.data.current.aulaInfo.id)
-      );
-    } else if (active.id.startsWith("marcada_")) {
-      const codAula = active.data.current.aulaInfo.Cod_Aula;
-      socket.emit("update-aula", { codAula, newDay: day, newStart: start });
-    }
-  };
 
   const openEditPopup = (aula) => {
     setEditingAula(aula);
@@ -252,23 +161,58 @@ function Horarios(props) {
     setEditingAula(aula);
   };
 
-  // Function to add a new class
   const addClass = () => {
-    // add newAula to disponiveis
-    setAulasDisponiveis((prev) => [
-      ...prev,
-      {
-        id: aulasDisponiveis.length + 1,
-        subject: newAula.subject,
-        location: newAula.location,
-        duration: newAula.duration,
-      },
-    ]);
-    // clear newAula
-    setNewAula({ subject: "", location: "", duration: 30 });
-    // clear popup
+
+      console.log("DEBUG - Tipo da UC:", typeof uc);
+
+    const aulaCompleta = {
+      id: aulasDisponiveis.length + 1,
+
+      semestre: semestre,
+      curso: curso,
+      ano: ano,
+      turma: turma,
+
+      subject: uc, // UC selecionada
+      location: sala, // Sala selecionada
+      docente: docente, // Docente selecionado
+      duration: newAula.duration, // Duração
+    };
+
+    // Adicionar à lista de aulas disponíveis
+    setAulasDisponiveis((prev) => [...prev, aulaCompleta]);
+
+    setUc("");
+    setSala("");
+    setDocente("");
+    setNewAula({
+      subject: "",
+      location: "",
+      docente: "",
+      semestre: semestre,
+      ano: ano,
+      curso: curso,
+      turma: turma,
+      duration: newAula.duration,
+      curso: "",
+      turma: "",
+      duration: 30,
+    });
+
+    // Fechar popup
     setShowAddPopup(false);
-    console.log(aulasDisponiveis);
+
+    console.log("Nova aula criada:", aulaCompleta);
+    console.log(
+      "Filtros mantidos - Semestre:",
+      semestre,
+      "Curso:",
+      curso,
+      "Ano:",
+      ano,
+      "Turma:",
+      turma
+    );
   };
 
   // Check if all filters are selected
@@ -295,7 +239,18 @@ function Horarios(props) {
   }, []);
 
   return (
-    <DndContext modifiers={[restrictToWindowEdges]} onDragEnd={handleDragEnd}>
+    <DndContext
+      modifiers={[restrictToWindowEdges]}
+      onDragEnd={(event) =>
+        handleDragEnd(event, {
+          setErro,
+          setAulasDisponiveis,
+          aulasMarcadas,
+          horas,
+          socket,
+        })
+      }
+    >
       <div className="horarios-container">
         <div className="layout">
           <div className="filters-and-buttons">
@@ -391,22 +346,52 @@ function Horarios(props) {
                 <div className="add-popup">
                   <div className="popup-content">
                     <h3>Adicionar Aula</h3>
-                    <input
-                      type="text"
-                      placeholder="Disciplina"
-                      value={newAula.subject}
-                      onChange={(e) =>
-                        setNewAula({ ...newAula, subject: e.target.value })
-                      }
-                    />
-                    <input
-                      type="text"
-                      placeholder="Localização"
-                      value={newAula.location}
-                      onChange={(e) =>
-                        setNewAula({ ...newAula, location: e.target.value })
-                      }
-                    />
+                    <select
+                      onChange={(e) => setUc(e.target.value)}
+                      value={uc}
+                      disabled={!curso}
+                    >
+                      <option value="" disabled>
+                        Escolher UC
+                      </option>
+                      {ucDisponiveis.map((ucObj) => (
+                        <option key={ucObj.Cod_Uc} value={ucObj.Cod_Uc}>
+                          {ucObj.Nome}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      onChange={(e) => setSala(e.target.value)}
+                      value={sala}
+                    >
+                      <option value="" disabled>
+                        Escolher Localização
+                      </option>
+                      {dropdownFilters.salas.map((salaObj) => (
+                        <option key={salaObj.Cod_Sala} value={salaObj.Cod_Sala}>
+                          {salaObj.Nome}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      onChange={(e) => setDocente(e.target.value)}
+                      value={docente}
+                    >
+                      <option value="" disabled>
+                        Escolher docente
+                      </option>
+                      {dropdownFilters.docentes.map((docenteObj) => (
+                        <option
+                          key={docenteObj.Cod_Docente}
+                          value={docenteObj.Cod_Docente}
+                        >
+                          {docenteObj.Nome}
+                        </option>
+                      ))}
+                    </select>
+
                     <input
                       type="number"
                       placeholder="Duração (minutos)"
@@ -558,10 +543,14 @@ function Horarios(props) {
                                         aulaInfo={classItem}
                                       >
                                         <div className="class-entry">
-                                          <strong>{classItem.subject}</strong>
+                                          <strong>{getNomeUC(classItem.subject)}</strong>
                                           <br />
                                           <span className="location">
-                                            {classItem.location}
+                                            {getNomeSala(classItem.location)}
+                                          </span>
+                                           <br />
+                                          <span className="location">
+                                            {getNomeDocente(classItem.docente)}
                                           </span>
                                         </div>
                                       </Draggable>
@@ -605,10 +594,15 @@ function Horarios(props) {
                               aulaInfo={aula}
                             >
                               <div className="aula-disponivel">
-                                <strong>{aula.subject}</strong>
-                                <p>{aula.id}</p>
-                                <br />
-                                <span>{aula.location}</span>
+                                <strong>
+                                  Curso: {getNomeCurso(aula.curso)}
+                                </strong>
+                                <p>Ano: {aula.ano}º</p>
+                                <p>Turma: {getNomeTurma(aula.turma)}</p>
+                                <p>UC: {getNomeUC(aula.subject)}</p>
+                                <p>Docente: {getNomeDocente(aula.docente)}</p>
+                                <p>Sala: {getNomeSala(aula.location)}</p>
+                                <p>Duração: {aula.duration} min</p>
                               </div>
                             </Draggable>
                           ))
@@ -631,17 +625,8 @@ function Horarios(props) {
           )}
         </div>
       </div>
-      <div className="footer">
-        <h1>Escola = {props.escola}</h1>
-        <h1>Meu piruzinho tem {props.piru}</h1>
-      </div>
     </DndContext>
   );
 }
-
-Horarios.defaultProps = {
-  escola: "Escola Padrão",
-  piru: "0cm",
-};
 
 export default Horarios;
