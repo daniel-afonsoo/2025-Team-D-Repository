@@ -3,7 +3,7 @@ const router = express.Router()
 const pool = require('../db/connection.js')
 
 //FUNCIONA
-router.get('/api/aulas', (req, res) => {
+router.get('/aulas', (req, res) => {
     const filters = [];
     const values = [];
 

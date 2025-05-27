@@ -64,7 +64,10 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Escola:
-          <select onChange={(e) => setEscola(e.target.value)} value={escola}>
+          <select onChange={(e) => {
+            console.log("Escola selected:", e.target.value);
+            setEscola(e.target.value)
+            }} value={escola}>
             <option value="">Escolher Escola</option>
             {escolas.map((escola, index) => (
               <option key={index} value={escola}>

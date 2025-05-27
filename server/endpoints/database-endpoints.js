@@ -88,50 +88,50 @@ router.get('/anos', (req, res) => {
 });
 
 // Endpoint to fetch all Aulas (filtered by escola, curso, ano, turma)
-router.get('/aulas', (req, res) => {
-    const { escola, curso, ano, turma } = req.query;
+// router.get('/aulas', (req, res) => {
+//     const { escola, curso, ano, turma } = req.query;
 
-    let query = `
-        SELECT Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Cod_Escola
-        FROM aula
-        WHERE 1=1
-    `;
+//     let query = `
+//         SELECT Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Cod_Escola
+//         FROM aula
+//         WHERE 1=1
+//     `;
 
-    const params = [];
+//     const params = [];
 
-    if (escola) {
-        query += `
-            AND Cod_Curso IN (
-                SELECT Cod_Curso
-                FROM curso
-                WHERE Cod_Escola = ?
-            )
-        `;
-        params.push(escola);
-    }
-    if (curso) {
-        query += " AND Cod_Curso = ?";
-        params.push(curso);
-    }
-    if (ano) {
-        query += " AND Cod_AnoSemestre = ?";
-        params.push(ano);
-    }
-    if (turma) {
-        query += " AND Cod_Turma = ?";
-        params.push(turma);
-    }
+//     if (escola) {
+//         query += `
+//             AND Cod_Curso IN (
+//                 SELECT Cod_Curso
+//                 FROM curso
+//                 WHERE Cod_Escola = ?
+//             )
+//         `;
+//         params.push(escola);
+//     }
+//     if (curso) {
+//         query += " AND Cod_Curso = ?";
+//         params.push(curso);
+//     }
+//     if (ano) {
+//         query += " AND Cod_AnoSemestre = ?";
+//         params.push(ano);
+//     }
+//     if (turma) {
+//         query += " AND Cod_Turma = ?";
+//         params.push(turma);
+//     }
 
-    console.log("Executing query:", query);
-    console.log("With parameters:", params);
+//     console.log("Executing query:", query);
+//     console.log("With parameters:", params);
 
-    pool.query(query, params, (err, results) => {
-        if (err) {
-            console.error("Error fetching aulas:", err);
-            return res.status(500).json({ error: "Failed to fetch aulas" });
-        }
-        res.json(results);
-    });
-});
+//     pool.query(query, params, (err, results) => {
+//         if (err) {
+//             console.error("Error fetching aulas:", err);
+//             return res.status(500).json({ error: "Failed to fetch aulas" });
+//         }
+//         res.json(results);
+//     });
+// });
 
 module.exports = router;
