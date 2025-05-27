@@ -49,11 +49,8 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
   // Trigger the query whenever any filter changes
   useEffect(() => {
-    console.log("onFiltersChange prop:", onFiltersChange);
     if (typeof onFiltersChange === "function") {
       onFiltersChange({ escola, docente, sala, turma, uc, curso, ano });
-    } else {
-      console.error("onFiltersChange is not a function");
     }
   }, [escola, docente, sala, turma, uc, curso, ano, onFiltersChange]);
 
@@ -64,14 +61,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Escola:
-          <select onChange={(e) => {
-            console.log("Escola selected:", e.target.value);
-            setEscola(e.target.value)
-            }} value={escola}>
+          <select onChange={e => setEscola(e.target.value)} value={escola}>
             <option value="">Escolher Escola</option>
-            {escolas.map((escola, index) => (
-              <option key={index} value={escola}>
-                {escola}
+            {escolas.map((escolaObj, index) => (
+              <option key={index} value={escolaObj.Cod_Escola}>
+                {escolaObj.Nome}
               </option>
             ))}
           </select>
@@ -79,11 +73,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Docente:
-          <select onChange={(e) => setDocente(e.target.value)} value={docente}>
+          <select onChange={e => setDocente(e.target.value)} value={docente}>
             <option value="">Escolher Docente</option>
-            {docentes.map((docente, index) => (
-              <option key={index} value={docente}>
-                {docente}
+            {docentes.map((docenteObj, index) => (
+              <option key={index} value={docenteObj.Cod_Docente}>
+                {docenteObj.Nome}
               </option>
             ))}
           </select>
@@ -91,11 +85,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Sala:
-          <select onChange={(e) => setSala(e.target.value)} value={sala}>
+          <select onChange={e => setSala(e.target.value)} value={sala}>
             <option value="">Escolher Sala</option>
-            {salas.map((sala, index) => (
-              <option key={index} value={sala}>
-                {sala}
+            {salas.map((salaObj, index) => (
+              <option key={index} value={salaObj.Cod_Sala}>
+                {salaObj.Nome}
               </option>
             ))}
           </select>
@@ -103,11 +97,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Turma:
-          <select onChange={(e) => setTurma(e.target.value)} value={turma}>
+          <select onChange={e => setTurma(e.target.value)} value={turma}>
             <option value="">Escolher Turma</option>
-            {turmas.map((turma, index) => (
-              <option key={index} value={turma}>
-                {turma}
+            {turmas.map((turmaObj, index) => (
+              <option key={index} value={turmaObj.Cod_Turma}>
+                {turmaObj.Nome ? turmaObj.Nome : turmaObj.Cod_Turma}
               </option>
             ))}
           </select>
@@ -115,11 +109,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Unidade Curricular (UC):
-          <select onChange={(e) => setUc(e.target.value)} value={uc}>
+          <select onChange={e => setUc(e.target.value)} value={uc}>
             <option value="">Escolher UC</option>
-            {ucs.map((uc, index) => (
-              <option key={index} value={uc}>
-                {uc}
+            {ucs.map((ucObj, index) => (
+              <option key={index} value={ucObj.Cod_Uc}>
+                {ucObj.Nome}
               </option>
             ))}
           </select>
@@ -127,11 +121,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Curso:
-          <select onChange={(e) => setCurso(e.target.value)} value={curso}>
+          <select onChange={e => setCurso(e.target.value)} value={curso}>
             <option value="">Escolher Curso</option>
-            {cursos.map((curso, index) => (
-              <option key={index} value={curso}>
-                {curso}
+            {cursos.map((cursoObj, index) => (
+              <option key={index} value={cursoObj.Cod_Curso}>
+                {cursoObj.Nome}
               </option>
             ))}
           </select>
@@ -139,11 +133,11 @@ function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma,
 
         <label>
           Ano:
-          <select onChange={(e) => setAno(e.target.value)} value={ano}>
+          <select onChange={e => setAno(e.target.value)} value={ano}>
             <option value="">Escolher Ano</option>
-            {anos.map((ano, index) => (
-              <option key={index} value={ano}>
-                {ano}
+            {anos.map((anoObj, index) => (
+              <option key={index} value={anoObj.Cod_AnoSemestre}>
+                {anoObj.Ano ? anoObj.Ano : anoObj.Cod_AnoSemestre}
               </option>
             ))}
           </select>
