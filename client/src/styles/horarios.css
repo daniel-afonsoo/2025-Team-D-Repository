@@ -138,8 +138,8 @@
 .class-cell-flex {
   display: flex;
   align-items: stretch;
-  position: relative;
   height: 100%;
+  min-height: 40px; /* Garante altura mínima igual à célula */
 }
 
 .class-cell:hover .class-entry {
@@ -151,18 +151,20 @@
 }
 
 .class-entry {
-  background-color: #00bfff;
-  color: white;
+  flex: 1 1 0;
+  width: 100%;
+  height: 100%;
+  min-height: 40px; /* Igual à altura da célula */
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  justify-content: center;
   cursor: grab;
+  background-color: #00bfff;
+  color: white;
+  padding: 8px;
   border-radius: 6px;
-  width: 100%;
-  height: 100%; /* Ensure it spans the full height of the cell */
-  box-sizing: border-box; /* Include padding in height calculation */
+  box-sizing: border-box;
   overflow: hidden;
-  flex: 1;
 }
 
 .class-entry .location {
@@ -217,15 +219,15 @@
 
 /* Botão para mover aula para as aulas disponíveis */
 .move-to-disponiveis-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
+  align-self: center;
+  margin-left: 8px;
+  position: static; /* Garante que não fica absoluto */
+  height: 32px;
+  min-width: 32px;
   background: #ff0000;
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
   cursor: pointer;
   font-weight: bold;
   font-size: 16px;

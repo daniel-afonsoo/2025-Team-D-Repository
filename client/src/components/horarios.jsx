@@ -266,13 +266,21 @@ function Horarios() {
 
   const saveEditedAula = () => {
     if (editingAula) {
-      socket.emit("update-aula", {
-        codAula: editingAula.Cod_Aula,
-        newSubject: editingAula.subject,
-        newLocation: editingAula.location,
-        newTeacher: editingAula.teacher,
-        newDuration: editingAula.duration,
-      });
+      // Remove the class from the marked schedule (server)
+      socket.emit("delete-aula", { codAula: editingAula.Cod_Aula });
+
+      // Add the edited class to the available classes with a new unique id
+      setAulasDisponiveis((prev) => [
+        ...prev,
+        {
+          id: (prev[prev.length - 1]?.id || 0) + 1,
+          subject: editingAula.subject,
+          location: editingAula.location,
+          teacher: editingAula.teacher,
+          duration: editingAula.duration,
+        },
+      ]);
+
       setShowEditPopup(false);
       setEditingAula(null);
     }
@@ -286,12 +294,32 @@ function Horarios() {
   const handleAulaChange = (event) => {
     const aulaId = event.target.value;
     const aula = aulasMarcadas.find((a) => a.Cod_Aula === aulaId);
-    setEditingAula(aula);
+    // Clone all fields to avoid undefined
+    setEditingAula({
+      Cod_Aula: aula.Cod_Aula,
+      subject: aula.subject || "",
+      location: aula.location || "",
+      teacher: aula.teacher || "",
+      duration: aula.duration || 30,
+    });
   };
 
   // Function to add a new class
   const addClass = () => {
-    // add newAula to disponiveis
+    // Validation: check if all fields are filled
+    if (
+      !newAula.subject ||
+      !newAula.location ||
+      !newAula.teacher ||
+      !newAula.duration ||
+      isNaN(newAula.duration) ||
+      newAula.duration < 0 ||
+      newAula.duration > 320
+    ) {
+      setErro("Por favor, preencha todos os campos corretamente.");
+      return;
+    }
+
     setAulasDisponiveis((prev) => [
       ...prev,
       {
@@ -302,11 +330,9 @@ function Horarios() {
         duration: newAula.duration,
       },
     ]);
-    // clear newAula
     setNewAula({ subject: "", location: "", teacher: "", duration: 30 });
-    // clear popup
     setShowAddPopup(false);
-    console.log(aulasDisponiveis);
+    setErro(""); // Clear error
   }
 
   // Check if all filters are selected
@@ -403,6 +429,8 @@ function Horarios() {
                     <input
                       type="number"
                       step="30"
+                      min="0"
+                      max="240"
                       placeholder="Duração (minutos)"
                       value={newAula.duration}
                       onChange={(e) => setNewAula({ ...newAula, duration: parseInt(e.target.value, 10) })}
@@ -432,7 +460,7 @@ function Horarios() {
                         <input
                           type="text"
                           placeholder="Disciplina"
-                          value={editingAula.subject}
+                          value={editingAula?.subject || ""}
                           onChange={(e) =>
                             setEditingAula({ ...editingAula, subject: e.target.value })
                           }
@@ -440,24 +468,36 @@ function Horarios() {
                         <input
                           type="text"
                           placeholder="Localização"
-                          value={editingAula.location}
+                          value={editingAula?.location || ""}
                           onChange={(e) =>
                             setEditingAula({ ...editingAula, location: e.target.value })
                           }
                         />
                         <input
+                          type="text"
+                          placeholder="Docente"
+                          value={editingAula?.teacher || ""}
+                          onChange={(e) =>
+                            setEditingAula({ ...editingAula, teacher: e.target.value })
+                          }
+                        />
+                        <input
                           type="number"
                           placeholder="Duração (minutos)"
-                          value={editingAula.duration}
+                          value={editingAula?.duration || 30}
+                          step="30"
+                          min="0"
+                          max="240"
                           onChange={(e) =>
                             setEditingAula({ ...editingAula, duration: parseInt(e.target.value, 10) })
                           }
                         />
                         <button onClick={saveEditedAula}>Salvar</button>
                         <button onClick={() => deleteAula(editingAula.Cod_Aula)}>Excluir</button>
+                        <button onClick={() => setShowEditPopup(false)}>Cancelar</button>
+                        {erro && <div className="error-message">{erro}</div>}
                       </>
                     )}
-                    <button onClick={() => setShowEditPopup(false)}>Cancelar</button>
                   </div>
                 </div>
               )}
@@ -465,7 +505,6 @@ function Horarios() {
               <div className="conteudo">
                 <div className="timetable-and-available-classes">
                   <div className="timetable-container">
-                    {erro && <div className="error-message">{erro}</div>}
                     <table className="timetable">
                       <thead>
                         <tr>
@@ -521,10 +560,14 @@ function Horarios() {
                                           className="move-to-disponiveis-btn"
                                           title="Mover para Aulas Disponíveis"
                                           onClick={() => {
-                                            // Remove do servidor
                                             socket.emit("remove-aula", { codAula: classItem.Cod_Aula });
-                                            // Adiciona localmente às disponíveis
-                                            setAulasDisponiveis((prev) => [...prev, classItem]);
+                                            setAulasDisponiveis((prev) => [
+                                              ...prev,
+                                              {
+                                                ...classItem,
+                                                id: (prev[prev.length - 1]?.id || 0) + 1,
+                                              },
+                                            ]);
                                           }}
                                         >
                                           &rarr;
