@@ -49,6 +49,7 @@ const setupSockets = (server) => {
 
         socket.on("refresh-logs", () => {
             console.log(`Refreshing logs for socket ${socket.id}`);
+            socket.emit('clear-logs');
             getBufferedLogs().forEach(log => {
                 socket.emit('console-log', log);
             });

@@ -30,6 +30,15 @@ function processExcelFile(filePath) {
     try {
         const workbook = xlsx.readFile(filePath);
 
+        //preparar folder
+        // timestamp da execução
+        const timestamp = Date.now()
+        const originalFileName = path.basename(filePath, path.extname(filePath)) // nome do arquivo sem extensão
+        const folderName = `${timestamp}_${originalFileName}` // nome da pasta para onde irao os arquivos gerados
+        const outputDir = path.join(__dirname, "generated_scripts", folderName);
+        fs.mkdirSync(outputDir, { recursive: true });
+
+
         // Para cada folha na planilha, gerar um arquivo SQL correspondente
         let generatedFiles = [];
         
@@ -48,13 +57,16 @@ function processExcelFile(filePath) {
             const sqlStatements = generateSQL(tableName, data);
 
             // Salvar o arquivo SQL
-            const sqlFilePath = path.join(__dirname, `${tableName}.sql`);
+            const sqlFilePath = path.join(outputDir, `${tableName}.sql`);
             fs.writeFileSync(sqlFilePath, sqlStatements, "utf-8");
 
             generatedFiles.push(sqlFilePath); // Armazenar o caminho do arquivo gerado
         });
 
-        return generatedFiles;  // Retornar os caminhos dos arquivos gerados
+        return  { // retorna detalhes dos caminhos
+            folderPath: outputDir,
+            files: generatedFiles
+        };
     } catch (error) {
         throw new Error("Erro ao processar o arquivo: " + error.message);
     }

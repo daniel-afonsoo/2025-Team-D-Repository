@@ -3,6 +3,7 @@ import "../styles/backoffice.css";
 import { useNavigate } from 'react-router-dom';
 import ConsoleViewer from '../components/backoffice/ConsoleViewer';
 import ExportPopup from '../components/backoffice/ExportPopup';
+import UploadSQL from '../components/backoffice/UploadSQL';
 
 const Backoffice = () => {
   const navigate = useNavigate();
@@ -44,7 +45,8 @@ const Backoffice = () => {
       </div>
 
       <div className="container_back">
-        <h2>Carregar Dados</h2>
+        <h2>Gerar Dados em .SQL</h2>
+        <UploadSQL />
       </div>
 
       <div className="container_back">

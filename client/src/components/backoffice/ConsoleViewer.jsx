@@ -13,13 +13,18 @@ const ConsoleViewer = () => {
       setLogs((prevLogs) => [...prevLogs.slice(-999), log]);
     };
 
+    const clearHandler = () => {
+      setLogs([]); // clear logs on 'clear-logs' event
+    };
+
     socket.on('console-log', handler);
-   
-    setLogs([]);
+    socket.on('clear-logs', clearHandler);
+
     socket.emit("refresh-logs");
 
     return () => {
       socket.off('console-log', handler);
+      socket.off('clear-logs', clearHandler);
     };
   }, []);
 
