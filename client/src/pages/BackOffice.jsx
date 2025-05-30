@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import "../styles/backoffice.css";
 import { useNavigate } from 'react-router-dom';
 import ConsoleViewer from '../components/backoffice/ConsoleViewer';
-import ipt_background from '../images/background_ipt_logo.svg'
 import ExportPopup from '../components/backoffice/ExportPopup';
 
 const Backoffice = () => {
@@ -20,7 +19,7 @@ const Backoffice = () => {
   }, []);
 
   return (
-    <div className="area_backoffice" style={{ backgroundImage: `url(${ipt_background})` }}>
+    <div className="area_backoffice">
 
       <div>
         <ConsoleViewer />
