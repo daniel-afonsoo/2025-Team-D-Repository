@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 
 //routes
 logToClient("setup", `Setting up routes...`)
-app.use('/', loginRoutes)
+app.use('/auth', require('./endpoints/auth-endpoints'));
 app.use('/', dbRoutes)
 app.use('/', sqlRoutes)
 app.use('/', docenteRoutes)
