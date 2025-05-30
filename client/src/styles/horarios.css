@@ -2,7 +2,14 @@
 
 .horarios-container {
   padding: 20px;
-  overflow-x: auto;
+  overflow: visible; /* Permite que o dragOverlay vá além dos limites */
+  position: relative; /* Necessário para posicionamento absoluto dos overlays */
+}
+
+.drag-overlay {
+  position: fixed; /* Importantíssimo */
+  z-index: 9999;
+  pointer-events: none;
 }
 
 .layout {
@@ -26,7 +33,7 @@
 .add-class-button,
 .block-btn {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #0dab05;
   border: none;
   color: white;
   border-radius: 4px;
@@ -35,7 +42,7 @@
 
 .add-class-button:hover,
 .block-btn:hover {
-  background-color: #0056b3;
+  background-color: #145a0a;
 }
 
 .add-popup {
@@ -68,7 +75,7 @@
 
 .popup-content button {
   padding: 8px;
-  background-color: #007bff;
+  background-color: #0dab05;
   border: none;
   color: white;
   border-radius: 4px;
@@ -76,7 +83,7 @@
 }
 
 .popup-content button:hover {
-  background-color: #0056b3;
+  background-color: #145a0a;
 }
 
 .error-message {
@@ -123,29 +130,39 @@
 }
 
 .class-cell {
-  background-color: #00bfff;
+  background-color: #0dab05;
   padding: 0;
   vertical-align: top;
 }
 
+.class-cell-flex {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  min-height: 40px; /* Garante altura mínima igual à célula */
+  position: relative;
+}
+
 .class-cell:hover .class-entry {
-  background-color: #003d80; /* Darker shade for hover */
+  background-color: #145a0a; /* Darker shade for hover */
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for emphasis */
-  z-index: 1; /* Ensure it appears above other elements */
+   /* Ensure it appears above other elements */
   position: relative; /* Required for z-index to work */
 }
 
 .class-entry {
-  background-color: #00bfff;
-  color: white;
+  height:100%;
+  width: 100px;
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  justify-content: center;
   cursor: grab;
+  background-color: #0dab05;
+  color: white;
+  padding: 8px;
   border-radius: 6px;
-  height: 100%; /* Ensure it spans the full height of the cell */
-  box-sizing: border-box; /* Include padding in height calculation */
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -160,16 +177,9 @@
   height: 40px;
 }
 
-.aulas-disponiveis {
-  margin-top: 0; /* Remove margin-top to align properly */
-  margin-left: 20px;
-  flex-shrink: 0;
-  width: 300px;
-}
-
 .aula-disponivel {
-  background-color: #e6f7ff;
-  border: 1px solid #91d5ff;
+  background-color: #0dab05;
+  border: 1px solid #145a0a;
   border-radius: 4px;
   padding: 8px;
   margin-bottom: 8px;
@@ -195,7 +205,7 @@
 /* Adicionei estilos para o botão de edição de aulas. */
 .edit-class-button {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #0dab05;
   border: none;
   color: white;
   border-radius: 4px;
@@ -203,5 +213,41 @@
 }
 
 .edit-class-button:hover {
-  background-color: #218838;
+  background-color: #145a0a;
+}
+
+/* Botão para mover aula para as aulas disponíveis */
+.move-to-disponiveis-btn {
+  align-self: center;
+  
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  height: 32px;
+  min-width: 32px;
+  background: #ff0000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background 0.2s;
+}
+
+.move-to-disponiveis-btn:hover {
+  background: #f04949;
+}
+
+.aulas-disponiveis-droppable {
+  min-height: 60px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
 }
