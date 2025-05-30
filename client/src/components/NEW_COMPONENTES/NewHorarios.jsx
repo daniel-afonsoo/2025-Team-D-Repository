@@ -8,6 +8,9 @@ import "../../styles/horarios.css";
 import Filtros from "./Filtros";
 import Schedule from "./Schedule";
 import AulasDisponiveis from "./AulasDisponiveis";
+import { handleDragEnd } from "../horarios_components/handleDragEnd";
+import Draggable from "./draggable";
+import Droppable from "./droppable";
 
 // Dias da semana e horas
 const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -104,6 +107,28 @@ function NewHorarios(props) {
   const filteredAulasDisponiveis = aulasDisponiveis.filter((aula) =>
     getNomeUC(aula.subject).toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Função para mover aula do horário para aulas disponíveis
+  const moveToDisponiveis = (classItem) => {
+    // Remove a aula do servidor
+    socket.emit("remove-aula", { codAula: classItem.Cod_Aula });
+    
+    // Adiciona à lista de aulas disponíveis
+    setAulasDisponiveis((prev) => [
+      ...prev,
+      {
+        id: (prev[prev.length - 1]?.id || 0) + 1,
+        semestre,
+        curso,
+        ano,
+        turma,
+        subject: classItem.subject,
+        location: classItem.location,
+        docente: classItem.docente,
+        duration: classItem.duration,
+      },
+    ]);
+  };
 
   // Funções de popup e edição
   const openEditPopup = (aula) => {
@@ -236,7 +261,15 @@ function NewHorarios(props) {
   return (
     <DndContext
       modifiers={[restrictToWindowEdges]}
-      onDragEnd={() => {/* handleDragEnd aqui se necessário */}}
+      onDragEnd={(event) =>
+        handleDragEnd(event, {
+          setErro,
+          setAulasDisponiveis,
+          aulasMarcadas,
+          horas,
+          socket,
+        })
+      }
     >
       <div className="horarios-container">
         <div className="layout">
@@ -285,38 +318,184 @@ function NewHorarios(props) {
             </div>
           )}
 
-          <div className="conteudo">
-            <div className="timetable-and-available-classes">
-              <div className="timetable-container">
-                {erro && <div className="error-message">{erro}</div>}
-                <Schedule
-                  diasSemana={diasSemana}
-                  horas={horas}
-                  aulasMarcadas={aulasMarcadas}
-                  isBlocked={isBlocked}
-                  getNomeUC={getNomeUC}
-                  getNomeSala={getNomeSala}
-                  getNomeDocente={getNomeDocente}
-                />
+          {/* Show content only if filters are selected */}
+          {filtrosSelecionados ? (
+            <>
+              <div className="conteudo">
+                <div className="timetable-and-available-classes">
+                  {/* Tabela do horário */}
+                  <div className="timetable-container">
+                    {erro && <div className="error-message">{erro}</div>}
+                    <table className="timetable">
+                      <thead>
+                        <tr>
+                          <th>Horas</th>
+                          {diasSemana.map((dia) => (
+                            <th key={dia}>{dia}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {horas.map((hora, index) => {
+                          const horaInicio = hora.split(" - ")[0];
+                          return (
+                            <tr key={index}>
+                              <td className="hora">{hora}</td>
+                              {diasSemana.map((dia) => {
+                                const cellId = `${dia}-${horaInicio}`;
+
+                                const isCellSpanned = aulasMarcadas.some(
+                                  (cls) => {
+                                    const classStartIndex = horas.findIndex(
+                                      (h) => h.startsWith(cls.start)
+                                    );
+                                    const classEndIndex =
+                                      classStartIndex + cls.duration / 30;
+                                    const currentIndex = index;
+                                    return (
+                                      cls.day === dia &&
+                                      currentIndex > classStartIndex &&
+                                      currentIndex < classEndIndex
+                                    );
+                                  }
+                                );
+                                if (isCellSpanned) return null;
+
+                                const classItem = aulasMarcadas.find(
+                                  (cls) =>
+                                    cls.day === dia && cls.start === horaInicio
+                                );
+
+                                if (classItem) {
+                                  const durationBlocks =
+                                    classItem.duration / 30;
+                                  return (
+                                    <td
+                                      key={cellId}
+                                      rowSpan={durationBlocks}
+                                      className="class-cell"
+                                    >
+                                      <div className="class-cell-flex">
+                                        <Draggable
+                                          id={"marcada_" + classItem.Cod_Aula}
+                                          isBlocked={isBlocked}
+                                          aulaInfo={classItem}
+                                        >
+                                          <div className="class-entry">
+                                            <strong>{getNomeUC(classItem.subject)}</strong>
+                                            <br />
+                                            <span className="location">
+                                              {getNomeSala(classItem.location)}
+                                            </span>
+                                            <br />
+                                            <span className="location">
+                                              {getNomeDocente(classItem.docente)}
+                                            </span>
+                                          </div>
+                                        </Draggable>
+                                        <button
+                                          className="move-to-disponiveis-btn"
+                                          title="Mover para Aulas Disponíveis"
+                                          onClick={() => moveToDisponiveis(classItem)}
+                                        >
+                                          &rarr;
+                                        </button>
+                                      </div>
+                                    </td>
+                                  );
+                                }
+
+                                return (
+                                  <Droppable
+                                    key={cellId}
+                                    id={cellId}
+                                    isBlocked={isBlocked}
+                                  />
+                                );
+                              })}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Aulas Disponíveis */}
+                  <Droppable id="aulas-disponiveis" isBlocked={false}>
+                    <div className="aulas-disponiveis">
+                      <h3>Aulas Disponíveis</h3>
+                      <input
+                        type="text"
+                        placeholder="Pesquisar aulas..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                      />
+                      {filtrosSelecionados ? (
+                        filteredAulasDisponiveis.length > 0 ? (
+                          filteredAulasDisponiveis.map((aula) => (
+                            <Draggable
+                              key={aula.id}
+                              id={"disponivel_" + aula.id}
+                              isBlocked={isBlocked}
+                              aulaInfo={aula}
+                            >
+                              <div className="aula-disponivel">
+                                <div className="aula-header">
+                                  <strong className="curso-nome">{getNomeCurso(aula.curso)}</strong>
+                                  <span className="ano-badge">{aula.ano}º Ano</span>
+                                </div>
+                                
+                                <div className="aula-info">
+                                  <div className="info-row">
+                                    <span className="info-label">Turma:</span>
+                                    <span className="info-value">{getNomeTurma(aula.turma)}</span>
+                                  </div>
+                                  
+                                  <div className="info-row">
+                                    <span className="info-label">UC:</span>
+                                    <span className="info-value">{getNomeUC(aula.subject)}</span>
+                                  </div>
+                                  
+                                  <div className="info-row">
+                                    <span className="info-label">Docente:</span>
+                                    <span className="info-value">{getNomeDocente(aula.docente)}</span>
+                                  </div>
+                                  
+                                  <div className="info-row">
+                                    <span className="info-label">Sala:</span>
+                                    <span className="info-value">{getNomeSala(aula.location)}</span>
+                                  </div>
+                                  
+                                  <div className="info-row duracao">
+                                    <span className="info-label">Duração:</span>
+                                    <span className="info-value">{aula.duration} min</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </Draggable>
+                          ))
+                        ) : (
+                          <p>Nenhuma aula disponível.</p>
+                        )
+                      ) : (
+                        <p>
+                          Por favor, preencha os filtros para acessar as aulas
+                          disponíveis.
+                        </p>
+                      )}
+                    </div>
+                  </Droppable>
+                </div>
               </div>
-              <AulasDisponiveis
-                filtrosSelecionados={filtrosSelecionados}
-                filteredAulasDisponiveis={filteredAulasDisponiveis}
-                isBlocked={isBlocked}
-                getNomeCurso={getNomeCurso}
-                getNomeTurma={getNomeTurma}
-                getNomeUC={getNomeUC}
-                getNomeDocente={getNomeDocente}
-                getNomeSala={getNomeSala}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-              />
-            </div>
-          </div>
+            </>
+          ) : (
+            <p>Por favor, preencha os filtros para visualizar o horário.</p>
+          )}
         </div>
       </div>
 
-      {/* Popups para adicionar/editar aula (mantém lógica original) */}
+      {/* Popups para adicionar/editar aula */}
       {showAddPopup && (
         <div className="add-popup">
           <div className="popup-content">
