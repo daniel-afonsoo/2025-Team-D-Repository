@@ -33,7 +33,7 @@
 .add-class-button,
 .block-btn {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #0dab05;
   border: none;
   color: white;
   border-radius: 4px;
@@ -42,7 +42,7 @@
 
 .add-class-button:hover,
 .block-btn:hover {
-  background-color: #0056b3;
+  background-color: #145a0a;
 }
 
 .add-popup {
@@ -75,7 +75,7 @@
 
 .popup-content button {
   padding: 8px;
-  background-color: #007bff;
+  background-color: #0dab05;
   border: none;
   color: white;
   border-radius: 4px;
@@ -83,7 +83,7 @@
 }
 
 .popup-content button:hover {
-  background-color: #0056b3;
+  background-color: #145a0a;
 }
 
 .error-message {
@@ -130,7 +130,7 @@
 }
 
 .class-cell {
-  background-color: #00bfff;
+  background-color: #0dab05;
   padding: 0;
   vertical-align: top;
 }
@@ -140,10 +140,11 @@
   align-items: stretch;
   height: 100%;
   min-height: 40px; /* Garante altura mínima igual à célula */
+  position: relative;
 }
 
 .class-cell:hover .class-entry {
-  background-color: #003d80; /* Darker shade for hover */
+  background-color: #145a0a; /* Darker shade for hover */
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for emphasis */
    /* Ensure it appears above other elements */
@@ -151,15 +152,13 @@
 }
 
 .class-entry {
-  flex: 1 1 0;
-  width: 100%;
-  height: 100%;
-  min-height: 40px; /* Igual à altura da célula */
+  height:100%;
+  width: 100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   cursor: grab;
-  background-color: #00bfff;
+  background-color: #0dab05;
   color: white;
   padding: 8px;
   border-radius: 6px;
@@ -179,8 +178,8 @@
 }
 
 .aula-disponivel {
-  background-color: #e6f7ff;
-  border: 1px solid #91d5ff;
+  background-color: #0dab05;
+  border: 1px solid #145a0a;
   border-radius: 4px;
   padding: 8px;
   margin-bottom: 8px;
@@ -206,7 +205,7 @@
 /* Adicionei estilos para o botão de edição de aulas. */
 .edit-class-button {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #0dab05;
   border: none;
   color: white;
   border-radius: 4px;
@@ -214,14 +213,16 @@
 }
 
 .edit-class-button:hover {
-  background-color: #218838;
+  background-color: #145a0a;
 }
 
 /* Botão para mover aula para as aulas disponíveis */
 .move-to-disponiveis-btn {
   align-self: center;
-  margin-left: 8px;
-  position: static; /* Garante que não fica absoluto */
+  
+  position: absolute;
+  top: 6px;
+  right: 6px;
   height: 32px;
   min-width: 32px;
   background: #ff0000;
