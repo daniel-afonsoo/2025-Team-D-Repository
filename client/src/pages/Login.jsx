@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 import ipt_tomar from '../images/ipt_campus_tomar.png';
 import ipt_abrantes from '../images/ESTA_Abrantes-min.jpg';
+
+axios.defaults.withCredentials = true;
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +17,6 @@ const Login = () => {
 
   // Limpa storage no mount
   useEffect(() => {
-    localStorage.clear();
   }, []);
 
   // Carousel de imagens de fundo
@@ -35,17 +36,7 @@ const Login = () => {
       const response = await axios.post('http://localhost:5170/auth/login', {
         email,
         password,
-      });
-
-      const { token, isAdmin } = response.data;
-      if (typeof isAdmin === 'undefined') {
-        setError('Erro no servidor: resposta inválida.');
-        console.error("Campo 'isAdmin' ausente na resposta do servidor.");
-        return;
-      }
-
-      localStorage.setItem('token', token);
-      localStorage.setItem('isAdmin', JSON.stringify(isAdmin));
+      },{ withCredentials: true })
 
       setEmail('');
       setPassword('');

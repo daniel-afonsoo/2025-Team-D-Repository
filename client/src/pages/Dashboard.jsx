@@ -1,36 +1,32 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import "../styles/dashboard.css";
-import ipt_background from '../images/novo_backgound_logo_ipt.svg';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [nome, setNome] = useState('Visitante');
+  const [role, setRole] = useState(null);
 
-  // 1) lê token e isAdmin
-  const token = localStorage.getItem("token");
-  const isAdmin = JSON.parse(localStorage.getItem("isAdmin") || "false");
-
-  // 2) exemplo de como resgatar o nome (ou manténs hard-coded)
-  //    se guardaste o userName no login, podes fazer:
-  // const nome = localStorage.getItem("userName") || "Visitante";
-  const nome = "Diogo Larangeira";
-
-  // 3) força redirect se não estiver autenticado
   useEffect(() => {
-    if (!token) {
-      navigate("/", { replace: true });
-    }
-  }, [token, navigate]);
+    // Verifica se o usuário está autenticado
+    axios.get('http://localhost:5170/auth/verify', { withCredentials: true })
+      .then(response => {
+        // define a role do utilizador
+        setRole(response.data.role)
+        // define o nome
+        //setNome(response.data.nome)
+
+      })
+      .catch(() => {
+        // redireciona para o login se autenticação falhar
+        navigate('/login');
+      });
+  }, [navigate]);
 
   return (
     <div className="area_dashboard">
-      <div
-        className="dashboard-background"
-        style={{ backgroundImage: `url(${ipt_background})` }}
-      />
-
-      {/* Conteúdo principal por cima da imagem */}
       <div className="dashboard-content">
         <h1 className="titulo_dashboard">
           Bem-vindo{" "}
@@ -39,44 +35,40 @@ const Dashboard = () => {
 
         <div className="botoes-container">
           <div>
-            <button
-              className="botao_dashboard"
-              onClick={() => navigate("/horariosESGT")}
-            >
+            <button className="botao_dashboard" onClick={() => navigate("/horariosESGT")}>
               Horários ESGT
             </button>
-            <Link className="linksEdit" to="/horariosESGT">
-              Editar Horário
-            </Link>
+            {['mod', 'admin'].includes(role) && (
+              <Link className="linksEdit" to="/horariosESGT">
+                Editar Horário
+              </Link>
+            )}
           </div>
 
           <div>
-            <button
-              className="botao_dashboard"
-              onClick={() => navigate("/horariosESTT")}
-            >
+            <button className="botao_dashboard" onClick={() => navigate("/horariosESTT")}>
               Horários ESTT
             </button>
-            <Link className="linksEdit" to="/horariosESTT">
-              Editar Horário
-            </Link>
+            {['mod', 'admin'].includes(role) && (
+              <Link className="linksEdit" to="/horariosESTT">
+                Editar Horário
+              </Link>
+            )}
           </div>
 
           <div>
-            <button
-              className="botao_dashboard"
-              onClick={() => navigate("/horariosESTA")}
-            >
+            <button className="botao_dashboard" onClick={() => navigate("/horariosESTA")}>
               Horários ESTA
             </button>
-            <Link className="linksEdit" to="/horariosESTA">
-              Editar Horário
-            </Link>
+            {['mod', 'admin'].includes(role) && (
+              <Link className="linksEdit" to="/horariosESTA">
+                Editar Horário
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* 4) Botão Backoffice só para admins */}
-        {isAdmin && (
+        {['admin'].includes(role) && (
           <div className="backoffice-container_dashboard">
             <button
               className="botao_backoffice_dashboard"

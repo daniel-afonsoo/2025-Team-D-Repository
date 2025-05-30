@@ -24,12 +24,12 @@ const RouterConfig = () => (
       <Route path="/horariosESTA" element={<HorariosESTA/>}/>
 
       <Route path="/backoffice" element={<BackOffice/>}/>
-      <Route path="/backoffice/docentes"                 element={<Data_Pages/>}/>
-      <Route path="/backoffice/cursos"                   element={<Data_Pages/>}/>
-      <Route path="/backoffice/unidades-curriculares"    element={<Data_Pages/>}/>
-      <Route path="/backoffice/escolas"                  element={<Data_Pages/>}/>
-      <Route path="/backoffice/salas"                    element={<Data_Pages/>}/>
-      <Route path="/backoffice/turmas"                   element={<Data_Pages/>}/>
+      <Route path="/backoffice/docentes" element={<Data_Pages/>}/>
+      <Route path="/backoffice/cursos" element={<Data_Pages/>}/>
+      <Route path="/backoffice/unidades-curriculares" element={<Data_Pages/>}/>
+      <Route path="/backoffice/escolas" element={<Data_Pages/>}/>
+      <Route path="/backoffice/salas" element={<Data_Pages/>}/>
+      <Route path="/backoffice/turmas" element={<Data_Pages/>}/>
     </Route>
 
     {/* Qualquer outra URL */} 
