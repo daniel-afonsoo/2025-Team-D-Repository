@@ -1,4 +1,5 @@
 // imports
+
 const { Server } = require("socket.io");
 const {
   setSocketIOInstance,
@@ -101,9 +102,12 @@ const setupSockets = (server) => {
         console.log("Aula not found: ", data.codAula);
         socket.emit("remove-aula-error", {
           message: "Esta aula não pode ser removida.",
+
+
         });
       }
     });
+
 
     // Update aula
     socket.on("update-aula", async (data) => {
@@ -146,3 +150,4 @@ const setupSockets = (server) => {
 
 // export
 module.exports = { setupSockets };
+

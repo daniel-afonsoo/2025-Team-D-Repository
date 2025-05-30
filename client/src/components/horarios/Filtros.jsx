@@ -1,0 +1,150 @@
+import React, { useEffect, useState } from "react";
+
+function Filtros({ escola, setEscola, docente, setDocente, sala, setSala, turma, setTurma, uc, setUc, curso, setCurso, ano, setAno, onFiltersChange }) {
+  const [docentes, setDocentes] = useState([]);
+  const [salas, setSalas] = useState([]);
+  const [turmas, setTurmas] = useState([]);
+  const [ucs, setUcs] = useState([]);
+  const [cursos, setCursos] = useState([]);
+  const [anos, setAnos] = useState([]);
+  const [escolas, setEscolas] = useState([]);
+
+  // Fetch dropdown options on component mount
+  useEffect(() => {
+    fetch("/api/docentes")
+      .then((response) => response.json())
+      .then((data) => setDocentes(data))
+      .catch((error) => console.error("Error fetching docentes:", error));
+
+    fetch("/api/escolas")
+      .then((response) => response.json())
+      .then((data) => setEscolas(data))
+      .catch((error) => console.error("Error fetching escolas:", error));
+
+    fetch("/api/salas")
+      .then((response) => response.json())
+      .then((data) => setSalas(data))
+      .catch((error) => console.error("Error fetching salas:", error));
+
+    fetch("/api/turmas")
+      .then((response) => response.json())
+      .then((data) => setTurmas(data))
+      .catch((error) => console.error("Error fetching turmas:", error));
+
+    fetch("/api/ucs")
+      .then((response) => response.json())
+      .then((data) => setUcs(data))
+      .catch((error) => console.error("Error fetching UCs:", error));
+
+    fetch("/api/cursos")
+      .then((response) => response.json())
+      .then((data) => setCursos(data))
+      .catch((error) => console.error("Error fetching cursos:", error));
+
+    fetch("/api/anos")
+      .then((response) => response.json())
+      .then((data) => setAnos(data))
+      .catch((error) => console.error("Error fetching anos:", error));
+  }, []);
+
+  // Trigger the query whenever any filter changes
+  useEffect(() => {
+    if (typeof onFiltersChange === "function") {
+      onFiltersChange({ escola, docente, sala, turma, uc, curso, ano });
+    }
+  }, [escola, docente, sala, turma, uc, curso, ano, onFiltersChange]);
+
+  return (
+    <div className="filters-and-buttons">
+      <div className="filtros">
+        <h3>Filtros</h3>
+
+        <label>
+          Escola:
+          <select onChange={e => setEscola(e.target.value)} value={escola}>
+            <option value="">Escolher Escola</option>
+            {escolas.map((escolaObj, index) => (
+              <option key={index} value={escolaObj.Cod_Escola}>
+                {escolaObj.Nome}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Docente:
+          <select onChange={e => setDocente(e.target.value)} value={docente}>
+            <option value="">Escolher Docente</option>
+            {docentes.map((docenteObj, index) => (
+              <option key={index} value={docenteObj.Cod_Docente}>
+                {docenteObj.Nome}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Sala:
+          <select onChange={e => setSala(e.target.value)} value={sala}>
+            <option value="">Escolher Sala</option>
+            {salas.map((salaObj, index) => (
+              <option key={index} value={salaObj.Cod_Sala}>
+                {salaObj.Nome}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Turma:
+          <select onChange={e => setTurma(e.target.value)} value={turma}>
+            <option value="">Escolher Turma</option>
+            {turmas.map((turmaObj, index) => (
+              <option key={index} value={turmaObj.Cod_Turma}>
+                {turmaObj.Nome ? turmaObj.Nome : turmaObj.Cod_Turma}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Unidade Curricular (UC):
+          <select onChange={e => setUc(e.target.value)} value={uc}>
+            <option value="">Escolher UC</option>
+            {ucs.map((ucObj, index) => (
+              <option key={index} value={ucObj.Cod_Uc}>
+                {ucObj.Nome}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Curso:
+          <select onChange={e => setCurso(e.target.value)} value={curso}>
+            <option value="">Escolher Curso</option>
+            {cursos.map((cursoObj, index) => (
+              <option key={index} value={cursoObj.Cod_Curso}>
+                {cursoObj.Nome}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Ano:
+          <select onChange={e => setAno(e.target.value)} value={ano}>
+            <option value="">Escolher Ano</option>
+            {anos.map((anoObj, index) => (
+              <option key={index} value={anoObj.Cod_AnoSemestre}>
+                {anoObj.Ano ? anoObj.Ano : anoObj.Cod_AnoSemestre}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </div>
+  );
+}
+
+export default Filtros;
