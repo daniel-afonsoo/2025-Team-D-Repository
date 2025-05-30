@@ -1,11 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import "../styles/backoffice.css";
 import { useNavigate } from 'react-router-dom';
 import ConsoleViewer from '../components/backoffice/ConsoleViewer';
 import ipt_background from '../images/background_ipt_logo.svg'
+import ExportPopup from '../components/backoffice/ExportPopup';
 
 const Backoffice = () => {
   const navigate = useNavigate();
+
+  // export feature
+  const [showPopup, setShowPopup] = useState(false);
+  const handleExportSubmit = (formData) => {
+    // ADD CLASSES LOADING AND EXPORT LOGIC LATER
+    console.log('Form Data:', formData);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -13,7 +21,7 @@ const Backoffice = () => {
 
   return (
     <div className="area_backoffice" style={{ backgroundImage: `url(${ipt_background})` }}>
-  
+
       <div>
         <ConsoleViewer />
       </div>
@@ -42,15 +50,21 @@ const Backoffice = () => {
 
       <div className="container_back">
         <h2>Exportar Aulas</h2>
+        <h3>Exportação Rápida:</h3>
+        <input id="" type="text" placeholder="Insira o Codigo da turma:" />
+        <button>PDF</button>
+        <button>Excel</button>
         <div>
-          {/* Button for interacting with export functions */}
-          {/* <h5 style={{color:"#fff"}}>Exportar aulas para:</h5>
-          <button onClick={() => exportToPdf(aulas)}>PDF</button>
-          <button onClick={() => exportToExcel(aulas)}>Excel</button> */}
-
+          <button onClick={() => setShowPopup(true)}>Exportação com Pesquisa</button>
         </div>
+        {showPopup && (
+          <ExportPopup
+            onClose={() => setShowPopup(false)}
+            // callback function to handle form data submission
+            onSubmit={handleExportSubmit}
+          />
+        )}
       </div>
-
     </div>
   );
 };
