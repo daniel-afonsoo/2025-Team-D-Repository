@@ -51,6 +51,62 @@ router.get('/aulas', (req, res) => {
     });
 });
 
+//getaulas por CodTurma
+router.get('/aulas/turma/:Cod_Turma', (req, res) => {
+    const Cod_Turma = req.params.Cod_Turma;
+
+    if (!Cod_Turma) {
+        return res.status(400).json({ error: 'Cod_Turma é obrigatório' });
+    }
+
+    const query = `SELECT * FROM aula WHERE Cod_Turma = ?`;
+    pool.query(query, [Cod_Turma], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.json(rows);
+    });
+});
+
+//getaulas por CodDocente e CodAnoSemestre
+router.get('/aulas/docente/:Cod_Docente/ano/:Cod_AnoSemestre', (req, res) => {
+    const Cod_Docente = req.params.Cod_Docente;
+    const Cod_AnoSemestre = req.params.Cod_AnoSemestre;
+
+    if (!Cod_Docente || !Cod_AnoSemestre) {
+        return res.status(400).json({ error: 'Cod_Docente e Cod_AnoSemestre são obrigatórios' });
+    }
+
+    const query = `SELECT * FROM aula WHERE Cod_Docente = ? AND Cod_AnoSemestre = ?`;
+    pool.query(query, [Cod_Docente, Cod_AnoSemestre], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.json(rows);
+    });
+});
+
+//getaulas codsala e CodAnoSemestre
+router.get('/aulas/sala/:Cod_Sala/ano/:Cod_AnoSemestre', (req, res) => {
+    const Cod_Sala = req.params.Cod_Sala;
+    const Cod_AnoSemestre = req.params.Cod_AnoSemestre;
+
+    if (!Cod_Sala || !Cod_AnoSemestre) {
+        return res.status(400).json({ error: 'Cod_Sala e Cod_AnoSemestre são obrigatórios' });
+    }
+
+    const query = `SELECT * FROM aula WHERE Cod_Sala = ? AND Cod_AnoSemestre = ?`;
+    pool.query(query, [Cod_Sala, Cod_AnoSemestre], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        res.json(rows);
+    });
+});
+
 //FUNCIONA
 router.post('/createAula', async (req, res) => {
     const {Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim} = req.body
