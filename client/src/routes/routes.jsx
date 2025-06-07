@@ -1,3 +1,4 @@
+// src/routes.jsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
@@ -8,33 +9,32 @@ import HorariosESTT from '../pages/HorariosESTT';
 import HorariosESTA from '../pages/HorariosESTA';
 import BackOffice   from '../pages/BackOffice';
 import Data_Pages   from '../pages/Data_Pages';
+
 import PrivateRoute from '../components/PrivateRoute';
 
-const RouterConfig = () => (
-  <Routes>
-    {/* Rota pública */}
-    <Route path="/" element={<Login />} />
+export default function RouterConfig() {
+  return (
+    <Routes>
+      {/* pública */}
+     <Route path="/login" element={<Login />} />
+     <Route path="/" element={<Navigate to="/login" replace />} />
 
-    {/* Todas as rotas abaixo requerem login */}
-    <Route element={<PrivateRoute />}>
-      <Route path="/dashboard" element={<Dashboard/>} />
+      {/* dashboard: qualquer user autenticado */}
+      <Route element={<PrivateRoute allowedRoles={['user','admin']} />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/horariosESGT" element={<HorariosESGT />} />
+        <Route path="/horariosESTT" element={<HorariosESTT />} />
+        <Route path="/horariosESTA" element={<HorariosESTA />} />
+      </Route>
 
-      <Route path="/horariosESGT" element={<HorariosESGT/>}/>
-      <Route path="/horariosESTT" element={<HorariosESTT/>}/>
-      <Route path="/horariosESTA" element={<HorariosESTA/>}/>
+      {/* backoffice: só admins */}
+      <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+        <Route path="/backoffice" element={<BackOffice />} />
+        <Route path="/backoffice/:entity" element={<Data_Pages />} />
+      </Route>
 
-      <Route path="/backoffice" element={<BackOffice/>}/>
-      <Route path="/backoffice/docentes" element={<Data_Pages/>}/>
-      <Route path="/backoffice/cursos" element={<Data_Pages/>}/>
-      <Route path="/backoffice/unidades-curriculares" element={<Data_Pages/>}/>
-      <Route path="/backoffice/escolas" element={<Data_Pages/>}/>
-      <Route path="/backoffice/salas" element={<Data_Pages/>}/>
-      <Route path="/backoffice/turmas" element={<Data_Pages/>}/>
-    </Route>
-
-    {/* Qualquer outra URL */} 
-    <Route path="*" element={<Navigate to="/" replace />} />
-  </Routes>
-);
-
-export default RouterConfig;
+      {/* fallback */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+}

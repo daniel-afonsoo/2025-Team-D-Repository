@@ -5,7 +5,12 @@ import ConsoleViewer from '../components/backoffice/ConsoleViewer';
 import ipt_background from '../images/background_ipt_logo.svg'
 
 const Backoffice = () => {
+  
   const navigate = useNavigate();
+
+
+   
+
 
   useEffect(() => {
     window.scrollTo(0, 0);
