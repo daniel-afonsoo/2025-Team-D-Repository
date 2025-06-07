@@ -98,7 +98,7 @@ const Docente_edit_remove = ({ filtro }) => {
       cod_docente: editarCampos.Cod_Docente,
       nome: editarCampos.Nome,
       email: editarCampos.Email,
-      password: editarCampos.Password,
+      password: editarCampos.Password
     };
 
 
@@ -150,7 +150,7 @@ const Docente_edit_remove = ({ filtro }) => {
       </div>
 
       <ConfirmacaoModal
-        itemToRemove={`"${idParaRemover ? dados.find(item => item.Cod_Docente === idParaRemover).nome : ''}"`}
+        itemToRemove={`"${idParaRemover ? dados.find(item => item.Cod_Docente === idParaRemover).Nome : ''}"`}
         isOpen={modalAberta}
         onClose={fecharModal}
         onConfirm={confirmarRemocao}

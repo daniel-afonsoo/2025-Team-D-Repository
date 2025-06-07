@@ -70,7 +70,7 @@ router.post('/updateCurso', async(req,res)=>{
 router.delete('/deleteCurso', async(req,res)=>{
     const {Cod_Curso} = req.body
     // Validação dos dados
-    if (!Cod_Curso) {
+    if (!cod_curso) {
         return res.status(400).json({ error: 'Código do curso é obrigatório' })
     }
     // Verificar se o curso existe

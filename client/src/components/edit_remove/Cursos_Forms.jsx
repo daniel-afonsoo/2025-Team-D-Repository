@@ -5,8 +5,9 @@ import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal'; // Componente do modal de edição
+import axios from 'axios'
 
-import { TbEdit, TbTrash  } from "react-icons/tb";
+import { TbEdit, TbTrash } from "react-icons/tb";
 
 // Componente principal responsável pela listagem, edição e remoção de cursos
 const Curso_edit_remove = ({ filtro }) => {
@@ -21,24 +22,21 @@ const Curso_edit_remove = ({ filtro }) => {
 
   // Carrega dados simulados ao iniciar o componente
   useEffect(() => {
-    const dadosSimulados = [
-      { id: 1, nome: "Engenharia Informática", abreviatura: "LEI", codCurso: "911", escola: "ESTT" },
-      { id: 2, nome: "Engenharia Eletrotécnica e de Computadores", abreviatura: "LEEC", codCurso: "912", escola: "ESTT" },
-      { id: 3, nome: "Engenharia Mecanica", abreviatura: "EMC", codCurso: "824", escola: "ESTT" },
-      { id: 4, nome: "Engenharia Bioquimica", abreviatura: "EBQ", codCurso: "45", escola: "ESTA" },
-      { id: 5, nome: "Engenharia Eletrotécnica ", abreviatura: "LE", codCurso: "910", escola: "ESTT" },
-      { id: 6, nome: "Recursos Humanos", abreviatura: "RH", codCurso: "885", escola: "ESGT" },
-      { id: 7, nome: "Contabilidade", abreviatura: "Ct", codCurso: "820", escola: "ESGT" },
-      { id: 8, nome: "Psicologia", abreviatura: "PS", codCurso: "42", escola: "ESCT" }
-    ];
-    setDados(dadosSimulados);
+    axios.get('http://localhost:5170/getCurso')
+      .then(response => {
+        console.log("Resposta da API:", response.data);
+        setDados(response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao buscar docentes:", error);
+      });
   }, []);
 
   const dadosFiltrados = dados.filter((curso) =>
-    curso.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    curso.abreviatura.toLowerCase().includes(filtro.toLowerCase()) ||
-    curso.codCurso.toLowerCase().includes(filtro.toLowerCase()) ||
-    curso.escola.toLowerCase().includes(filtro.toLowerCase())
+    curso.Nome.toLowerCase().includes(filtro.toLowerCase()) ||
+    curso.Abreviasao.toLowerCase().includes(filtro.toLowerCase()) ||
+    curso.Cod_Curso.toLowerCase().includes(filtro.toLowerCase()) ||
+    curso.Cod_Escola.toLowerCase().includes(filtro.toLowerCase())
   );
 
   // Funções auxiliares para abrir/fechar modais e manipular dados
@@ -54,13 +52,21 @@ const Curso_edit_remove = ({ filtro }) => {
 
   const confirmarRemocao = () => {
     if (idParaRemover !== null) {
-      setDados(dados.filter(item => item.id !== idParaRemover));
+      axios.delete('http://localhost:5170/deleteCurso/', {
+        data: { cod_curso: idParaRemover }
+      })
+        .then(() => {
+          setDados(dados.filter(item => item.Cod_Curso !== idParaRemover));
+          fecharModal();
+        })
+        .catch(error => {
+          console.error("Erro ao remover curso:", error);
+        });
     }
-    fecharModal();
   };
 
   const abrirModalEdicao = (item) => {
-    setEditarItemId(item.id);
+    setEditarItemId(item.Cod_Curso);
     setEditarCampos(item);
     setTituloModal('Editar Curso');
     setModalEdicaoAberta(true);
@@ -78,25 +84,52 @@ const Curso_edit_remove = ({ filtro }) => {
   };
 
   const confirmarEdicao = () => {
-    setDados(dados.map(item => item.id === editarItemId ? editarCampos : item));
-    fecharModalEdicao();
+    const dadosParaEnviar = {
+      Nome: editarCampos.Nome,
+      Abreviacao: editarCampos.Abreviacao,
+      Cod_Escola: editarCampos.Cod_Escola,
+      Cod_Curso: editarCampos.Cod_Curso,
+    };
+
+    console.log('Dados enviados para updateCurso:', dadosParaEnviar);
+    axios.post(`http://localhost:5170/updateCurso`, dadosParaEnviar)
+      .then(() => {
+        const updatedItem = {
+          Nome: editarCampos.Nome,
+          Abreviacao: editarCampos.Abreviacao,
+          Cod_Escola: editarCampos.Cod_Escola,
+          Cod_Curso: editarCampos.Cod_Curso
+        };
+        setDados(prev => prev.map(item => item.Cod_Curso === editarCampos.Cod_Curso ? updatedItem : item));
+
+        console.log('Dados depois de atualizar', dados);
+        fecharModalEdicao();
+      })
+      .catch(error => {
+        if (error.response) {
+          console.error('Status:', error.response.status);
+          console.error('Dados retornados:', error.response.data);
+        } else {
+          console.error('Erro ao atualizar docente:', error.message);
+        }
+      });
   };
 
   return (
     <div className="lista-container">
       <div className="lista">
         {dadosFiltrados.map((item) => (
-          <div key={item.id} className="card">
+          <div key={item.Cod_Curso} className="card">
             <div className="card-info">
-              <h3>{item.nome}</h3>
-              <p><b>Abreviatura:</b> {item.abreviatura}</p>
-              <p><b>Código do Curso:</b> {item.codCurso}</p>
-              <p><b>Escola:</b> {item.escola}</p>
+              <h3>{item.Nome}</h3>
+              <p><b>Abreviatura:</b> {item.Abreviacao}</p>
+              <p><b>Código do Curso:</b> {item.Cod_Curso}</p>
+              <p><b>Escola:</b> {item.Cod_Escola}</p>
               <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                <TbEdit size={25}/>
+                <TbEdit size={25} />
               </button>
-              <button className='btRemove' onClick={() => abrirModal(item.id)}>
-                <TbTrash size={25}/>
+              <button className='btRemove' onClick={() => abrirModal(item.Cod_Curso)}>
+                <TbTrash size={25} />
               </button>
             </div>
           </div>
@@ -104,7 +137,7 @@ const Curso_edit_remove = ({ filtro }) => {
       </div>
 
       <ConfirmacaoModal
-        itemToRemove={`"${dados.find(item => item.id === idParaRemover)?.nome}"`}
+        itemToRemove={`"${dados.find(item => item.Cod_Curso === idParaRemover)?.Nome}"`}
         isOpen={modalAberta}
         onClose={fecharModal}
         onConfirm={confirmarRemocao}

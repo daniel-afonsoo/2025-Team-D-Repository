@@ -5,8 +5,9 @@ import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal';
+import axios from 'axios'
 
-import { TbEdit, TbTrash  } from "react-icons/tb";
+import { TbEdit, TbTrash } from "react-icons/tb";
 
 // Componente principal para listar, editar e remover unidades curriculares
 const UCs_edit_remove = ({ filtro }) => {
@@ -19,22 +20,21 @@ const UCs_edit_remove = ({ filtro }) => {
   const [editarCampos, setEditarCampos] = useState({});
   const [tituloModal, setTituloModal] = useState('Editar Curso');
 
-  // Simula o carregamento inicial dos dados
   useEffect(() => {
-    const dadosSimulados = [
-      { id: 1, nome: "Programação Web", horas: "5", codCurso: "911" },
-      { id: 2, nome: "Programação Java", horas: "4", codCurso: "911" },
-      { id: 3, nome: "Análise Matemática", horas: "10", codCurso: "911" },
-      { id: 4, nome: "Gestão de Projetos", horas: "4", codCurso: "911" },
-      { id: 5, nome: "Sistemas Digitais", horas: "5", codCurso: "911" }
-    ];
-    setDados(dadosSimulados);
+    axios.get('http://localhost:5170/getUC')
+      .then(response => {
+        console.log("Resposta da API:", response.data);
+        setDados(response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao buscar docentes:", error);
+      });
   }, []);
 
   const dadosFiltrados = dados.filter((uc) =>
-    uc.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    uc.horas.toLowerCase().includes(filtro.toLowerCase())||
-    uc.codCurso.toLowerCase().includes(filtro.toLowerCase()) 
+    uc.Nome.toLowerCase().includes(filtro.toLowerCase()) ||
+    uc.Horas.toLowerCase().includes(filtro.toLowerCase()) ||
+    uc.Cod_Curso.toLowerCase().includes(filtro.toLowerCase())
   );
 
   // Abrir o modal de confirmação e guardar o ID do item a remover
@@ -52,14 +52,23 @@ const UCs_edit_remove = ({ filtro }) => {
   // Confirmar e aplicar a remoção do item
   const confirmarRemocao = () => {
     if (idParaRemover !== null) {
-      setDados(dados.filter(item => item.id !== idParaRemover));
+      axios.delete(`http://localhost:5170/deleteUC/`, {
+        data: { Cod_Uc: idParaRemover } 
+      })
+        .then(() => {
+          console.log("ID para remover:", idParaRemover);
+          setDados(dados.filter(item => item.Cod_Uc !== idParaRemover));
+          fecharModal();
+        })
+        .catch(error => {
+          console.error("Erro ao remover docente:", error);
+        });
     }
-    fecharModal();
   };
 
   // Abrir o modal de edição e preencher os campos com os dados do item
   const abrirModalEdicao = (item) => {
-    setEditarItemId(item.id);
+    setEditarItemId(item.Cod_Uc);
     setEditarCampos(item);
     setTituloModal('Editar Unidade Curricular');
     setModalEdicaoAberta(true);
@@ -80,24 +89,52 @@ const UCs_edit_remove = ({ filtro }) => {
 
   // Confirmar e aplicar as alterações no item editado
   const confirmarEdicao = () => {
-    setDados(dados.map(item => item.id === editarItemId ? editarCampos : item));
-    fecharModalEdicao();
+    const dadosParaEnviar = {
+      Nome: editarCampos.Nome,
+      Horas: editarCampos.Horas,
+      Cod_Curso: editarCampos.Cod_Curso,
+      Cod_Uc: editarCampos.Cod_Uc
+    };
+
+
+    console.log('Dados enviados para updateUC:', dadosParaEnviar);
+
+    axios.post(`http://localhost:5170/updateUC`, dadosParaEnviar)
+      .then(() => {
+        const updatedItem = {
+          Nome: editarCampos.Nome,
+          Horas: editarCampos.Horas,
+          Cod_Curso: editarCampos.Cod_Curso,
+          Cod_Uc: editarCampos.Cod_Uc,
+        };
+        setDados(prev => prev.map(item => item.Cod_Uc === editarCampos.Cod_Uc ? updatedItem : item));
+
+        console.log('Dados depois de atualizar', dados);
+        fecharModalEdicao();
+      })
+      .catch(error => {
+        if (error.response) {
+          console.error('Status:', error.response.status);
+          console.error('Dados retornados:', error.response.data);
+        } else {
+          console.error('Erro ao atualizar docente:', error.message);
+        }
+      });
   };
 
   return (
     <div className="lista-container">
       <div className="lista">
         {dadosFiltrados.map((item) => (
-          <div key={item.id} className="card">
+          <div key={item.Cod_Uc} className="card">
             <div className="card-info">
-              <h3>{item.nome}</h3>
-              <p><b>Horas:</b> {item.horas}</p>
-              <p><b>Código do Curso:</b> {item.codCurso}</p>
+              <h3>{item.Nome}</h3>
+              <p><b>Código do Curso:</b> {item.Cod_Curso}</p>
               <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                <TbEdit size={25}/>
+                <TbEdit size={25} />
               </button>
-              <button className='btRemove' onClick={() => abrirModal(item.id)}>
-                <TbTrash size={25}/>
+              <button className='btRemove' onClick={() => abrirModal(item.Cod_Uc)}>
+                <TbTrash size={25} />
               </button>
             </div>
           </div>
@@ -105,7 +142,7 @@ const UCs_edit_remove = ({ filtro }) => {
       </div>
 
       <ConfirmacaoModal
-        itemToRemove={`"${dados.find(item => item.id === idParaRemover)?.codCurso} - ${dados.find(item => item.id === idParaRemover)?.nome}"`}
+        itemToRemove={`"${dados.find(item => item.Cod_Uc === idParaRemover)?.Cod_Curso} - ${dados.find(item => item.Cod_Uc === idParaRemover)?.Nome}"`}
         isOpen={modalAberta}
         onClose={fecharModal}
         onConfirm={confirmarRemocao}
