@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import socket from "../../utils/socket";
-import { useSocket } from "../../utils/useSocket";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import "../../styles/horarios.css";
+import { useSocket } from "../../utils/hooks/useSocket";
+import socket from "../../utils/socket";
+import { useHorarios } from "../../utils/hooks/useHorarios";
 import Filtros from "./Filtros";
-import { HandleDragEnd } from "./HandleDragEnd";
 import HorarioTable from "./HorarioTable";
 import AulasDisponiveisBox from "./AulasDisponiveisBox";
 import AddAulaPopup from "./AddAulaPopup";
 import EditAulaPopup from "./EditAulaPopup";
 import ControlButtons from "./ControlButtons";
+import HandleDragEnd from "./HandleDragEnd";
 
-// Dias da semana e horas
-const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+// Funcao para gerar os intervalos de horas
 const horas = Array.from({ length: 31 }, (_, i) => {
   const hour = 8 + Math.floor(i / 2);
   const minutes = i % 2 === 0 ? "00" : "30";
@@ -26,238 +27,57 @@ const horas = Array.from({ length: 31 }, (_, i) => {
 });
 
 function NewHorarios(props) {
+
   const location = useLocation();
-  const path = location.pathname;
 
   // Socket aulas marcadas
   const { aulasMarcadas } = useSocket();
 
-  // Dropdown filters
-  const [dropdownFilters, setDropdownFilters] = useState({
-    anosemestre: [],
-    cursos: [],
-    turmas: [],
-    ucs: [],
-    salas: [],
-    docentes: [],
-  });
+  const {
+    // estado dos filtros
+    semestre, setSemestre,
+    curso, setCurso,
+    ano, setAno,
+    turma, setTurma,
+    uc, setUc,
+    sala, setSala,
+    docente, setDocente,
 
-  // Funções para obter nomes
-  const getNomeCurso = (codCurso) => {
-    const curso = dropdownFilters.cursos.find((c) => c.Cod_Curso == codCurso);
-    return curso ? curso.Nome : codCurso;
-  };
-  const getNomeUC = (codUC) => {
-    const uc = dropdownFilters.ucs.find((u) => u.Cod_Uc == codUC);
-    return uc ? uc.Nome : codUC;
-  };
-  const getNomeSala = (codSala) => {
-    const sala = dropdownFilters.salas.find((s) => s.Cod_Sala == codSala);
-    return sala ? sala.Nome : codSala;
-  };
-  const getNomeDocente = (codDocente) => {
-    const docente = dropdownFilters.docentes.find((d) => d.Cod_Docente == codDocente);
-    return docente ? docente.Nome : codDocente;
-  };
-  const getNomeTurma = (codTurma) => {
-    const turma = dropdownFilters.turmas.find((t) => t.Cod_Turma == codTurma);
-    return turma ? turma.Turma_Abv : codTurma;
-  };
+    // estados para lógica
+    dropdownFilters,
+    aulasDisponiveis, setAulasDisponiveis,
+    newAula, setNewAula,
+    isBlocked, setIsBlocked,
+    erro, setErro,
+    showAddPopup, setShowAddPopup,
+    showEditPopup, setShowEditPopup,
+    editingAula, setEditingAula,
+    searchQuery, setSearchQuery,
 
-  // Estados dos filtros
-  const [semestre, setSemestre] = useState("");
-  const [curso, setCurso] = useState("");
-  const [ano, setAno] = useState("");
-  const [turma, setTurma] = useState("");
-  const [uc, setUc] = useState("");
-  const [sala, setSala] = useState("");
-  const [docente, setDocente] = useState("");
+    // derivados
+    cursoSelecionado,
+    anosPossiveis,
+    turmasDisponiveis,
+    ucDisponiveis,
+    filtrosSelecionados,
+    filteredAulasDisponiveis,
 
-  // Estados auxiliares
-  const [aulasDisponiveis, setAulasDisponiveis] = useState([]);
-  const [newAula, setNewAula] = useState({
-    subject: "",
-    location: "",
-    docente: "",
-    semestre: "",
-    ano: "",
-    curso: "",
-    turma: "",
-    duration: 30,
-  });
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [erro, setErro] = useState("");
-  const [showAddPopup, setShowAddPopup] = useState(false);
-  const [showEditPopup, setShowEditPopup] = useState(false);
-  const [editingAula, setEditingAula] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+    // acoes
+    addClass,
+    addAulaToSchedule,
+    moveToDisponiveis,
+    openEditPopup,
+    saveEditedAula,
+    deleteAula,
+    handleAulaChange,
+  } = useHorarios(props.escola, aulasMarcadas);
 
-  // Filtros dependentes
-  const cursoSelecionado = dropdownFilters.cursos.find((c) => c.Cod_Curso == curso);
-  const ucDisponiveis = dropdownFilters.ucs.filter((ucObj) => ucObj.Cod_Curso == curso);
-  const duracaoCurso = cursoSelecionado ? Number(cursoSelecionado.Duracao) : 0;
-  const anosPossiveis = duracaoCurso > 0 ? Array.from({ length: duracaoCurso }, (_, i) => (i + 1).toString()) : [];
-  const turmasDisponiveis = dropdownFilters.turmas.filter(
-    (turmaObj) =>
-      turmaObj.Cod_AnoSemestre == semestre &&
-      turmaObj.Cod_Curso == curso &&
-      turmaObj.AnoTurma == ano
-  );
+  const getNomeCurso = (cod) => dropdownFilters.cursos.find(c => c.Cod_Curso == cod)?.Nome || cod;
+  const getNomeUC = (cod) => dropdownFilters.ucs.find(u => u.Cod_Uc == cod)?.Nome || cod;
+  const getNomeSala = (cod) => dropdownFilters.salas.find(s => s.Cod_Sala == cod)?.Nome || cod;
+  const getNomeDocente = (cod) => dropdownFilters.docentes.find(d => d.Cod_Docente == cod)?.Nome || cod;
+  const getNomeTurma = (cod) => dropdownFilters.turmas.find(t => t.Cod_Turma == cod)?.Turma_Abv || cod;
 
-  // Filtrar aulas disponíveis pelo search
-  const filteredAulasDisponiveis = aulasDisponiveis.filter((aula) =>
-    getNomeUC(aula.subject).toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Função para mover aula do horário para aulas disponíveis
-  const moveToDisponiveis = (classItem) => {
-    // Remove a aula do servidor
-    socket.emit("remove-aula", { codAula: classItem.Cod_Aula });
-
-    // Adiciona à lista de aulas disponíveis
-    setAulasDisponiveis((prev) => [
-      ...prev,
-      {
-        id: (prev[prev.length - 1]?.id || 0) + 1,
-        semestre,
-        curso,
-        ano,
-        turma,
-        subject: classItem.subject,
-        location: classItem.location,
-        docente: classItem.docente,
-        duration: classItem.duration,
-      },
-    ]);
-  };
-
-  // Funções de popup e edição
-  const openEditPopup = (aula) => {
-    setEditingAula(aula);
-    setShowEditPopup(true);
-  };
-  const saveEditedAula = () => {
-    if (editingAula) {
-      socket.emit("update-aula", {
-        codAula: editingAula.Cod_Aula,
-        newSubject: editingAula.subject,
-        newLocation: editingAula.location,
-        newDuration: editingAula.duration,
-      });
-      setShowEditPopup(false);
-      setEditingAula(null);
-    }
-  };
-  const deleteAula = (codAula) => {
-    socket.emit("delete-aula", { codAula });
-    setShowEditPopup(false);
-  };
-  const handleAulaChange = (event) => {
-    const aulaId = event.target.value;
-    const aula = aulasMarcadas.find((a) => a.Cod_Aula === aulaId);
-    setEditingAula(aula);
-  };
-
-  // Função para adicionar aula disponível
-  const addClass = () => {
-    const aulaCompleta = {
-      id: aulasDisponiveis.length + 1,
-      semestre,
-      curso,
-      ano,
-      turma,
-      subject: uc,
-      location: sala,
-      docente,
-      duration: newAula.duration,
-    };
-    setAulasDisponiveis((prev) => [...prev, aulaCompleta]);
-    setUc("");
-    setSala("");
-    setDocente("");
-    setNewAula({
-      subject: "",
-      location: "",
-      docente: "",
-      semestre,
-      ano,
-      curso,
-      turma,
-      duration: 30,
-    });
-    setShowAddPopup(false);
-  };
-
-  // Função para calcular hora final
-  const calculateEndTime = (start, duration) => {
-    const [hours, minutes] = start.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes + duration;
-    const endHours = Math.floor(totalMinutes / 60);
-    const endMinutes = totalMinutes % 60;
-    return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
-  };
-
-  // Função para adicionar aula ao horário
-  const addAulaToSchedule = () => {
-    if (!newAula.subject || !newAula.location || !newAula.day || !newAula.start) {
-      setErro("Preencha todos os campos para adicionar uma aula.");
-      return;
-    }
-    const aulaData = {
-      Cod_Docente: newAula.subject,
-      Cod_Sala: newAula.location,
-      Cod_Turma: turma,
-      Cod_Uc: uc,
-      Cod_Curso: curso,
-      Cod_AnoSemestre: semestre,
-      Dia: newAula.day,
-      Inicio: newAula.start,
-      Fim: calculateEndTime(newAula.start, newAula.duration),
-    };
-    socket.emit("add-aula", { newAula: aulaData });
-    setShowAddPopup(false);
-    setErro("");
-  };
-
-  // Filtros selecionados
-  const filtrosSelecionados = curso && ano && turma;
-
-  // Carregar filtros do backend
-  useEffect(() => {
-    const fetchDropdownFilters = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5170/getDropdownFilters?escola=${props.escola}`
-        );
-        const data = await response.json();
-        setDropdownFilters(data);
-      } catch (error) {
-        console.error("Error fetching dropdown filters:", error);
-      }
-    };
-    if (props.escola) {
-      fetchDropdownFilters();
-    }
-  }, [props.escola]);
-
-  // Reset filters quando dependências mudam
-  useEffect(() => {
-    setCurso("");
-    setAno("");
-    setTurma("");
-  }, [semestre]);
-  useEffect(() => {
-    setAno("");
-    setTurma("");
-  }, [curso]);
-  useEffect(() => {
-    setTurma("");
-  }, [ano]);
-
-  // Refresh aulas marcadas no início
-  useEffect(() => {
-    socket.emit("refresh-aulas");
-  }, []);
 
   return (
     <DndContext

@@ -1,4 +1,4 @@
-export function HandleDragEnd(
+export default function HandleDragEnd(
   event,
   { setErro, setAulasDisponiveis, aulasMarcadas, horas, socket }
 ) {
