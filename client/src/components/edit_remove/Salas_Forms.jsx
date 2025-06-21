@@ -19,6 +19,7 @@ const Curso_edit_remove = ({ filtro }) => {
   const [editarItemId, setEditarItemId] = useState(null);
   const [editarCampos, setEditarCampos] = useState({});
   const [tituloModal, setTituloModal] = useState('Editar Sala');
+  const [escolas, setEscolas] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:5170/getSala')
@@ -29,12 +30,25 @@ const Curso_edit_remove = ({ filtro }) => {
       .catch(error => {
         console.error("Erro ao buscar docentes:", error);
       });
+    // Buscar escolas
+    axios.get('http://localhost:5170/getEscola')
+      .then(response => {
+        setEscolas(response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao buscar escolas:", error);
+      });
   }, []);
 
-  const dadosFiltrados = dados.filter((sala) =>
-    sala.Nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    sala.Cod_Escola.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const dadosFiltrados = dados.filter((sala) => {
+    const filtroLower = filtro ? filtro.toLowerCase() : '';
+    const escola = escolas.find(e => String(e.Cod_Escola) === String(sala.Cod_Escola));
+    return (
+      (sala.Nome && sala.Nome.toLowerCase().includes(filtroLower)) ||
+      (sala.Cod_Escola && String(sala.Cod_Escola).toLowerCase().includes(filtroLower)) ||
+      (escola && escola.Nome && escola.Nome.toLowerCase().includes(filtroLower))
+    );
+  });
 
   // Abre o modal de confirmação e define o ID da sala a remover
   const abrirModal = (id) => {
@@ -122,19 +136,23 @@ const Curso_edit_remove = ({ filtro }) => {
   return (
     <div className="lista-container">
       <div className="lista">
-        {dadosFiltrados.map((item) => (
-          <div key={item.Cod_Sala} className="card">
-            <div className="card-info">
-              <h3>{item.Nome}</h3>
-              <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                <TbEdit size={25} />
-              </button>
-              <button className='btRemove' onClick={() => abrirModal(item.Cod_Sala)}>
-                <TbTrash size={25} />
-              </button>
+        {dadosFiltrados.map((item) => {
+          const escola = escolas.find(e => String(e.Cod_Escola) === String(item.Cod_Escola));
+          return (
+            <div key={item.Cod_Sala} className="card">
+              <div className="card-info">
+                <h3>{item.Nome}</h3>
+                <p><b>Escola:</b> {escola ? escola.Nome : item.Cod_Escola}</p>
+                <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
+                  <TbEdit size={25} />
+                </button>
+                <button className='btRemove' onClick={() => abrirModal(item.Cod_Sala)}>
+                  <TbTrash size={25} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <ConfirmacaoModal
@@ -151,6 +169,7 @@ const Curso_edit_remove = ({ filtro }) => {
         campos={editarCampos}
         onSave={confirmarEdicao}
         titulo={tituloModal}
+        escolas={escolas}
       />
     </div>
   );

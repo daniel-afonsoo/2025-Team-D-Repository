@@ -19,6 +19,7 @@ const Curso_edit_remove = ({ filtro }) => {
   const [editarItemId, setEditarItemId] = useState(null);
   const [editarCampos, setEditarCampos] = useState({});
   const [tituloModal, setTituloModal] = useState('Editar Curso');
+  const [escolas, setEscolas] = useState([]);
 
   // Carrega dados simulados ao iniciar o componente
   useEffect(() => {
@@ -30,14 +31,27 @@ const Curso_edit_remove = ({ filtro }) => {
       .catch(error => {
         console.error("Erro ao buscar docentes:", error);
       });
+    // Buscar escolas
+    axios.get('http://localhost:5170/getEscola')
+      .then(response => {
+        setEscolas(response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao buscar escolas:", error);
+      });
   }, []);
 
-  const dadosFiltrados = dados.filter((curso) =>
-    curso.Nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    curso.Abreviasao.toLowerCase().includes(filtro.toLowerCase()) ||
-    curso.Cod_Curso.toLowerCase().includes(filtro.toLowerCase()) ||
-    curso.Cod_Escola.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const dadosFiltrados = dados.filter((curso) => {
+    const filtroLower = filtro ? filtro.toLowerCase() : '';
+    const escola = escolas.find(e => String(e.Cod_Escola) === String(curso.Cod_Escola));
+    return (
+      (curso.Nome && curso.Nome.toLowerCase().includes(filtroLower)) ||
+      (curso.Abreviacao && curso.Abreviacao.toLowerCase().includes(filtroLower)) ||
+      (curso.Cod_Curso && String(curso.Cod_Curso).toLowerCase().includes(filtroLower)) ||
+      (curso.Cod_Escola && String(curso.Cod_Escola).toLowerCase().includes(filtroLower)) ||
+      (escola && escola.Nome && escola.Nome.toLowerCase().includes(filtroLower))
+    );
+  });
 
   // Funções auxiliares para abrir/fechar modais e manipular dados
   const abrirModal = (id) => {
@@ -94,16 +108,16 @@ const Curso_edit_remove = ({ filtro }) => {
     console.log('Dados enviados para updateCurso:', dadosParaEnviar);
     axios.post(`http://localhost:5170/updateCurso`, dadosParaEnviar)
       .then(() => {
-        const updatedItem = {
-          Nome: editarCampos.Nome,
-          Abreviacao: editarCampos.Abreviacao,
-          Cod_Escola: editarCampos.Cod_Escola,
-          Cod_Curso: editarCampos.Cod_Curso
-        };
-        setDados(prev => prev.map(item => item.Cod_Curso === editarCampos.Cod_Curso ? updatedItem : item));
-
-        console.log('Dados depois de atualizar', dados);
-        fecharModalEdicao();
+        // Buscar novamente os cursos após editar para garantir atualização
+        axios.get('http://localhost:5170/getCurso')
+          .then(response => {
+            setDados(response.data);
+            fecharModalEdicao();
+          })
+          .catch(error => {
+            console.error("Erro ao buscar cursos após update:", error);
+            fecharModalEdicao();
+          });
       })
       .catch(error => {
         if (error.response) {
@@ -118,22 +132,25 @@ const Curso_edit_remove = ({ filtro }) => {
   return (
     <div className="lista-container">
       <div className="lista">
-        {dadosFiltrados.map((item) => (
-          <div key={item.Cod_Curso} className="card">
-            <div className="card-info">
-              <h3>{item.Nome}</h3>
-              <p><b>Abreviatura:</b> {item.Abreviacao}</p>
-              <p><b>Código do Curso:</b> {item.Cod_Curso}</p>
-              <p><b>Escola:</b> {item.Cod_Escola}</p>
-              <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                <TbEdit size={25} />
-              </button>
-              <button className='btRemove' onClick={() => abrirModal(item.Cod_Curso)}>
-                <TbTrash size={25} />
-              </button>
+        {dadosFiltrados.map((item) => {
+          const escola = escolas.find(e => e.Cod_Escola === item.Cod_Escola);
+          return (
+            <div key={item.Cod_Curso} className="card">
+              <div className="card-info">
+                <h3>{item.Nome}</h3>
+                <p><b>Abreviatura:</b> {item.Abreviacao}</p>
+                <p><b>Código do Curso:</b> {item.Cod_Curso}</p>
+                <p><b>Escola:</b> {escola ? escola.Nome : item.Cod_Escola}</p>
+                <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
+                  <TbEdit size={25} />
+                </button>
+                <button className='btRemove' onClick={() => abrirModal(item.Cod_Curso)}>
+                  <TbTrash size={25} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <ConfirmacaoModal
@@ -150,6 +167,7 @@ const Curso_edit_remove = ({ filtro }) => {
         campos={editarCampos}
         onSave={confirmarEdicao}
         titulo={tituloModal}
+        escolas={escolas}
       />
     </div>
   );

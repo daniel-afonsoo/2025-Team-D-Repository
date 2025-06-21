@@ -19,6 +19,8 @@ const Turma_Forms = ({ filtro }) => {
     const [editarItemId, setEditarItemId] = useState(null);
     const [editarCampos, setEditarCampos] = useState({});
     const [tituloModal, setTituloModal] = useState('Editar Turma');
+    const [cursos, setCursos] = useState([]);
+    const [anosemestres, setAnoSemestres] = useState([]);
 
     useEffect(() => {
         axios.get('http://localhost:5170/getTurma')
@@ -28,6 +30,22 @@ const Turma_Forms = ({ filtro }) => {
           })
           .catch(error => {
             console.error("Erro ao buscar docentes:", error);
+          });
+        // Buscar cursos
+        axios.get('http://localhost:5170/getCurso')
+          .then(response => {
+            setCursos(response.data);
+          })
+          .catch(error => {
+            console.error("Erro ao buscar cursos:", error);
+          });
+        // Buscar anosemestre
+        axios.get('http://localhost:5170/getAnoSemestre')
+          .then(response => {
+            setAnoSemestres(response.data);
+          })
+          .catch(error => {
+            console.error("Erro ao buscar anosemestre:", error);
           });
       }, []);
 
@@ -126,26 +144,30 @@ const Turma_Forms = ({ filtro }) => {
     return (
         <div className="lista-container">
             <div className="lista">
-                {dadosFiltrados.map((item) => (
-                    <div key={item.id} className="card">
-                        <div className="card-info">
-                            <h3>{item.Turma_Abv}</h3>
-                            <p><b>Código de Curso:</b> {item.Cod_Curso}</p>
-                            <p><b>Ano da Turma</b>: {item.AnoTurma}º Ano</p>
-                            <p><b>Código Ano Semestre</b>: {item.Cod_AnoSemestre}</p>
-                            <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                                <TbEdit size={25}/>
-                            </button>
-                            <button className='btRemove' onClick={() => abrirModal(item.Cod_Turma)}>
-                                <TbTrash size={25}/>
-                            </button>
+                {dadosFiltrados.map((item) => {
+                    const curso = cursos.find(c => String(c.Cod_Curso) === String(item.Cod_Curso));
+                    const anosemestre = anosemestres.find(a => String(a.Cod_AnoSemestre) === String(item.Cod_AnoSemestre));
+                    return (
+                        <div key={item.id} className="card">
+                            <div className="card-info">
+                                <h3>{item.Turma_Abv}</h3>
+                                <p><b>Curso:</b> {curso ? curso.Nome : item.Cod_Curso}</p>
+                                <p><b>Ano da Turma</b>: {item.AnoTurma}º Ano</p>
+                                <p><b>Ano/Semestre:</b> {anosemestre ? anosemestre.Nome : item.Cod_AnoSemestre}</p>
+                                <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
+                                    <TbEdit size={25}/>
+                                </button>
+                                <button className='btRemove' onClick={() => abrirModal(item.Cod_Turma)}>
+                                    <TbTrash size={25}/>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <ConfirmacaoModal
-                itemToRemove={`Ano_Semestre "${dados.find(item => item.Cod_Turma === idParaRemover)?.Cod_AnoSemestre} -  Turma ${dados.find(item => item.Cod_Turma === idParaRemover)?.Turma_Abv}"`}
+                itemToRemove={`Nome "${dados.find(item => item.Cod_Turma === idParaRemover)?.Cod_AnoSemestre} -  Turma ${dados.find(item => item.Cod_Turma === idParaRemover)?.Turma_Abv}"`}
                 isOpen={modalAberta}
                 onClose={fecharModal}
                 onConfirm={confirmarRemocao}
@@ -158,6 +180,8 @@ const Turma_Forms = ({ filtro }) => {
                 campos={editarCampos}
                 onSave={confirmarEdicao}
                 titulo={tituloModal}
+                cursos={cursos}
+                anosemestres={anosemestres}
             />
         </div>
     );
