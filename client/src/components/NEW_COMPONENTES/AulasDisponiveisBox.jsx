@@ -1,19 +1,19 @@
 import React from "react";
-import Draggable from "./draggable";
-import Droppable from "./droppable";
+import Draggable from "./Draggable";
+import Droppable from "./Droppable";
 
-function AulasDisponiveis({
-  filtrosSelecionados,
+const AulasDisponiveisBox = ({
+  searchQuery,
+  setSearchQuery,
   filteredAulasDisponiveis,
   isBlocked,
+  filtrosSelecionados,
   getNomeCurso,
   getNomeTurma,
   getNomeUC,
   getNomeDocente,
   getNomeSala,
-  searchQuery,
-  setSearchQuery
-}) {
+}) => {
   return (
     <Droppable id="aulas-disponiveis" isBlocked={false}>
       <div className="aulas-disponiveis">
@@ -39,6 +39,7 @@ function AulasDisponiveis({
                     <strong className="curso-nome">{getNomeCurso(aula.curso)}</strong>
                     <span className="ano-badge">{aula.ano}º Ano</span>
                   </div>
+
                   <div className="aula-info">
                     <div className="info-row">
                       <span className="info-label">Turma:</span>
@@ -73,6 +74,6 @@ function AulasDisponiveis({
       </div>
     </Droppable>
   );
-}
+};
 
-export default AulasDisponiveis;
+export default AulasDisponiveisBox;
