@@ -6,7 +6,7 @@ const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
 
 const HorarioTable = ({
   horas,
-  aulasMarcadas,
+  aulasMarcadas = [],
   isBlocked,
   moveToDisponiveis,
   getNomeUC,
@@ -14,6 +14,9 @@ const HorarioTable = ({
   getNomeDocente,
   setErro,
 }) => {
+  
+  console.log("🧩 Aulas recebidas na tabela:", aulasMarcadas);
+
   return (
     <div className="timetable-container">
       <table className="timetable">

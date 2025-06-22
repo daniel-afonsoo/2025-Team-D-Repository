@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import socket from "../socket";
 
-export function useHorarios(escola, aulasMarcadas) {
+export function useHorarios(escola) {
   const [dropdownFilters, setDropdownFilters] = useState({
     anosemestre: [],
     cursos: [],
@@ -11,6 +11,10 @@ export function useHorarios(escola, aulasMarcadas) {
     docentes: [],
   });
 
+  //estado para aulas
+  const [aulasMarcadas, setAulasMarcadas] = useState([]);
+
+  // detalhes selecionados para o horário (filtros aplicados)
   const [semestre, setSemestre] = useState("");
   const [curso, setCurso] = useState("");
   const [ano, setAno] = useState("");
@@ -19,6 +23,7 @@ export function useHorarios(escola, aulasMarcadas) {
   const [sala, setSala] = useState("");
   const [docente, setDocente] = useState("");
 
+  // estado para aulas disponiveis
   const [aulasDisponiveis, setAulasDisponiveis] = useState([]);
   const [newAula, setNewAula] = useState({ subject: "", location: "", docente: "", duration: 30 });
   const [isBlocked, setIsBlocked] = useState(false);
@@ -46,13 +51,13 @@ export function useHorarios(escola, aulasMarcadas) {
 
   // Reset filter hierarchy
   useEffect(() => {
-    setCurso(""); setAno(""); setTurma("");
+    setCurso(""); setAno(""); setTurma(""); console.log("turma: ", turma);
   }, [semestre]);
   useEffect(() => {
-    setAno(""); setTurma("");
+    setAno(""); setTurma(""); console.log("turma: ", turma);
   }, [curso]);
   useEffect(() => {
-    setTurma("");
+    setTurma(""); console.log("turma: ", turma);
   }, [ano]);
 
   useEffect(() => {
@@ -66,6 +71,70 @@ export function useHorarios(escola, aulasMarcadas) {
   useEffect(() => {
     socket.emit("refresh-aulas");
   }, []);
+
+
+  function calculateDuration(inicio, fim) {
+    const [h1, m1] = inicio.split(":").map(Number);
+    const [h2, m2] = fim.split(":").map(Number);
+    return (h2 * 60 + m2) - (h1 * 60 + m1);
+  }
+  // fetch aulas marcadas por turma
+  useEffect(() => {
+    console.log("turma: aaa", turma);
+    if (!turma) return;
+
+    fetch(`http://localhost:5170/aulas/turma/${turma}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const normalized = data.map(aula => ({
+            ...aula,
+            day: aula.Dia,
+            start: aula.Inicio,
+            duration: calculateDuration(aula.Inicio, aula.Fim),
+            subject: aula.Cod_Uc,
+            location: aula.Cod_Sala,
+            docente: aula.Cod_Docente,
+          }));
+          setAulasMarcadas(normalized);
+        } else {
+          console.error("Erro: resposta inválida das aulas");
+          setAulasMarcadas([]);
+        }
+      })
+      .catch(err => {
+        console.error("Erro ao buscar aulas:", err);
+        setAulasMarcadas([]);
+      });
+  }, [turma]);
+
+  // effect para atualizar as aulas se o codigo da turma for igual ao selecionado
+  useEffect(() => {
+    const handleUpdateAulas = (data) => {
+      if (data?.Cod_Turma && data.Cod_Turma === turma) {
+        fetch(`http://localhost:5170/aulas/turma/${turma}`)
+          .then(res => res.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              const normalized = data.map(aula => ({
+                ...aula,
+                day: aula.Dia,
+                start: aula.Inicio,
+                duration: calculateDuration(aula.Inicio, aula.Fim),
+                subject: aula.Cod_Uc,
+                location: aula.Cod_Sala,
+                docente: aula.Cod_Docente,
+              }));
+              setAulasMarcadas(normalized);
+            }
+          })
+          .catch(console.error);
+      }
+    };
+
+    socket.on("update-aulas", handleUpdateAulas);
+    return () => socket.off("update-aulas", handleUpdateAulas);
+  }, [turma]);
 
   const moveToDisponiveis = (classItem) => {
     socket.emit("remove-aula", { codAula: classItem.Cod_Aula });
@@ -84,6 +153,7 @@ export function useHorarios(escola, aulasMarcadas) {
   };
 
   const calculateEndTime = (start, duration) => {
+    console.log("🧠 Calculando fim:", { start, duration });
     const [h, m] = start.split(":").map(Number);
     const mins = h * 60 + m + duration;
     const eh = String(Math.floor(mins / 60)).padStart(2, "0");
@@ -91,29 +161,48 @@ export function useHorarios(escola, aulasMarcadas) {
     return `${eh}:${em}`;
   };
 
-  const addAulaToSchedule = () => {
-    if (!newAula.subject || !newAula.location || !newAula.day || !newAula.start) {
+  const addAulaToSchedule = (aulaInfo, day, start) => {
+    if (!aulaInfo.subject || !aulaInfo.location || !aulaInfo.docente || !day || !start) {
       setErro("Preencha todos os campos para adicionar uma aula.");
       return;
     }
 
-    socket.emit("add-aula", {
-      newAula: {
-        Cod_Docente: newAula.subject,
-        Cod_Sala: newAula.location,
-        Cod_Turma: turma,
-        Cod_Uc: uc,
-        Cod_Curso: curso,
-        Cod_AnoSemestre: semestre,
-        Dia: newAula.day,
-        Inicio: newAula.start,
-        Fim: calculateEndTime(newAula.start, newAula.duration),
-      },
-    });
+    const payload = {
+      Cod_Docente: aulaInfo.docente,
+      Cod_Sala: aulaInfo.location,
+      Cod_Turma: aulaInfo.turma,
+      Cod_Uc: aulaInfo.subject,
+      Cod_Curso: aulaInfo.curso,
+      Cod_AnoSemestre: aulaInfo.semestre,
+      Dia: day,
+      Inicio: start,
+      Fim: calculateEndTime(start, aulaInfo.duration),
+      Duration: aulaInfo.duration,
+    };
 
-    setShowAddPopup(false);
-    setErro("");
+    console.log("payload",payload);
+
+    fetch("http://localhost:5170/createAula", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao criar aula");
+        return res.json();
+      })
+      .then(() => {
+        socket.emit("refresh-aulas", { Cod_Turma: aulaInfo.turma });
+        setShowAddPopup(false);
+        setErro("");
+      })
+      .catch(err => {
+        console.error(err);
+        setErro("Erro ao adicionar aula. Verifique os dados.");
+      });
   };
+
+
 
   const addClass = () => {
     const aulaCompleta = {
@@ -138,21 +227,60 @@ export function useHorarios(escola, aulasMarcadas) {
   };
 
   const saveEditedAula = () => {
-    if (editingAula) {
-      socket.emit("update-aula", {
-        codAula: editingAula.Cod_Aula,
-        newSubject: editingAula.subject,
-        newLocation: editingAula.location,
-        newDuration: editingAula.duration,
+    if (!editingAula) return;
+
+    const payload = {
+      Cod_Aula: editingAula.Cod_Aula,
+      Cod_Docente: editingAula.docente,
+      Cod_Sala: editingAula.location,
+      Cod_Turma: turma,
+      Cod_Uc: editingAula.subject, // ✅ corrigido aqui
+      Cod_Curso: curso,
+      Cod_AnoSemestre: semestre,
+      Dia: editingAula.day,
+      Inicio: editingAula.start,
+      Fim: calculateEndTime(editingAula.start, editingAula.duration),
+    };
+
+    fetch("http://localhost:5170/updateAula", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao atualizar aula");
+        return res.json();
+      })
+      .then(() => {
+        socket.emit("refresh-aulas", { Cod_Turma: turma }); // ✅ garantir atualização correta
+        setShowEditPopup(false);
+        setEditingAula(null);
+      })
+      .catch(err => {
+        console.error(err);
+        setErro("Erro ao atualizar aula.");
       });
-      setShowEditPopup(false);
-      setEditingAula(null);
-    }
   };
 
-  const deleteAula = (codAula) => {
-    socket.emit("delete-aula", { codAula });
-    setShowEditPopup(false);
+
+  const deleteAula = (Cod_Aula) => {
+    fetch("http://localhost:5170/deleteAula", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ Cod_Aula }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao remover aula");
+        return res.json();
+      })
+      .then(() => {
+        socket.emit("refresh-aulas", { Cod_Turma: turma });
+        setShowEditPopup(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setErro("Erro ao remover aula.");
+      });
   };
 
   const handleAulaChange = (event) => {
@@ -162,6 +290,10 @@ export function useHorarios(escola, aulasMarcadas) {
   };
 
   return {
+
+    // aulas por turma
+    aulasMarcadas,
+
     // states
     dropdownFilters,
     semestre, setSemestre,

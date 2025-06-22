@@ -28,42 +28,29 @@ const AddAulaPopup = ({
         <h3>Adicionar Aula</h3>
 
         <select onChange={(e) => setUc(e.target.value)} value={uc} disabled={!curso}>
-          <option value="" disabled>Escolher UC</option>
+          <option value="" disabled>Escolha a UC</option>
           {ucDisponiveis.map((ucObj) => (
             <option key={ucObj.Cod_Uc} value={ucObj.Cod_Uc}>{ucObj.Nome}</option>
           ))}
         </select>
 
         <select onChange={(e) => setSala(e.target.value)} value={sala}>
-          <option value="" disabled>Escolher Localização</option>
+          <option value="" disabled>Escolha a sala:</option>
           {dropdownFilters.salas.map((salaObj) => (
             <option key={salaObj.Cod_Sala} value={salaObj.Cod_Sala}>{salaObj.Nome}</option>
           ))}
         </select>
 
         <select onChange={(e) => setDocente(e.target.value)} value={docente}>
-          <option value="" disabled>Escolher docente</option>
+          <option value="" disabled>Escolha o Docente:</option>
           {dropdownFilters.docentes.map((docenteObj) => (
             <option key={docenteObj.Cod_Docente} value={docenteObj.Cod_Docente}>{docenteObj.Nome}</option>
           ))}
         </select>
 
-        <select onChange={(e) => setNewAula({ ...newAula, day: e.target.value })} value={newAula.day}>
-          <option value="" disabled>Escolher Dia</option>
-          {diasSemana.map((dia) => (
-            <option key={dia} value={dia}>{dia}</option>
-          ))}
-        </select>
-
-        <input
-          type="time"
-          placeholder="Hora de início"
-          value={newAula.start}
-          onChange={(e) => setNewAula({ ...newAula, start: e.target.value })}
-        />
-
         <input
           type="number"
+          step="30"
           placeholder="Duração (minutos)"
           value={newAula.duration}
           onChange={(e) =>
@@ -75,8 +62,7 @@ const AddAulaPopup = ({
         />
 
         <div className="popup-buttons">
-          <button onClick={addClass} className="btn-primary">Criar Aula Disponível</button>
-          <button onClick={addAulaToSchedule} className="btn-success">Adicionar ao Horário</button>
+          <button onClick={addClass} className="btn-primary">Criar Bloco de Aula</button>
           <button onClick={() => setShow(false)} className="btn-secondary">Cancelar</button>
         </div>
 

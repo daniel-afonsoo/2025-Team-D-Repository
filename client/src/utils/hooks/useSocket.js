@@ -1,21 +1,15 @@
-import { useState, useEffect } from "react";
-import socket from '../socket' 
+import { useEffect } from "react";
+import socket from "../socket";
 
 export function useSocket() {
-    const [socketMsg, setSocketMsg] = useState("fetching socket connection...")
-    const [aulasMarcadas, setAulasMarcadas] = useState([])
+  useEffect(() => {
+    socket.on("connection-ack-alert", (data) => {
+      console.log("[Socket connected]:", data);
+    });
 
-    useEffect(() => {
-        socket.on("connection-ack-msg", (data) => {
-            setSocketMsg(data)
-        })
-    }, [])
+    return () => {
+      socket.off("connection-ack-alert");
+    };
+  }, []);
 
-    useEffect(() => {
-        socket.on("update-aulas", (data) => {
-            setAulasMarcadas(data.newAulas);
-        })
-    }, [])
-
-    return { socketMsg , aulasMarcadas }
 }

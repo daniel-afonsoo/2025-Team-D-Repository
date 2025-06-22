@@ -109,9 +109,10 @@ router.get('/aulas/sala/:Cod_Sala/ano/:Cod_AnoSemestre', (req, res) => {
 
 //FUNCIONA
 router.post('/createAula', async (req, res) => {
-    const {Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim} = req.body
-    const query = `INSERT INTO aula (Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim]
+    console.log("REQ BODY RECEBIDO:", req.body);
+    const {Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration} = req.body
+    const query = `INSERT INTO aula (Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration]
     pool.query(query, values, (err) => {
         if (err) {
             console.error(err)

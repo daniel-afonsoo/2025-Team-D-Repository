@@ -13,6 +13,7 @@ const AulasDisponiveisBox = ({
   getNomeUC,
   getNomeDocente,
   getNomeSala,
+  getAnoTurma,
 }) => {
   return (
     <Droppable id="aulas-disponiveis" isBlocked={false}>
@@ -37,7 +38,7 @@ const AulasDisponiveisBox = ({
                 <div className="aula-disponivel">
                   <div className="aula-header">
                     <strong className="curso-nome">{getNomeCurso(aula.curso)}</strong>
-                    <span className="ano-badge">{aula.ano}º Ano</span>
+                    <span className="ano-badge">{getAnoTurma(aula.turma)}º Ano</span>
                   </div>
 
                   <div className="aula-info">

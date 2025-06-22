@@ -5,7 +5,7 @@ const ControlButtons = ({
   setIsBlocked,
   setShowAddPopup,
   setShowEditPopup,
-  aulasMarcadas,
+  aulasMarcadas = [],
 }) => {
   return (
     <div className="filters-and-buttons">
@@ -32,7 +32,7 @@ const ControlButtons = ({
       <button
         onClick={() => setShowEditPopup(true)}
         className="edit-class-button"
-        disabled={aulasMarcadas.length === 0}
+        disabled={!aulasMarcadas.length}
       >
         Editar Aula
       </button>

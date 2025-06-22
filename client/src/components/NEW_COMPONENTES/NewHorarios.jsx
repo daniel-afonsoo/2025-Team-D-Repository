@@ -3,7 +3,6 @@ import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { useLocation } from "react-router-dom";
 import "../../styles/horarios.css";
-import { useSocket } from "../../utils/hooks/useSocket";
 import socket from "../../utils/socket";
 import { useHorarios } from "../../utils/hooks/useHorarios";
 import Filtros from "./Filtros";
@@ -28,12 +27,9 @@ const horas = Array.from({ length: 31 }, (_, i) => {
 
 function NewHorarios(props) {
 
-  const location = useLocation();
-
-  // Socket aulas marcadas
-  const { aulasMarcadas } = useSocket();
-
   const {
+    // Aulas marcadas (baseado no código da turma)
+    aulasMarcadas,
     // estado dos filtros
     semestre, setSemestre,
     curso, setCurso,
@@ -70,13 +66,14 @@ function NewHorarios(props) {
     saveEditedAula,
     deleteAula,
     handleAulaChange,
-  } = useHorarios(props.escola, aulasMarcadas);
+  } = useHorarios(props.escola);
 
   const getNomeCurso = (cod) => dropdownFilters.cursos.find(c => c.Cod_Curso == cod)?.Nome || cod;
   const getNomeUC = (cod) => dropdownFilters.ucs.find(u => u.Cod_Uc == cod)?.Nome || cod;
   const getNomeSala = (cod) => dropdownFilters.salas.find(s => s.Cod_Sala == cod)?.Nome || cod;
   const getNomeDocente = (cod) => dropdownFilters.docentes.find(d => d.Cod_Docente == cod)?.Nome || cod;
   const getNomeTurma = (cod) => dropdownFilters.turmas.find(t => t.Cod_Turma == cod)?.Turma_Abv || cod;
+  const getAnoTurma = (cod) => dropdownFilters.turmas.find(t => t.Cod_Turma == cod)?.AnoTurma || "?";
 
 
   return (
@@ -86,9 +83,14 @@ function NewHorarios(props) {
         HandleDragEnd(event, {
           setErro,
           setAulasDisponiveis,
+          setNewAula,
+          addAulaToSchedule,
+          saveEditedAula,
+          deleteAula,
+          setEditingAula,
           aulasMarcadas,
           horas,
-          socket,
+          dropdownFilters,
         })
       }
     >
@@ -152,6 +154,7 @@ function NewHorarios(props) {
                     getNomeUC={getNomeUC}
                     getNomeDocente={getNomeDocente}
                     getNomeSala={getNomeSala}
+                    getAnoTurma={getAnoTurma}
                   />
 
                 </div>
