@@ -9,7 +9,10 @@ export default function HandleDragEnd(
     setEditingAula,
     aulasMarcadas,
     horas,
-    dropdownFilters, // necessário para obter o ano
+    dropdownFilters,
+    turma,
+    curso,
+    semestre,
   }
 ) {
   const { active, over } = event;
@@ -81,14 +84,20 @@ export default function HandleDragEnd(
   else if (active.id.startsWith("marcada_")) {
     if (aulaInfo.day === day && aulaInfo.start === start) return;
 
-    setEditingAula({
-      ...aulaInfo,
+    const aulaEditada = {
+      Cod_Aula: aulaInfo.Cod_Aula,
+      docente: aulaInfo.docente,
+      location: aulaInfo.location,
+      turma: aulaInfo.turma || turma,         // fallback para estado global
+      subject: aulaInfo.subject,
+      curso: aulaInfo.curso || curso,         // fallback para estado global
+      semestre: aulaInfo.semestre || semestre, // fallback para estado global
       day,
       start,
       duration: Number(aulaInfo.duration),
-    });
+    };
 
-    saveEditedAula();
+    saveEditedAula(aulaEditada);
   }
 
   function calculateDuration(inicio, fim) {

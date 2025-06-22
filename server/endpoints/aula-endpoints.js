@@ -110,7 +110,7 @@ router.get('/aulas/sala/:Cod_Sala/ano/:Cod_AnoSemestre', (req, res) => {
 //FUNCIONA
 router.post('/createAula', async (req, res) => {
     console.log("REQ BODY RECEBIDO:", req.body);
-    const {Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration} = req.body
+    const { Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration } = req.body
     const query = `INSERT INTO aula (Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration]
     pool.query(query, values, (err) => {
@@ -124,21 +124,44 @@ router.post('/createAula', async (req, res) => {
 })
 
 //FUNCIONA
-router.post('/updateAula', async (req, res) => {  
-    const { Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Cod_Aula } = req.body;
+router.post('/updateAula', async (req, res) => {
+
+    
+    const { Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration 
+    } = req.body;
+
+    console.log("🧾 RECEBIDO EM /updateAula:", {
+  Cod_Aula,
+  Cod_Docente,
+  Cod_Sala,
+  Cod_Turma,
+  Cod_Uc,
+  Cod_Curso,
+  Cod_AnoSemestre,
+  Dia,
+  Inicio,
+  Fim,
+  Duration
+});
 
     // Validação dos campos obrigatórios
-    if (!Cod_Aula || !Cod_Docente || !Cod_Sala || !Cod_Turma || !Cod_Uc || !Cod_Curso || !Cod_AnoSemestre || !Dia || !Inicio || !Fim) {
+    if (!Cod_Aula || !Cod_Docente || !Cod_Sala || !Cod_Turma || !Cod_Uc || !Cod_Curso || !Cod_AnoSemestre || !Dia || !Inicio || !Fim || Duration == null) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
     try {
-        const query = `UPDATE aula SET Cod_Docente = ?, Cod_Sala = ?, Cod_Turma = ?, Cod_Uc = ?, Cod_Curso = ?, Cod_AnoSemestre = ?, Dia = ?, Inicio = ?, Fim = ? WHERE Cod_Aula = ?`;
-        const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Cod_Aula];
+        const query = `
+      UPDATE aula SET
+        Cod_Docente = ?, Cod_Sala = ?, Cod_Turma = ?, Cod_Uc = ?, Cod_Curso = ?,
+        Cod_AnoSemestre = ?, Dia = ?, Inicio = ?, Fim = ?, Duration = ?
+      WHERE Cod_Aula = ?
+    `;
+
+        const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration, Cod_Aula
+        ];
 
         const [result] = await pool.promise().query(query, values);
 
-        // Verificar se a aula foi encontrada e atualizada
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Aula não encontrada' });
         }

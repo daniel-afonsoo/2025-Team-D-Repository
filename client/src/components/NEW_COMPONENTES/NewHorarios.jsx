@@ -91,6 +91,9 @@ function NewHorarios(props) {
           aulasMarcadas,
           horas,
           dropdownFilters,
+          turma,     
+          curso,     
+          semestre,
         })
       }
     >

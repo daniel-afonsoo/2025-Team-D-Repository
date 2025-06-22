@@ -180,7 +180,7 @@ export function useHorarios(escola) {
       Duration: aulaInfo.duration,
     };
 
-    console.log("payload",payload);
+    console.log("payload", payload);
 
     fetch("http://localhost:5170/createAula", {
       method: "POST",
@@ -226,20 +226,21 @@ export function useHorarios(escola) {
     setShowEditPopup(true);
   };
 
-  const saveEditedAula = () => {
-    if (!editingAula) return;
+  const saveEditedAula = (aula) => {
+    if (!aula) return;
 
     const payload = {
-      Cod_Aula: editingAula.Cod_Aula,
-      Cod_Docente: editingAula.docente,
-      Cod_Sala: editingAula.location,
-      Cod_Turma: turma,
-      Cod_Uc: editingAula.subject, // ✅ corrigido aqui
-      Cod_Curso: curso,
-      Cod_AnoSemestre: semestre,
-      Dia: editingAula.day,
-      Inicio: editingAula.start,
-      Fim: calculateEndTime(editingAula.start, editingAula.duration),
+      Cod_Aula: aula.Cod_Aula,
+      Cod_Docente: aula.docente,
+      Cod_Sala: aula.location,
+      Cod_Turma: aula.turma,
+      Cod_Uc: aula.subject,
+      Cod_Curso: aula.curso,
+      Cod_AnoSemestre: aula.semestre,
+      Dia: aula.day,
+      Inicio: aula.start,
+      Fim: calculateEndTime(aula.start, aula.duration),
+      Duration: aula.duration,
     };
 
     fetch("http://localhost:5170/updateAula", {
@@ -252,9 +253,7 @@ export function useHorarios(escola) {
         return res.json();
       })
       .then(() => {
-        socket.emit("refresh-aulas", { Cod_Turma: turma }); // ✅ garantir atualização correta
-        setShowEditPopup(false);
-        setEditingAula(null);
+        socket.emit("refresh-aulas", { Cod_Turma: aula.turma });
       })
       .catch(err => {
         console.error(err);
