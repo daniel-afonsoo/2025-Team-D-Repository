@@ -12,7 +12,7 @@ import { TbUserEdit, TbTrash } from "react-icons/tb";
 
 
 // Componente principal que permite listar, editar e remover docentes
-const Docente_edit_remove = ({ filtro }) => {
+const Docente_edit_remove = ({ filtro, refresh }) => {
   // Estados para controlar dados, modais e campos de edição
   const [dados, setDados] = useState([]);
   const [modalAberta, setModalAberta] = useState(false);
@@ -24,16 +24,20 @@ const Docente_edit_remove = ({ filtro }) => {
   // Título do modal de edição
   const [tituloModal, setTituloModal] = useState('Editar Docente');
 
-  useEffect(() => {
+  // Função para buscar docentes do backend
+  const fetchDocentes = () => {
     axios.get('http://localhost:5170/getDocente')
       .then(response => {
-        console.log("Resposta da API:", response.data);
         setDados(response.data);
       })
       .catch(error => {
         console.error("Erro ao buscar docentes:", error);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchDocentes();
+  }, [refresh]);
 
 
   const dadosFiltrados = dados.filter((docente) =>
@@ -60,8 +64,7 @@ const Docente_edit_remove = ({ filtro }) => {
         data: { cod_docente: idParaRemover }
       })
         .then(() => {
-          console.log("ID para remover:", idParaRemover);
-          setDados(dados.filter(item => item.Cod_Docente !== idParaRemover));
+          fetchDocentes();
           fecharModal();
         })
         .catch(error => {
@@ -101,20 +104,9 @@ const Docente_edit_remove = ({ filtro }) => {
       password: editarCampos.Password
     };
 
-
-    console.log('Dados enviados para updateDocente:', dadosParaEnviar);
-
     axios.post(`http://localhost:5170/updateDocente`, dadosParaEnviar)
       .then(() => {
-        const updatedItem = {
-          Cod_Docente: editarCampos.Cod_Docente,
-          Nome: editarCampos.Nome,
-          Email: editarCampos.Email,
-          Password: editarCampos.Password
-        };
-        setDados(prev => prev.map(item =>item.Cod_Docente === editarCampos.Cod_Docente ? updatedItem : item )  );
-        
-        console.log('Dados depois de atualizar', dados);
+        fetchDocentes();
         fecharModalEdicao();
       })
       .catch(error => {

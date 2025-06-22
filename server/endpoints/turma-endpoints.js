@@ -15,9 +15,9 @@ router.get('/getTurma', (req, res) => {
 })
 
 router.post('/createTurma', async (req, res) => {
-    const {Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma} = req.body;
-    const query = `INSERT INTO turma (Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma) VALUES (?, ?, ?, ?, ?)`;
-    const values = [Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma]
+    const {Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma} = req.body;
+    const query = `INSERT INTO turma (Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma) VALUES (?, ?, ?, ?)`;
+    const values = [Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma]
     pool.query(query, values, (err) => {
         if (err) {
             console.error(err)

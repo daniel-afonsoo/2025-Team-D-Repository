@@ -67,7 +67,8 @@ const Curso_edit_remove = ({ filtro }) => {
   const confirmarRemocao = () => {
     if (idParaRemover !== null) {
       axios.delete('http://localhost:5170/deleteCurso/', {
-        data: { cod_curso: idParaRemover }
+        headers: { 'Content-Type': 'application/json' },
+        data: { Cod_Curso: idParaRemover }
       })
         .then(() => {
           setDados(dados.filter(item => item.Cod_Curso !== idParaRemover));

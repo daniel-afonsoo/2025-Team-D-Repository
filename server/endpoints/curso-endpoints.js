@@ -18,10 +18,10 @@ router.get('/getCurso',(req,res)=>{
 
 //FUNCIONA
 router.post('/createCurso',async(req,res)=>{
-    const {Nome, Abreviacao, Cod_Escola} = req.body
+    const {Nome, Abreviacao, Cod_Escola, Duracao} = req.body
     // Validação dos dados
-    if (!Nome || !Abreviacao || !Cod_Escola) {
-        return res.status(400).json({ error: 'Nome, abreviação e código da escola são obrigatórios' })
+    if (!Nome || !Abreviacao || !Cod_Escola || !Duracao) {
+        return res.status(400).json({ error: 'Nome, abreviação, código da escola e duração do curso são obrigatórios' })
     }
     // Verificar se o curso já existe
     const [resultado] = await pool.promise().query(`SELECT * FROM curso WHERE Nome = ? and Abreviacao = ? and Cod_Escola = ?`,[Nome, Abreviacao, Cod_Escola])
@@ -29,8 +29,8 @@ router.post('/createCurso',async(req,res)=>{
         return res.status(400).json({ error: 'Esse curso já existe' })
     }
     // Inserir novo curso
-    const query = `INSERT INTO curso (Nome, Abreviacao, Cod_Escola) VALUES (?,?,?)`
-    const values = [Nome, Abreviacao, Cod_Escola]
+    const query = `INSERT INTO curso (Nome, Abreviacao, Cod_Escola, Duracao) VALUES (?,?,?,?)`
+    const values = [Nome, Abreviacao, Cod_Escola, Duracao]
     pool.query(query,values,(err) => {
         if(err) {
             console.error(err)
@@ -70,7 +70,7 @@ router.post('/updateCurso', async(req,res)=>{
 router.delete('/deleteCurso', async(req,res)=>{
     const {Cod_Curso} = req.body
     // Validação dos dados
-    if (!cod_curso) {
+    if (!Cod_Curso) {
         return res.status(400).json({ error: 'Código do curso é obrigatório' })
     }
     // Verificar se o curso existe
@@ -78,7 +78,6 @@ router.delete('/deleteCurso', async(req,res)=>{
     if(resultado.length === 0){
         return res.status(400).json({ error: 'Esse curso não existe' })
     }
-    
     //query para remover o curso
     const query = `DELETE FROM curso WHERE Cod_Curso = ?`
     const values = [Cod_Curso]
