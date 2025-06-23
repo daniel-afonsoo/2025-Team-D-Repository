@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db/connection.js')
+const { getSocketIOInstance } = require("../utils/socketInstance");
 
 //FUNCIONA
 router.get('/aulas', (req, res) => {
@@ -118,6 +119,10 @@ router.post('/createAula', async (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         } else {
+            const io = getSocketIOInstance();
+            if (io) {
+                io.emit("update-aulas", { Cod_Turma });
+            }
             return res.status(200).json({ message: 'Aula criada com sucesso' })
         }
     })
@@ -126,23 +131,23 @@ router.post('/createAula', async (req, res) => {
 //FUNCIONA
 router.post('/updateAula', async (req, res) => {
 
-    
-    const { Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration 
+
+    const { Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration
     } = req.body;
 
     console.log("🧾 RECEBIDO EM /updateAula:", {
-  Cod_Aula,
-  Cod_Docente,
-  Cod_Sala,
-  Cod_Turma,
-  Cod_Uc,
-  Cod_Curso,
-  Cod_AnoSemestre,
-  Dia,
-  Inicio,
-  Fim,
-  Duration
-});
+        Cod_Aula,
+        Cod_Docente,
+        Cod_Sala,
+        Cod_Turma,
+        Cod_Uc,
+        Cod_Curso,
+        Cod_AnoSemestre,
+        Dia,
+        Inicio,
+        Fim,
+        Duration
+    });
 
     // Validação dos campos obrigatórios
     if (!Cod_Aula || !Cod_Docente || !Cod_Sala || !Cod_Turma || !Cod_Uc || !Cod_Curso || !Cod_AnoSemestre || !Dia || !Inicio || !Fim || Duration == null) {

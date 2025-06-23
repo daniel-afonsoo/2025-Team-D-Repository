@@ -8,7 +8,6 @@ const HorarioTable = ({
   horas,
   aulasMarcadas = [],
   isBlocked,
-  moveToDisponiveis,
   getNomeUC,
   getNomeSala,
   getNomeDocente,
@@ -64,13 +63,6 @@ const HorarioTable = ({
                               <span className="location">{getNomeDocente(classItem.docente)}</span>
                             </div>
                           </Draggable>
-                          <button
-                            className="move-to-disponiveis-btn"
-                            title="Mover para Aulas Disponíveis"
-                            onClick={() => moveToDisponiveis(classItem)}
-                          >
-                            &rarr;
-                          </button>
                         </div>
                       </td>
                     );

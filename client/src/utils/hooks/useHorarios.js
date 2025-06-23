@@ -31,8 +31,6 @@ export function useHorarios(escola) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [showAddPopup, setShowAddPopup] = useState(false);
-  const [showEditPopup, setShowEditPopup] = useState(false);
-  const [editingAula, setEditingAula] = useState(null);
 
   // Logica para filtros
   const cursoSelecionado = dropdownFilters.cursos.find((c) => c.Cod_Curso == curso);
@@ -68,9 +66,9 @@ export function useHorarios(escola) {
       .catch(console.error);
   }, [escola]);
 
-  useEffect(() => {
-    socket.emit("refresh-aulas");
-  }, []);
+  // useEffect(() => {
+  //   socket.emit("refresh-aulas");
+  // }, []);
 
 
   function calculateDuration(inicio, fim) {
@@ -192,7 +190,7 @@ export function useHorarios(escola) {
         return res.json();
       })
       .then(() => {
-        socket.emit("refresh-aulas", { Cod_Turma: aulaInfo.turma });
+        socket.emit("update-aulas", { Cod_Turma: aulaInfo.turma });
         setShowAddPopup(false);
         setErro("");
       })
@@ -219,11 +217,6 @@ export function useHorarios(escola) {
     setDocente("");
     setNewAula({ subject: "", location: "", docente: "", duration: 30 });
     setShowAddPopup(false);
-  };
-
-  const openEditPopup = (aula) => {
-    setEditingAula(aula);
-    setShowEditPopup(true);
   };
 
   const saveEditedAula = (aula) => {
@@ -274,18 +267,11 @@ export function useHorarios(escola) {
       })
       .then(() => {
         socket.emit("refresh-aulas", { Cod_Turma: turma });
-        setShowEditPopup(false);
       })
       .catch(err => {
         console.error(err);
         setErro("Erro ao remover aula.");
       });
-  };
-
-  const handleAulaChange = (event) => {
-    const aulaId = event.target.value;
-    const aula = aulasMarcadas.find((a) => a.Cod_Aula === aulaId);
-    setEditingAula(aula);
   };
 
   return {
@@ -307,8 +293,6 @@ export function useHorarios(escola) {
     isBlocked, setIsBlocked,
     erro, setErro,
     showAddPopup, setShowAddPopup,
-    showEditPopup, setShowEditPopup,
-    editingAula, setEditingAula,
     searchQuery, setSearchQuery,
 
     // derived
@@ -323,9 +307,7 @@ export function useHorarios(escola) {
     addClass,
     addAulaToSchedule,
     moveToDisponiveis,
-    openEditPopup,
     saveEditedAula,
     deleteAula,
-    handleAulaChange,
   };
 }

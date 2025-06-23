@@ -1,9 +1,13 @@
 const { Server } = require("socket.io");
 const {
-  setSocketIOInstance,
+  setSocketIOInstance: setLoggerSocketIOInstance,
   logToClient,
   getBufferedLogs,
 } = require("../utils/logger");
+
+const {
+  setSocketIOInstance: setAppSocketIOInstance,
+} = require("../utils/socketInstance");
 
 const setupSockets = (server) => {
   const io = new Server(server, {
@@ -12,10 +16,10 @@ const setupSockets = (server) => {
     },
   });
 
-  setSocketIOInstance(io);
+  setLoggerSocketIOInstance(io);
+  setAppSocketIOInstance(io);
 
   io.on("connection", (socket) => {
-    // Logs
     getBufferedLogs().forEach((log) => {
       socket.emit("console-log", log);
     });
@@ -23,7 +27,6 @@ const setupSockets = (server) => {
     console.log(`New socket connection. Socket id: ${socket.id}`);
     socket.emit("connection-ack-alert", "Real-time connection established.");
 
-    // Broadcast refresh for specific turma
     socket.on("refresh-aulas", (data) => {
       if (data?.Cod_Turma) {
         io.emit("update-aulas", { Cod_Turma: data.Cod_Turma });
@@ -33,5 +36,7 @@ const setupSockets = (server) => {
 
   logToClient("setup", "Socket.io setup complete");
 };
+
+module.exports = { setupSockets };
 
 module.exports = { setupSockets };

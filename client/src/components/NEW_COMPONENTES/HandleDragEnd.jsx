@@ -6,7 +6,6 @@ export default function HandleDragEnd(
     addAulaToSchedule,
     saveEditedAula,
     deleteAula,
-    setEditingAula,
     aulasMarcadas,
     horas,
     dropdownFilters,

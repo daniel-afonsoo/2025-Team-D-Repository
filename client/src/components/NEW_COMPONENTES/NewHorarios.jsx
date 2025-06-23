@@ -1,7 +1,6 @@
 import React from "react";
 import { DndContext } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { useLocation } from "react-router-dom";
 import "../../styles/horarios.css";
 import socket from "../../utils/socket";
 import { useHorarios } from "../../utils/hooks/useHorarios";
@@ -9,7 +8,6 @@ import Filtros from "./Filtros";
 import HorarioTable from "./HorarioTable";
 import AulasDisponiveisBox from "./AulasDisponiveisBox";
 import AddAulaPopup from "./AddAulaPopup";
-import EditAulaPopup from "./EditAulaPopup";
 import ControlButtons from "./ControlButtons";
 import HandleDragEnd from "./HandleDragEnd";
 
@@ -46,8 +44,6 @@ function NewHorarios(props) {
     isBlocked, setIsBlocked,
     erro, setErro,
     showAddPopup, setShowAddPopup,
-    showEditPopup, setShowEditPopup,
-    editingAula, setEditingAula,
     searchQuery, setSearchQuery,
 
     // derivados
@@ -62,10 +58,8 @@ function NewHorarios(props) {
     addClass,
     addAulaToSchedule,
     moveToDisponiveis,
-    openEditPopup,
     saveEditedAula,
     deleteAula,
-    handleAulaChange,
   } = useHorarios(props.escola);
 
   const getNomeCurso = (cod) => dropdownFilters.cursos.find(c => c.Cod_Curso == cod)?.Nome || cod;
@@ -87,7 +81,6 @@ function NewHorarios(props) {
           addAulaToSchedule,
           saveEditedAula,
           deleteAula,
-          setEditingAula,
           aulasMarcadas,
           horas,
           dropdownFilters,
@@ -120,7 +113,6 @@ function NewHorarios(props) {
               isBlocked={isBlocked}
               setIsBlocked={setIsBlocked}
               setShowAddPopup={setShowAddPopup}
-              setShowEditPopup={() => openEditPopup(aulasMarcadas[0])}
               aulasMarcadas={aulasMarcadas}
             />
           )}
@@ -186,19 +178,6 @@ function NewHorarios(props) {
         addClass={addClass}
         addAulaToSchedule={addAulaToSchedule}
         curso={curso}
-      />
-
-      <EditAulaPopup
-        aulasMarcadas={aulasMarcadas}
-        editingAula={editingAula}
-        setEditingAula={setEditingAula}
-        show={showEditPopup}
-        setShow={setShowEditPopup}
-        getNomeUC={getNomeUC}
-        getNomeSala={getNomeSala}
-        handleAulaChange={handleAulaChange}
-        saveEditedAula={saveEditedAula}
-        deleteAula={deleteAula}
       />
 
     </DndContext>

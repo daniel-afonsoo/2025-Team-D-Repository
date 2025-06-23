@@ -4,7 +4,6 @@ const ControlButtons = ({
   isBlocked,
   setIsBlocked,
   setShowAddPopup,
-  setShowEditPopup,
   aulasMarcadas = [],
 }) => {
   return (
@@ -29,13 +28,6 @@ const ControlButtons = ({
         {isBlocked ? "🔴 Desbloquear Horário" : "🟢 Bloquear Horário"}
       </button>
 
-      <button
-        onClick={() => setShowEditPopup(true)}
-        className="edit-class-button"
-        disabled={!aulasMarcadas.length}
-      >
-        Editar Aula
-      </button>
     </div>
   );
 };
