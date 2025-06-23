@@ -32,6 +32,15 @@ const setupSockets = (server) => {
         io.emit("update-aulas", { Cod_Turma: data.Cod_Turma });
       }
     });
+
+    socket.on("refresh-logs", () => {
+      console.log(`Refreshing logs for socket ${socket.id}`);
+      socket.emit('clear-logs');
+      getBufferedLogs().forEach(log => {
+        socket.emit('console-log', log);
+      });
+    });
+    
   });
 
   logToClient("setup", "Socket.io setup complete");

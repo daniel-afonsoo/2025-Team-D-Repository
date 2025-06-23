@@ -1,35 +1,49 @@
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import "../../styles/createForms.css";
 import axios from 'axios'
 
 
 const CursoCreate = () => {
-
     const [nome, setNome] = useState("");
     const [abreviatura, setAbreviatura] = useState("");
     const [escola, setEscola] = useState([""]);
     const [codCurso, setCodCurso] = useState("");
+    const [duracao, setDuracao] = useState("");
     const [error, setError] = useState("");
-    const opcoesEscolas = ["Escola A", "Escola B", "Escola C"]; // Simulação de dados do backend
+    const [escolasDisponiveis, setEscolasDisponiveis] = useState([]);
+    const [successMessage, setSuccessMessage] = useState("");
+
+
+    useEffect(() => {
+        axios.get("http://localhost:5170/getEscola")
+            .then(response => {
+                setEscolasDisponiveis(response.data);
+            })
+            .catch(error => {
+                setError("Erro ao buscar escolas.");
+            });
+    }, []);
 
     const handleSubmit = async (e) => {
         //previne que a página de refresh, por default o onsubmit do forms da refresh na página
         e.preventDefault();
         //elimina todos os erros
         setError("");
+        setSuccessMessage("");
 
         // Verifica se os campos estão vazios
-        if (!nome.trim() || !abreviatura.trim() || escola[0] == "" || codCurso === null || codCurso === "") {
+        if (!nome.trim() || !abreviatura.trim() || escola[0] === "" || codCurso === null || codCurso === "" || duracao === "") {
             setError("Por favor, preencha todos os campos.");
             return;
         }
 
-        // Criar curso para mandar para o backend
+        // Enviar apenas o id da escola (Cod_Escola)
         const novoCurso = {
-            nome,
-            abreviatura,
-            escola,
-            codCurso
+            Nome: nome,
+            Abreviacao: abreviatura,
+            Cod_Escola: escola[0],
+            Cod_Curso: codCurso,
+            Duracao: parseInt(duracao, 10)
         };
 
         //post no backend através de axios
@@ -41,25 +55,16 @@ const CursoCreate = () => {
                 if (response.status === 200) {
                     setSuccessMessage("Curso criado com sucesso!");
                     setNome("");
-                    setAbreviatura("")
-                    setEscola("")
-                    setCodCurso("")
+                    setAbreviatura("");
+                    setEscola([""]);
+                    setCodCurso("");
+                    setDuracao("");
                 }
             })
             .catch(err => {
-                setError(err.response?.data?.message || "Erro ao criar Curso.");
+                setError(err.response?.data?.error || "Erro ao criar Curso.");
             });
 
-    };
-
-
-
-
-
-    // Função para adicionar uma nova dropdown ao array de escolas
-    const adicionarDropdown = () => {
-        // Adiciona uma nova escola vazia ao array
-        setEscola([...escola, ""]);
     };
 
     // Função para atualizar o valor da dropdown quando o utilizador seleciona uma opção
@@ -77,38 +82,42 @@ const CursoCreate = () => {
         <div className="formulario">
             <div className='loginSquare'>
                 {error && <p style={{ color: "red" }}>{error}</p>}
+                {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
                 <form className='forms' onSubmit={handleSubmit}>
                     <div className='createIdentifier'>
                         <p><b>Criar Curso</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome do Curso</font></label>
+                        <label><font>Nome do Curso</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Abreviatura do curso</font></label>
+                        <label><font>Abreviatura do curso</font></label>
                         <input className='textbox_input' type="text" name="abrt" required="" value={abreviatura} onChange={(e) => setAbreviatura(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Código do Curso</font></label>
+                        <label><font>Código do Curso</font></label>
                         <input className='textbox_input' type="number" name="CodCurso" required="" value={codCurso} onChange={(e) => setCodCurso(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Escolas do Curso</font></label>
-                        {escola.map((escola, index) => (
+                        <label><font>Duração do Curso (anos)</font></label>
+                        <input className='textbox_input' type="number" min="1" name="duracao" required value={duracao} onChange={(e) => setDuracao(e.target.value)} />
+                    </div>
+                    <div className="create_input_field" style={{ fontWeight: 'bold' }}>
+                        <label><font>Escolas do Curso</font></label>
+                        {escola.map((escolaId, index) => (
                             <select
                                 key={index}
                                 className='input_dropdown'
-                                value={escola}
+                                value={escolaId}
                                 onChange={(e) => handleChange(index, e.target.value)}
                             >
                                 <option value="">Selecione uma escola</option>
-                                {opcoesEscolas.map((opcao, idx) => (
-                                    <option key={idx} value={opcao}>{opcao}</option>
+                                {escolasDisponiveis.map((opcao) => (
+                                    <option key={opcao.Cod_Escola} value={opcao.Cod_Escola}>{opcao.Nome}</option>
                                 ))}
                             </select>
                         ))}
-                        <button className="botao_create" type="button" onClick={adicionarDropdown} style={{ marginTop: '5px' }}>Adicionar outra escola</button>
                     </div>
                     <button className="botao_create" type='submit' >Criar</button>
                 </form>

@@ -28,6 +28,7 @@
     background-color: #3e8802;
     background-repeat: no-repeat;
     opacity: 0.6;
+    font-size: 1.3rem;
     background-position: center;
     background-size: 100%;
     color: white;
@@ -37,54 +38,93 @@
 
 .card p {
     text-align: left;
+    font-size: 1.2rem;
     min-width: 200px;
 }
 
+.limited-password {
+    max-width: 300px;       
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
 .btSave {
-    font-size: 15px;
+    font-size: 20px;
+    padding: 0.3rem 0.6rem;
     text-align: center;
-    font-family: "Courier New", Courier, monospace;
     border-radius: 12px;
-    font-weight: bold;
     text-shadow: 0 0 3px #FFF;
     display: block;
     max-width: 100%;
     max-height: 100%;
     margin-right: 0;
-    top: 5px;
+    top: 0;
     bottom: 0;
     left: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+}
+
+.btSave:hover{
+    background-color: #82C748;
 }
 
 .btEdit {
     font-size: 15px;
     text-align: center;
-    font-family: "Courier New", Courier, monospace;
+    justify-content: center;
     border-radius: 12px;
-    font-weight: bold;
     text-shadow: 0 0 3px #FFF;
     max-width: 100%;
     max-height: 100%;
-    margin-right: 10px;
+    margin-right: 10%;
+    margin-top: 5px;
+    display: inline-block;
     top: 0;
     bottom: 0;
     left: 0;
+    padding: 5px 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+}
+
+.btEdit:hover{
+    background-color: #82C748;
 }
 
 .btRemove {
     font-size: 15px;
     text-align: center;
-    font-family: "Courier New", Courier, monospace;
+    padding: 0.4rem 0.8rem;
+    justify-content: center;
     border-radius: 12px;
-    font-weight: bold;
     text-shadow: 0 0 3px #FFF;
+    display: inline-block;
     max-width: 100%;
     max-height: 100%;
     margin-right: 0;
+    margin-top: 5px;
+    padding: 5px 10px;
     top: 0;
     bottom: 0;
     left: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+}
+
+.btRemove:hover{
+    background-color: #82C748;
 }

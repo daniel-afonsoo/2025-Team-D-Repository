@@ -17,6 +17,8 @@ import EscolaCreate from '../components/create/EscolaCreate.jsx'
 import SalaCreate from '../components/create/SalaCreate.jsx'
 import TurmaCreate from '../components/create/TurmaCreate.jsx'
 
+import ipt_background from '../images/background_ipt_logo.svg'
+
 const DataPages = () => {
 
     const location = useLocation();
@@ -63,16 +65,17 @@ const DataPages = () => {
     }
 
     return (
-        <div>
+        <div className='data_pages_area' style={{ backgroundImage: `url(${ipt_background})` }}>
             <div className='PageTop'>
                 <SearchBar pageToGo={() => setShowModal(true)}  ButtonText={TextoBotao} searchValue={termoPesquisa} onSearchChange={setTermoPesquisa} />
             </div>
+            
             {Conteudo}
 
             {/* Modal simples */}
             {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
+                <div className="modal-overlay-dataPages">
+                    <div className="modal-content-dataPages">
                         {FormCreate}
                         <button className='botaoModal' onClick={() => setShowModal(false)}>Fechar</button>
                     </div>

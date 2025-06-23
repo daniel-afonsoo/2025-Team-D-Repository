@@ -1,47 +1,46 @@
-import React from 'react';
+import React  from 'react';
 import "../styles/dashboard.css";
 import { useNavigate, Link } from 'react-router-dom'; // Importe useNavigate
+import ipt_background from '../images/novo_backgound_logo_ipt.svg'
+
 
 const Dashboard = () => {
   const navigate = useNavigate(); // Inicialize o hook useNavigate
   const nome = "Diogo Larangeira";
 
+
+
   return (
-    <div className="area">
-      <h1 className="titulo">Bem-vindo <span className="destaque">{nome}</span></h1>
+    <div className="area_dashboard">
+      <div
+        className="dashboard-background"
+        style={{ backgroundImage: `url(${ipt_background})` }}
+      />
 
-      <div className="botoes-container">
+      {/* Conteúdo principal por cima da imagem */}
+      <div className="dashboard-content">
+        <h1 className="titulo_dashboard">Bem-vindo <span className="destaque_dashboard">{nome}</span></h1>
 
-        <div>
-          {/* Botão Horários ESGT */}
-          <button className="botao" onClick={() => navigate('/horariosESGT')}>Horários ESGT</button>
-          <Link className='linksEdit' to="/horariosESGT">Editar Horário</Link>
+        <div className="botoes-container">
+          <div>
+            <button className="botao_dashboard" onClick={() => navigate('/horariosESGT')}>Horários ESGT</button>
+            <Link className='linksEdit' to="/horariosESGT">Editar Horário</Link>
+          </div>
+
+          <div>
+            <button className="botao_dashboard" onClick={() => navigate('/horariosESTT')}>Horários ESTT</button>
+            <Link className='linksEdit' to="/horariosESTT">Editar Horário</Link>
+          </div>
+
+          <div>
+            <button className="botao_dashboard" onClick={() => navigate('/horariosESTA')}>Horários ESTA</button>
+            <Link className='linksEdit' to="/horariosESTA">Editar Horário</Link>
+          </div>
         </div>
 
-        <div>
-          {/* Botão Horários ESTT */}
-          <button className="botao" onClick={() => navigate('/horariosESTT')} > Horários ESTT </button>
-          <Link className='linksEdit' to="/horariosESTT">Editar Horário</Link>
+        <div className="backoffice-container_dashboard">
+          <button className="botao_backoffice_dashboard" onClick={() => navigate('/backoffice')}>Backoffice</button>
         </div>
-
-        <div>
-          {/* Botão Horários ESTA */}
-        <button  className="botao" onClick={() => navigate('/horariosESTA')}> Horários ESTA </button>
-         <Link className='linksEdit' to="/horariosESTA">Editar Horário</Link>
-        </div>
-        
-      </div>
-
-
-
-      {/* Botão Backoffice centralizado */}
-      <div className="backoffice-container">
-        <button
-          className="botao backoffice"
-          onClick={() => navigate('/backoffice')}
-        >
-          Backoffice
-        </button>
       </div>
     </div>
   );
