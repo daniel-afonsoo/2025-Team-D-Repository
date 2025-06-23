@@ -4,37 +4,46 @@ const pool = require('../db/connection.js')
 
 
 router.get('/getDropdownFilters', async (req, res) => {
+    //receber parametro 
+    const {escola} = req.query
+
     try {
-        // Query para obter as escolas
-        const escolasQuery = `SELECT Cod_Escola, Abreviacao FROM escola`;
-        const [escolas] = await pool.promise().query(escolasQuery);
 
-        // Query para obter os cursos
-        const cursosQuery = `SELECT Cod_Curso, Nome FROM curso`;
-        const [cursos] = await pool.promise().query(cursosQuery);
+        const [anosemestre] = await pool.promise().query(
+            `SELECT * FROM anosemestre`
+        );
 
-        // Query para obter as turmas
-        const turmasQuery = `SELECT Cod_Turma, Turma, AnoTurma FROM turma`;
-        const [turmas] = await pool.promise().query(turmasQuery);
+        const [cursos] = await pool.promise().query(
+            `SELECT * FROM curso Where Cod_Escola = ?`, [escola]
+        );
 
-        // Estrutura JSON
-        const response = {
-            filtrosEscolas: escolas.map(escola => ({
-                Cod_Escola: escola.Cod_Escola,
-                Abreviacao: escola.Abreviacao
-            })),
-            filtrosCursos: cursos.map(curso => ({
-                Cod_Curso: curso.Cod_Curso,
-                Nome: curso.Nome
-            })),
-            filtrosTurma: turmas.map(turma => ({
-                Cod_Turma: turma.Cod_Turma,
-                Turma: turma.Turma,
-                AnoTurma: turma.AnoTurma
-            }))
-        };
 
-        res.status(200).json(response);
+        const [turmas] = await pool.promise().query(
+            `SELECT * FROM turma`
+        );
+
+
+        const [ucs] = await pool.promise().query(
+            `SELECT * FROM uc`
+        );
+
+
+        const [salas] = await pool.promise().query(
+            `SELECT * FROM sala`
+        );
+
+        const [docentes] = await pool.promise().query(
+            `SELECT * FROM docente`
+        );
+
+        res.status(200).json({
+            anosemestre,
+            cursos,
+            turmas,
+            ucs,
+            salas,
+            docentes
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erro interno do servidor' });

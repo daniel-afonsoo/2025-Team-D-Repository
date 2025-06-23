@@ -1,0 +1,30 @@
+.schedule-container {
+    margin: 20px 0;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    table-layout: fixed; /* Ensures all columns have the same width */
+}
+
+.schedule-table th, .schedule-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    width: 1%; /* Ensures equal width distribution */
+}
+
+.schedule-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.hora {
+    font-weight: bold;
+}
+
+.empty-slot {
+    height: 40px;
+    background-color: #f9f9f9;
+}

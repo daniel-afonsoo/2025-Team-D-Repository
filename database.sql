@@ -38,7 +38,8 @@ CREATE TABLE `aula` (
   `Cod_AnoSemestre` int(10) NOT NULL,
   `Dia` varchar(50) NOT NULL,
   `Inicio` varchar(50) NOT NULL,
-  `Fim` varchar(50) NOT NULL
+  `Fim` varchar(50) NOT NULL,
+  `Cod_Escola` int(10) NOT NULL,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
