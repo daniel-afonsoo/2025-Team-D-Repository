@@ -1,13 +1,11 @@
-/* horarios.css */
-
 .horarios-container {
   padding: 20px;
-  overflow: visible; /* Permite que o dragOverlay vá além dos limites */
-  position: relative; /* Necessário para posicionamento absoluto dos overlays */
+  overflow: visible;
+  position: relative;
 }
 
 .drag-overlay {
-  position: fixed; /* Importantíssimo */
+  position: fixed;
   z-index: 9999;
   pointer-events: none;
 }
@@ -55,7 +53,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Added z-index to ensure it is above other elements */
+  z-index: 1000;
 }
 
 .popup-content {
@@ -91,34 +89,39 @@
   margin-top: 10px;
 }
 
-.timetable-container {
-  overflow-x: auto;
-  display: flex;
-  flex-direction: row; /* Change to row for horizontal alignment */
-  gap: 20px; /* Add spacing between timetable and available classes */
-  align-items: flex-start; /* Align items at the top */
-}
-
-.timetable {
-  width: auto;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-
-.timetable th,
-.timetable td {
-  border: 1px solid #ccc;
-  padding: 0;
-  text-align: center;
-  width: 150px;
-  height: 40px; /* One 30-minute block */
-}
-
+/* MAIN LAYOUT ADJUSTED */
 .timetable-and-available-classes {
   display: flex;
   flex-direction: row;
   gap: 20px;
   align-items: flex-start;
+}
+
+.timetable-container {
+  flex: 4;
+  min-width: 0;
+}
+
+.right-panel {
+  flex: 1;
+  max-width: 280px;
+}
+
+/* TIMETABLE */
+.timetable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid #000;
+}
+
+.timetable th,
+.timetable td {
+  border: 1px solid #000;
+  padding: 0;
+  text-align: center;
+  width: 150px;
+  height: 65px;
 }
 
 .hora {
@@ -139,28 +142,29 @@
   display: flex;
   align-items: stretch;
   height: 100%;
-  min-height: 40px; /* Garante altura mínima igual à célula */
+  min-height: 40px;
   position: relative;
 }
 
 .class-cell:hover .class-entry {
-  background-color: #145a0a; /* Darker shade for hover */
+  background-color: #145a0a;
   color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for emphasis */
-   /* Ensure it appears above other elements */
-  position: relative; /* Required for z-index to work */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
 .class-entry {
-  height:100%;
-  width: 100px;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  cursor: grab;
+  justify-content: space-evenly;
+  align-items: center;
   background-color: #0dab05;
   color: white;
-  padding: 8px;
+  text-align: center;
+  font-size: 1.2em;
+  padding: 6px;
   border-radius: 6px;
   box-sizing: border-box;
   overflow: hidden;
@@ -172,11 +176,13 @@
 }
 
 .empty-slot {
+  border: #000 solid 1px;
   display: table-cell;
   background-color: #fafafa;
   height: 40px;
 }
 
+/* AULAS DISPONÍVEIS */
 .aula-disponivel {
   background-color: #0dab05;
   border: 1px solid #145a0a;
@@ -191,7 +197,6 @@
   font-size: 14px;
 }
 
-/* Add styles for the search input field */
 .search-input {
   width: 100%;
   padding: 8px;
@@ -202,7 +207,6 @@
   box-sizing: border-box;
 }
 
-/* Adicionei estilos para o botão de edição de aulas. */
 .edit-class-button {
   padding: 8px 16px;
   background-color: #0dab05;
@@ -216,10 +220,8 @@
   background-color: #145a0a;
 }
 
-/* Botão para mover aula para as aulas disponíveis */
 .move-to-disponiveis-btn {
   align-self: center;
-  
   position: absolute;
   top: 6px;
   right: 6px;
@@ -251,3 +253,44 @@
   gap: 8px;
   padding: 8px 0;
 }
+
+.export-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f8f8f8;
+  border-left: 4px solid #0dab05;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.export-section h2 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.export-section h4 {
+  margin: 0 0 10px 0;
+  font-weight: 500;
+  color: #555;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.export-btn {
+  padding: 8px 16px;
+  background-color: #0dab05;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.export-btn:hover {
+  background-color: #145a0a;
+}
+

@@ -10,6 +10,7 @@ import AulasDisponiveisBox from "./AulasDisponiveisBox";
 import AddAulaPopup from "./AddAulaPopup";
 import ControlButtons from "./ControlButtons";
 import HandleDragEnd from "./HandleDragEnd";
+import { exportToPdf, exportToExcel } from '../../utils/exportFunctions';
 
 
 // Funcao para gerar os intervalos de horas
@@ -84,8 +85,8 @@ function NewHorarios(props) {
           aulasMarcadas,
           horas,
           dropdownFilters,
-          turma,     
-          curso,     
+          turma,
+          curso,
           semestre,
         })
       }
@@ -120,6 +121,15 @@ function NewHorarios(props) {
           {/* Show content only if filters are selected */}
           {filtrosSelecionados ? (
             <>
+              <div className="export-section">
+                <h2>Horário da turma {getNomeTurma(turma)} do {ano}º ano de {getNomeCurso(curso)}</h2>
+                <h3>Exportar horário:</h3>
+                <div className="export-buttons">
+                  <button className="export-btn" onClick={() => exportToPdf(turma)}>PDF</button>
+                  <button className="export-btn" onClick={() => exportToExcel(turma)}>Excel</button>
+                </div>
+              </div>
+
               <div className="conteudo">
                 <div className="timetable-and-available-classes">
                   {/* Tabela do horário */}
@@ -137,20 +147,30 @@ function NewHorarios(props) {
                     />
                   </div>
 
-                  {/* Aulas Disponíveis */}
-                  <AulasDisponiveisBox
-                    searchQuery={searchQuery}
-                    setSearchQuery={setSearchQuery}
-                    filteredAulasDisponiveis={filteredAulasDisponiveis}
-                    isBlocked={isBlocked}
-                    filtrosSelecionados={filtrosSelecionados}
-                    getNomeCurso={getNomeCurso}
-                    getNomeTurma={getNomeTurma}
-                    getNomeUC={getNomeUC}
-                    getNomeDocente={getNomeDocente}
-                    getNomeSala={getNomeSala}
-                    getAnoTurma={getAnoTurma}
-                  />
+                  <div className="right-panel">
+                    <h3>Aulas Disponíveis</h3>
+                    <input
+                      type="text"
+                      placeholder="Pesquisar aulas..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="search-input"
+                    />
+                    {/* Aulas Disponíveis */}
+                    <AulasDisponiveisBox
+                      searchQuery={searchQuery}
+                      setSearchQuery={setSearchQuery}
+                      filteredAulasDisponiveis={filteredAulasDisponiveis}
+                      isBlocked={isBlocked}
+                      filtrosSelecionados={filtrosSelecionados}
+                      getNomeCurso={getNomeCurso}
+                      getNomeTurma={getNomeTurma}
+                      getNomeUC={getNomeUC}
+                      getNomeDocente={getNomeDocente}
+                      getNomeSala={getNomeSala}
+                      getAnoTurma={getAnoTurma}
+                    />
+                  </div>
 
                 </div>
               </div>

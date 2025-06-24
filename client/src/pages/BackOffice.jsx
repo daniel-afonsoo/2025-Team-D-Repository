@@ -4,9 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import ConsoleViewer from '../components/backoffice/ConsoleViewer';
 import ExportPopup from '../components/backoffice/ExportPopup';
 import UploadSQL from '../components/backoffice/UploadSQL';
+import { exportToPdf, exportToExcel } from '../utils/exportFunctions';
 
 const Backoffice = () => {
   const navigate = useNavigate();
+
+  const [codTurma, setCodTurma] = useState("");
 
   // export feature
   const [showPopup, setShowPopup] = useState(false);
@@ -52,9 +55,14 @@ const Backoffice = () => {
       <div className="container_back">
         <h2>Exportar Aulas</h2>
         <h3>Exportação Rápida:</h3>
-        <input id="" type="text" placeholder="Insira o Codigo da turma:" />
-        <button>PDF</button>
-        <button>Excel</button>
+        <input
+          type="text"
+          placeholder="Insira o Codigo da turma:"
+          value={codTurma}
+          onChange={(e) => setCodTurma(e.target.value)}
+        />
+        <button onClick={() => exportToPdf(codTurma)}>PDF</button>
+        <button onClick={() => exportToExcel(codTurma)}>Excel</button>
         <div>
           <button onClick={() => setShowPopup(true)}>Exportação com Pesquisa</button>
         </div>
