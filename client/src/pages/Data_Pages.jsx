@@ -9,6 +9,7 @@ import UCs from '../components/edit_remove/UCs_Forms.jsx'
 import Escolas from '../components/edit_remove/Escolas_Forms.jsx'
 import Salas from '../components/edit_remove/Salas_Forms.jsx'
 import Turmas from '../components/edit_remove/Turmas_Forms.jsx'
+import Semestres from '../components/edit_remove/Semestres_Forms.jsx'
 
 import DocenteCreate from '../components/create/DocenteCreate.jsx'
 import CursoCreate from '../components/create/CursoCreate.jsx'
@@ -16,7 +17,7 @@ import UCseCreate from '../components/create/UCCreate.jsx'
 import EscolaCreate from '../components/create/EscolaCreate.jsx'
 import SalaCreate from '../components/create/SalaCreate.jsx'
 import TurmaCreate from '../components/create/TurmaCreate.jsx'
-
+import SemestreCreate from '../components/create/SemestreCreate.jsx'
 import ipt_background from '../images/background_ipt_logo.svg'
 
 const DataPages = () => {
@@ -60,6 +61,10 @@ const DataPages = () => {
         Conteudo = <Turmas filtro={termoPesquisa} />;
         TextoBotao = "Criar Turma"
         FormCreate = <TurmaCreate />
+    } else if (path === "/backoffice/semestres") {
+        Conteudo = <Semestres filtro={termoPesquisa} />;
+        TextoBotao = "Criar Semestre"
+        FormCreate = <SemestreCreate />
     } else {
         Conteudo = <p>Página não encontrada</p>;
     }

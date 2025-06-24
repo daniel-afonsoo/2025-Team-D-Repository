@@ -50,6 +50,7 @@ const Navbar = () => {
             <Link className={getSelectedClass("escolas")} to="/backoffice/escolas">Escolas</Link>
             <Link className={getSelectedClass("salas")} to="/backoffice/salas">Salas</Link>
             <Link className={getSelectedClass("turmas")} to="/backoffice/turmas">Turmas</Link>
+            <Link className={getSelectedClass("semestres")} to="/backoffice/semestres">Semestres</Link>
           </>
         )}
 

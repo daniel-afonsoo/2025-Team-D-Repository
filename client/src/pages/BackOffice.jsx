@@ -43,9 +43,11 @@ const Backoffice = () => {
           <button className="botao_backoffice" onClick={() => navigate('/backoffice/escolas')}>Escolas</button>
           {/* Botão Salas */}
           <button className="botao_backoffice" onClick={() => navigate('/backoffice/salas')}>Salas</button>
-          {/* Botão Turas */}
+          {/* Botão Turmas */}
           <button className="botao_backoffice" onClick={() => navigate('/backoffice/turmas')}>Turmas</button>
-        </div>
+           {/* Botão Semestres */}
+          <button className="botao_backoffice" onClick={() => navigate('/backoffice/semestres')}>Semestres</button>
+        </div>  
       </div>
 
       <div className="container_back">
