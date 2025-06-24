@@ -81,7 +81,24 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-right">
-
+        {path !== "/login" && (
+          <button
+            className="logout-button"
+            onClick={async () => {
+              try {
+                await fetch('http://localhost:5170/auth/logout', {
+                  method: 'POST',
+                  credentials: 'include',
+                });
+                window.location.href = '/login';
+              } catch (err) {
+                console.error('Erro ao fazer logout:', err);
+              }
+            }}
+          >
+            Sair
+          </button>
+        )}
       </div>
     </div>
   );

@@ -11,6 +11,8 @@ import AddAulaPopup from "./AddAulaPopup";
 import ControlButtons from "./ControlButtons";
 import HandleDragEnd from "./HandleDragEnd";
 import { exportToPdf, exportToExcel } from '../../utils/exportFunctions';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 
 // Funcao para gerar os intervalos de horas
@@ -25,6 +27,14 @@ const horas = Array.from({ length: 31 }, (_, i) => {
 });
 
 function NewHorarios(props) {
+
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    axios.get("http://localhost:5170/auth/verify", { withCredentials: true })
+      .then(res => setRole(res.data.role))
+      .catch(() => setRole(null));
+  }, []);
 
   const {
     // Aulas marcadas (baseado no código da turma)
@@ -74,7 +84,9 @@ function NewHorarios(props) {
   return (
     <DndContext
       modifiers={[restrictToWindowEdges]}
-      onDragEnd={(event) =>
+      onDragEnd={(event) => {
+        if (!['admin', 'comissao'].includes(role)) return;
+
         HandleDragEnd(event, {
           setErro,
           setAulasDisponiveis,
@@ -89,7 +101,7 @@ function NewHorarios(props) {
           curso,
           semestre,
         })
-      }
+      }}
     >
       <div className="horarios-container">
         <div className="layout">
@@ -109,7 +121,7 @@ function NewHorarios(props) {
             />
           </div>
 
-          {filtrosSelecionados && (
+          {filtrosSelecionados && ['comissao', 'diretor', 'admin'].includes(role) && (
             <ControlButtons
               isBlocked={isBlocked}
               setIsBlocked={setIsBlocked}
@@ -144,33 +156,35 @@ function NewHorarios(props) {
                       getNomeSala={getNomeSala}
                       getNomeDocente={getNomeDocente}
                       setErro={setErro}
+                      role={role}
                     />
                   </div>
 
-                  <div className="right-panel">
-                    <h3>Aulas Disponíveis</h3>
-                    <input
-                      type="text"
-                      placeholder="Pesquisar aulas..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="search-input"
-                    />
-                    {/* Aulas Disponíveis */}
-                    <AulasDisponiveisBox
-                      searchQuery={searchQuery}
-                      setSearchQuery={setSearchQuery}
-                      filteredAulasDisponiveis={filteredAulasDisponiveis}
-                      isBlocked={isBlocked}
-                      filtrosSelecionados={filtrosSelecionados}
-                      getNomeCurso={getNomeCurso}
-                      getNomeTurma={getNomeTurma}
-                      getNomeUC={getNomeUC}
-                      getNomeDocente={getNomeDocente}
-                      getNomeSala={getNomeSala}
-                      getAnoTurma={getAnoTurma}
-                    />
-                  </div>
+                  {['comissao', 'diretor', 'admin'].includes(role) && (
+                    <div className="right-panel">
+                      <h3>Aulas Disponíveis</h3>
+                      <input
+                        type="text"
+                        placeholder="Pesquisar aulas..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                      />
+                      <AulasDisponiveisBox
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        filteredAulasDisponiveis={filteredAulasDisponiveis}
+                        isBlocked={isBlocked}
+                        filtrosSelecionados={filtrosSelecionados}
+                        getNomeCurso={getNomeCurso}
+                        getNomeTurma={getNomeTurma}
+                        getNomeUC={getNomeUC}
+                        getNomeDocente={getNomeDocente}
+                        getNomeSala={getNomeSala}
+                        getAnoTurma={getAnoTurma}
+                      />
+                    </div>
+                  )}
 
                 </div>
               </div>

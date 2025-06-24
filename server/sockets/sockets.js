@@ -25,7 +25,6 @@ const setupSockets = (server) => {
     });
 
     console.log(`New socket connection. Socket id: ${socket.id}`);
-    socket.emit("connection-ack-alert", "Real-time connection established.");
 
     socket.on("refresh-aulas", (data) => {
       if (data?.Cod_Turma) {

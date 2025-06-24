@@ -20,7 +20,7 @@ export default function RouterConfig() {
      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* dashboard: qualquer user autenticado */}
-      <Route element={<PrivateRoute allowedRoles={['user','admin']} />}>
+      <Route element={<PrivateRoute allowedRoles={['prof', 'comissao', 'diretor', 'admin']} />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/horariosESGT" element={<HorariosESGT />} />
         <Route path="/horariosESTT" element={<HorariosESTT />} />
@@ -28,7 +28,7 @@ export default function RouterConfig() {
       </Route>
 
       {/* backoffice: só admins */}
-      <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+      <Route element={<PrivateRoute allowedRoles={['diretor', 'admin']} />}>
         <Route path="/backoffice" element={<BackOffice />} />
         <Route path="/backoffice/:entity" element={<Data_Pages />} />
       </Route>

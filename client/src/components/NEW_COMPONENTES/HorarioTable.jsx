@@ -12,6 +12,7 @@ const HorarioTable = ({
   getNomeSala,
   getNomeDocente,
   setErro,
+  role,
 }) => {
 
   console.log("🧩 Aulas recebidas na tabela:", aulasMarcadas);
@@ -53,7 +54,7 @@ const HorarioTable = ({
                     <td key={cellId} rowSpan={durationBlocks} className="class-cell">
                       <Draggable
                         id={"marcada_" + classItem.Cod_Aula}
-                        isBlocked={isBlocked}
+                        isBlocked={isBlocked || !['comissao', 'diretor', 'admin'].includes(role)}
                         aulaInfo={classItem}
                       >
                         <div className="class-entry">

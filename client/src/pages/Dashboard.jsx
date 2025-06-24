@@ -38,7 +38,7 @@ const Dashboard = () => {
             <button className="botao_dashboard" onClick={() => navigate("/horariosESGT")}>
               Horários ESGT
             </button>
-            {['mod', 'admin'].includes(role) && (
+            {['comissao', 'diretor', 'admin'].includes(role) && (
               <Link className="linksEdit" to="/horariosESGT">
                 Editar Horário
               </Link>
@@ -49,7 +49,7 @@ const Dashboard = () => {
             <button className="botao_dashboard" onClick={() => navigate("/horariosESTT")}>
               Horários ESTT
             </button>
-            {['mod', 'admin'].includes(role) && (
+            {['comissao', 'diretor', 'admin'].includes(role) && (
               <Link className="linksEdit" to="/horariosESTT">
                 Editar Horário
               </Link>
@@ -60,7 +60,7 @@ const Dashboard = () => {
             <button className="botao_dashboard" onClick={() => navigate("/horariosESTA")}>
               Horários ESTA
             </button>
-            {['mod', 'admin'].includes(role) && (
+            {['comissao', 'diretor', 'admin'].includes(role) && (
               <Link className="linksEdit" to="/horariosESTA">
                 Editar Horário
               </Link>
@@ -68,7 +68,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {['admin'].includes(role) && (
+        {['diretor', 'admin'].includes(role) && (
           <div className="backoffice-container_dashboard">
             <button
               className="botao_backoffice_dashboard"
