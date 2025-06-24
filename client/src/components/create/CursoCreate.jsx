@@ -7,7 +7,6 @@ const CursoCreate = () => {
     const [nome, setNome] = useState("");
     const [abreviatura, setAbreviatura] = useState("");
     const [escola, setEscola] = useState([""]);
-    const [codCurso, setCodCurso] = useState("");
     const [duracao, setDuracao] = useState("");
     const [error, setError] = useState("");
     const [escolasDisponiveis, setEscolasDisponiveis] = useState([]);
@@ -32,7 +31,7 @@ const CursoCreate = () => {
         setSuccessMessage("");
 
         // Verifica se os campos estão vazios
-        if (!nome.trim() || !abreviatura.trim() || escola[0] === "" || codCurso === null || codCurso === "" || duracao === "") {
+        if (!nome.trim() || !abreviatura.trim() || escola[0] === "" || duracao === "") {
             setError("Por favor, preencha todos os campos.");
             return;
         }
@@ -42,7 +41,6 @@ const CursoCreate = () => {
             Nome: nome,
             Abreviacao: abreviatura,
             Cod_Escola: escola[0],
-            Cod_Curso: codCurso,
             Duracao: parseInt(duracao, 10)
         };
 
@@ -57,7 +55,6 @@ const CursoCreate = () => {
                     setNome("");
                     setAbreviatura("");
                     setEscola([""]);
-                    setCodCurso("");
                     setDuracao("");
                 }
             })
@@ -94,10 +91,6 @@ const CursoCreate = () => {
                     <div className="create_input_field">
                         <label><font>Abreviatura do curso</font></label>
                         <input className='textbox_input' type="text" name="abrt" required="" value={abreviatura} onChange={(e) => setAbreviatura(e.target.value)} />
-                    </div>
-                    <div className="create_input_field">
-                        <label><font>Código do Curso</font></label>
-                        <input className='textbox_input' type="number" name="CodCurso" required="" value={codCurso} onChange={(e) => setCodCurso(e.target.value)} />
                     </div>
                     <div className="create_input_field">
                         <label><font>Duração do Curso (anos)</font></label>
