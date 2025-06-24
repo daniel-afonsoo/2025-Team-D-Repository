@@ -7,6 +7,7 @@ import UploadSQL from '../components/backoffice/UploadSQL';
 import { exportToPdf, exportToExcel } from '../utils/exportFunctions';
 
 const Backoffice = () => {
+  
   const navigate = useNavigate();
 
   const [codTurma, setCodTurma] = useState("");

@@ -4,12 +4,14 @@ import Footer from '../components/Footer.jsx'
 import { BrowserRouter as Router } from 'react-router-dom'; // Importar o BrowserRouter
 import RouterConfig from '../routes/routes'; // Importar o arquivo de rotas
 import '../styles/main.css'
+import Login from './Login.jsx';
 
 
 function App() {
   return (
     <div className="app-container">
       <Router> {/* Envolver toda a aplicação com BrowserRouter */}
+         
         <Navbar />
         <main className="content">
           <RouterConfig /> {/* Renderizar as rotas configuradas */}

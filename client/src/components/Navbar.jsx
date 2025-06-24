@@ -23,9 +23,9 @@ const Navbar = () => {
           <img src={logo} alt="Logo IPT" className="logo" style={{ width: "200px", height: "auto" }} />
         </a>
 
-        {!(path === "/" || path === "/login") && (
+        {!(path === "/dashboard" || path === "/login") && (
           <>
-            <Link className='linksNavBar' to="/"> <FaHome size={35} color="#fff" /></Link>
+            <Link className='linksNavBar' to="/dashboard"> <FaHome size={35} color="#fff" /></Link>
           </>
         )}
 

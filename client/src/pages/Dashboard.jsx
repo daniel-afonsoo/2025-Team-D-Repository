@@ -1,46 +1,83 @@
-import React  from 'react';
+// src/pages/Dashboard.jsx
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import "../styles/dashboard.css";
-import { useNavigate, Link } from 'react-router-dom'; // Importe useNavigate
-import ipt_background from '../images/novo_backgound_logo_ipt.svg'
-
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // Inicialize o hook useNavigate
-  const nome = "Diogo Larangeira";
+  const navigate = useNavigate();
+  const [nome, setNome] = useState('Visitante');
+  const [role, setRole] = useState(null);
 
+  useEffect(() => {
+    // Verifica se o usuário está autenticado
+    axios.get('http://localhost:5170/auth/verify', { withCredentials: true })
+      .then(response => {
+        // define a role do utilizador
+        setRole(response.data.role)
+        // define o nome
+        //setNome(response.data.nome)
 
+      })
+      .catch(() => {
+        // redireciona para o login se autenticação falhar
+        navigate('/login');
+      });
+  }, [navigate]);
 
   return (
     <div className="area_dashboard">
-      <div
-        className="dashboard-background"
-        style={{ backgroundImage: `url(${ipt_background})` }}
-      />
-
-      {/* Conteúdo principal por cima da imagem */}
       <div className="dashboard-content">
-        <h1 className="titulo_dashboard">Bem-vindo <span className="destaque_dashboard">{nome}</span></h1>
+        <h1 className="titulo_dashboard">
+          Bem-vindo{" "}
+          <span className="destaque_dashboard">{nome}</span>
+        </h1>
 
         <div className="botoes-container">
           <div>
-            <button className="botao_dashboard" onClick={() => navigate('/horariosESGT')}>Horários ESGT</button>
-            <Link className='linksEdit' to="/horariosESGT">Editar Horário</Link>
+            <button className="botao_dashboard" onClick={() => navigate("/horariosESGT")}>
+              Horários ESGT
+            </button>
+            {['mod', 'admin'].includes(role) && (
+              <Link className="linksEdit" to="/horariosESGT">
+                Editar Horário
+              </Link>
+            )}
           </div>
 
           <div>
-            <button className="botao_dashboard" onClick={() => navigate('/horariosESTT')}>Horários ESTT</button>
-            <Link className='linksEdit' to="/horariosESTT">Editar Horário</Link>
+            <button className="botao_dashboard" onClick={() => navigate("/horariosESTT")}>
+              Horários ESTT
+            </button>
+            {['mod', 'admin'].includes(role) && (
+              <Link className="linksEdit" to="/horariosESTT">
+                Editar Horário
+              </Link>
+            )}
           </div>
 
           <div>
-            <button className="botao_dashboard" onClick={() => navigate('/horariosESTA')}>Horários ESTA</button>
-            <Link className='linksEdit' to="/horariosESTA">Editar Horário</Link>
+            <button className="botao_dashboard" onClick={() => navigate("/horariosESTA")}>
+              Horários ESTA
+            </button>
+            {['mod', 'admin'].includes(role) && (
+              <Link className="linksEdit" to="/horariosESTA">
+                Editar Horário
+              </Link>
+            )}
           </div>
         </div>
 
-        <div className="backoffice-container_dashboard">
-          <button className="botao_backoffice_dashboard" onClick={() => navigate('/backoffice')}>Backoffice</button>
-        </div>
+        {['admin'].includes(role) && (
+          <div className="backoffice-container_dashboard">
+            <button
+              className="botao_backoffice_dashboard"
+              onClick={() => navigate("/backoffice")}
+            >
+              Backoffice
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

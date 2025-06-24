@@ -15,6 +15,7 @@
     "autotable": "^1.0.0",
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
     "exceljs": "^4.4.0",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
