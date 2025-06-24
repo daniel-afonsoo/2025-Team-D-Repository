@@ -58,7 +58,7 @@ router.post('/updateSala', async (req, res) => {
 
     try {
         // Verificar se a sala já existe
-       const [resultado] = await pool.promise().query(`SELECT * FROM sala WHERE Nome = ? and Cod_Escola = ? WHERE = ?`,[nome, cod_escola])
+       const [resultado] = await pool.promise().query(`SELECT * FROM sala WHERE Nome = ? and Cod_Escola = ?` , [nome, cod_escola])
        if(resultado.length > 0){
            return res.status(400).json({ error: 'Essa sala já existe na escola especificada' })
        }
@@ -74,5 +74,20 @@ router.post('/updateSala', async (req, res) => {
     }
 }
 )
+
+router.delete('/deleteSala',(req,res)=>{
+    const {cod_sala} = req.body
+    const query = `DELETE FROM sala WHERE Cod_Sala = ?`
+    const values = [cod_sala]
+    pool.query(query,values, (err)=>{
+        if(err){
+            console.error(err)
+            res.status(500).json({error: 'Internal server error'})
+        }
+        else{
+            res.status(200).json({message: 'Escola eliminada com sucesso'})
+        }
+    })
+})
 
 module.exports = router 

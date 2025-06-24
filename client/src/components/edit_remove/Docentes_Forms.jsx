@@ -5,13 +5,14 @@ import "../../styles/edit_remove_Forms.css";
 import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
-import ModalEdicao from './EditModal'; 
+import ModalEdicao from './EditModal';
+import axios from 'axios'
 
 import { TbUserEdit, TbTrash } from "react-icons/tb";
 
 
 // Componente principal que permite listar, editar e remover docentes
-const Docente_edit_remove = ({ filtro }) => {
+const Docente_edit_remove = ({ filtro, refresh }) => {
   // Estados para controlar dados, modais e campos de edição
   const [dados, setDados] = useState([]);
   const [modalAberta, setModalAberta] = useState(false);
@@ -21,24 +22,27 @@ const Docente_edit_remove = ({ filtro }) => {
   const [editarCampos, setEditarCampos] = useState({});
 
   // Título do modal de edição
-  const [tituloModal, setTituloModal] = useState('Editar Docente'); 
+  const [tituloModal, setTituloModal] = useState('Editar Docente');
 
-  // Carrega os dados simulados ao iniciar
+  // Função para buscar docentes do backend
+  const fetchDocentes = () => {
+    axios.get('http://localhost:5170/getDocente')
+      .then(response => {
+        setDados(response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao buscar docentes:", error);
+      });
+  };
+
   useEffect(() => {
-    const dadosSimulados = [
-      { id: 1, nome: "André Benquerer", email: "andre_benquerer@ipt.pt", password: "1234"},
-      { id: 2, nome: "Daniel Afonso", email: "daniel_afonso@ipt.pt", password: "1234"},
-      { id: 3, nome: "Diogo Cardeira", email: "diogo_cardeira@ipt.pt", password: "1234"},
-      { id: 4, nome: "Diogo Larangeira", email: "diogo_larangeira@ipt.pt", password: "1234"},
-      { id: 5, nome: "Guilherme Simões", email: "guilherme_simoes@ipt.pt", password: "1234"},
-      { id: 6, nome: "Rúben Dias", email: "ruben_dias@ipt.pt", password: "1234"}
-    ];
-    setDados(dadosSimulados);
-  }, []);
+    fetchDocentes();
+  }, [refresh]);
+
 
   const dadosFiltrados = dados.filter((docente) =>
-    docente.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    docente.email.toLowerCase().includes(filtro.toLowerCase())
+    docente?.Nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+    docente?.Email?.toLowerCase().includes(filtro.toLowerCase())
   );
 
   // Abre o modal de confirmação de remoção
@@ -56,16 +60,24 @@ const Docente_edit_remove = ({ filtro }) => {
   // Remove o docente selecionado
   const confirmarRemocao = () => {
     if (idParaRemover !== null) {
-      setDados(dados.filter(item => item.id !== idParaRemover));
+      axios.delete(`http://localhost:5170/deleteDocente/` , {
+        data: { cod_docente: idParaRemover }
+      })
+        .then(() => {
+          fetchDocentes();
+          fecharModal();
+        })
+        .catch(error => {
+          console.error("Erro ao remover docente:", error);
+        });
     }
-    fecharModal();
   };
 
   // Abre o modal de edição e preenche os campos
   const abrirModalEdicao = (item) => {
-    setEditarItemId(item.id);
+    setEditarItemId(item.Cod_Docente);
     setEditarCampos(item);
-    setTituloModal('Editar Docente');  
+    setTituloModal('Editar Docente');
     setModalEdicaoAberta(true);
   };
 
@@ -84,26 +96,45 @@ const Docente_edit_remove = ({ filtro }) => {
 
   // Salva as alterações feitas no docente
   const confirmarEdicao = () => {
-    setDados(dados.map(item => item.id === editarItemId ? editarCampos : item));
-    fecharModalEdicao();
+    // Criar objeto com as keys minúsculas
+    const dadosParaEnviar = {
+      cod_docente: editarCampos.Cod_Docente,
+      nome: editarCampos.Nome,
+      email: editarCampos.Email,
+      password: editarCampos.Password
+    };
+
+    axios.post(`http://localhost:5170/updateDocente`, dadosParaEnviar)
+      .then(() => {
+        fetchDocentes();
+        fecharModalEdicao();
+      })
+      .catch(error => {
+        if (error.response) {
+          console.error('Status:', error.response.status);
+          console.error('Dados retornados:', error.response.data);
+        } else {
+          console.error('Erro ao atualizar docente:', error.message);
+        }
+      });
   };
 
   return (
     <div className="lista-container">
       <div className="lista">
         {dadosFiltrados.map((item) => (
-          <div key={item.id} className="card">
+          <div key={item.Cod_Docente} className="card">
             <div className="card-info">
-              <h3>{item.nome}</h3>
-              <p><b>Email:</b> {item.email}</p>
-              <p><b>Password:</b> {item.password}</p>
+              <h3>{item.Nome}</h3>
+              <p><b>Email:</b> {item.Email}</p>
+              <p className="limited-password"><b>Password:</b>  {item.Password}</p>
               <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
                 {/* <img src={pencil} alt="Editar" width="20" height="20" /> */}
-                <TbUserEdit size={25}/>
+                <TbUserEdit size={25} />
               </button>
-              <button className='btRemove' onClick={() => abrirModal(item.id)}>
+              <button className='btRemove' onClick={() => abrirModal(item.Cod_Docente)}>
                 {/* <img src={bin} alt="Remover" width="20" height="20" /> */}
-                <TbTrash size={25}/>
+                <TbTrash size={25} />
               </button>
             </div>
           </div>
@@ -111,7 +142,7 @@ const Docente_edit_remove = ({ filtro }) => {
       </div>
 
       <ConfirmacaoModal
-        itemToRemove={`"${idParaRemover ? dados.find(item => item.id === idParaRemover).nome : ''}"`}
+        itemToRemove={`"${idParaRemover ? dados.find(item => item.Cod_Docente === idParaRemover).Nome : ''}"`}
         isOpen={modalAberta}
         onClose={fecharModal}
         onConfirm={confirmarRemocao}

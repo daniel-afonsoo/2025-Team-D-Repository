@@ -2,23 +2,9 @@
   text-align: center;
   min-height: 100vh;
   padding: 20px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #c0c0c0;
 }
 
-.backoffice-background{
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  opacity: 1;
-  z-index: 0;
-  transition: background-image 1s ease-in-out;
-}
 
 .titulo_backoffice {
   font-family: 'Titillium Web', sans-serif;
@@ -103,3 +89,21 @@
       0 0 40px #ff7b00;
   }
 } */
+
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

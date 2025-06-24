@@ -43,3 +43,8 @@ client/.vite/
 # Environment variables
 server/.env
 client/.env
+
+# Ignore backend temp uploads and generated folders
+server/scripts-sql/temp_uploads/
+server/scripts-sql/generated_scripts/
+server/scripts-sql/zips/

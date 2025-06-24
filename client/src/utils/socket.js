@@ -16,4 +16,11 @@ socket.on("remove-aula-error", (data) => {
     alert(data.message)
 })
 
+export const onUpdateAulas = (callback) => {
+    socket.on("update-aulas", (data) => {
+      console.log("Received update-aulas event:", data); // Debugging log
+      callback(data);
+    });
+  };
+
 export default socket;

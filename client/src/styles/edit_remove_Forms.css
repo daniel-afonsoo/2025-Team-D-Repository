@@ -42,6 +42,13 @@
     min-width: 200px;
 }
 
+.limited-password {
+    max-width: 300px;       
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
 .btSave {
     font-size: 20px;
     padding: 0.3rem 0.6rem;

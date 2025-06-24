@@ -11,7 +11,6 @@ router.get('/getEscola',(req,res)=>{
             return res.status(500).json({error:"Consulta à base de dados falhou"})
         }else{
             res.status(200).json(results)
-            res.json(results)
         }
     })
 })
@@ -73,7 +72,7 @@ router.post('/updateEscola', async(req,res)=>{
 
 
 //FUNCIONA
-router.post('/deleteEscola',(req,res)=>{
+router.delete('/deleteEscola',(req,res)=>{
     const {cod_escola} = req.body
     const query = `DELETE FROM escola WHERE Cod_Escola = ?`
     const values = [cod_escola]
