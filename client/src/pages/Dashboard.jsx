@@ -13,11 +13,8 @@ const Dashboard = () => {
     // Verifica se o usuário está autenticado
     axios.get('http://localhost:5170/auth/verify', { withCredentials: true })
       .then(response => {
-        // define a role do utilizador
-        setRole(response.data.role)
-        // define o nome
-        //setNome(response.data.nome)
-
+        setRole(response.data.role);
+        setNome(response.data.nome || 'Visitante');
       })
       .catch(() => {
         // redireciona para o login se autenticação falhar

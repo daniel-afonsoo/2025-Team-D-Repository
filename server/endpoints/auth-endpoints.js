@@ -52,7 +52,7 @@ router.post('/login', authLimiter, emailLimiter, async (req, res) => {
   try {
     // uso de alias para retornar Cod_Docente como id
     const [rows] = await pool.promise().query(
-      `SELECT Cod_Docente AS id, Email, Password, role FROM docente WHERE Email = ?`,
+      `SELECT Cod_Docente AS id, Email, Password, role, Nome FROM docente WHERE Email = ?`,
       [email]
     );
 
@@ -69,9 +69,9 @@ router.post('/login', authLimiter, emailLimiter, async (req, res) => {
     // reset de tentativas
     loginAttempts.delete(email);
 
-    // gera JWT usando user.id e sua role
+    // gera JWT usando user.id, role, email e nome
     const token = jwt.sign(
-      { userId: user.id, email, role: user.role },
+      { userId: user.id, email, role: user.role, nome: user.Nome },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -81,7 +81,7 @@ router.post('/login', authLimiter, emailLimiter, async (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
       maxAge: 3600000
-    }).status(200).json({ role: user.role });
+    }).status(200).json({ role: user.role, nome: user.Nome });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -95,7 +95,7 @@ router.get('/verify', (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.status(200).json({ userId: decoded.userId, role: decoded.role });
+    res.status(200).json({ userId: decoded.userId, role: decoded.role, email: decoded.email, nome: decoded.nome });
   } catch {
     res.sendStatus(403);
   }
