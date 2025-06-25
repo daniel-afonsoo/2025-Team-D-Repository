@@ -1,0 +1,21 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+  
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* garante altura total da janela */
+}
+
+.content {
+  flex: 1; /* faz o main crescer para preencher o espaço disponível */
+}
+  
+  main, /* onde renderizas o conteúdo, se houver */ 
+  .RouterConfig {
+    flex: 1; /* ocupa espaço entre navbar e footer */
+  }
+  

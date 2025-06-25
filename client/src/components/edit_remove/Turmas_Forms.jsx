@@ -5,6 +5,9 @@ import bin from '../../images/bin.png';
 import pencil from '../../images/pencil.png';
 import ConfirmacaoModal from './Confirmacao';
 import ModalEdicao from './EditModal';
+import axios from 'axios'
+
+import { TbEdit, TbTrash  } from "react-icons/tb";
 
 // Componente principal para listar, editar e remover salas
 const Turma_Forms = ({ filtro }) => {
@@ -16,24 +19,40 @@ const Turma_Forms = ({ filtro }) => {
     const [editarItemId, setEditarItemId] = useState(null);
     const [editarCampos, setEditarCampos] = useState({});
     const [tituloModal, setTituloModal] = useState('Editar Turma');
+    const [cursos, setCursos] = useState([]);
+    const [anosemestres, setAnoSemestres] = useState([]);
 
-    // Carrega dados simulados ao montar o componente
     useEffect(() => {
-        const dadosSimulados = [
-            { id: 1, nome: "A", escola: "ESTT", codCurso: "911", ano: "2" },
-            { id: 2, nome: "B", escola: "ESTT", codCurso: "911", ano: "3" },
-            { id: 3, nome: "A", escola: "ESTA", codCurso: "910", ano: "1" },
-            { id: 4, nome: "B", escola: "ESGT", codCurso: "951", ano: "3" },
-            { id: 5, nome: "C", escola: "ESTA", codCurso: "845", ano: "1" }
-        ];
-        setDados(dadosSimulados);
-    }, []);
+        axios.get('http://localhost:5170/getTurma')
+          .then(response => {
+            console.log("Resposta da API:", response.data);
+            setDados(response.data);
+          })
+          .catch(error => {
+            console.error("Erro ao buscar docentes:", error);
+          });
+        // Buscar cursos
+        axios.get('http://localhost:5170/getCurso')
+          .then(response => {
+            setCursos(response.data);
+          })
+          .catch(error => {
+            console.error("Erro ao buscar cursos:", error);
+          });
+        // Buscar anosemestre
+        axios.get('http://localhost:5170/getAnoSemestre')
+          .then(response => {
+            setAnoSemestres(response.data);
+          })
+          .catch(error => {
+            console.error("Erro ao buscar anosemestre:", error);
+          });
+      }, []);
 
     const dadosFiltrados = dados.filter((turma) =>
-        turma.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-        turma.escola.toLowerCase().includes(filtro.toLowerCase()) ||
-        turma.codCurso.toLowerCase().includes(filtro.toLowerCase()) ||
-        turma.ano.toLowerCase().includes(filtro.toLowerCase())
+        
+        turma.Turma_Abv.toLowerCase().includes(filtro.toLowerCase())
+
     );
 
     // Abre o modal de confirmação e define o ID da Turma a remover
@@ -51,14 +70,23 @@ const Turma_Forms = ({ filtro }) => {
     // Remove a Turma confirmada e fecha o modal
     const confirmarRemocao = () => {
         if (idParaRemover !== null) {
-            setDados(dados.filter(item => item.id !== idParaRemover));
+          axios.delete(`http://localhost:5170/deleteTurma/` , {
+            data: { Cod_Turma: idParaRemover }
+          })
+            .then(() => {
+              console.log("ID para remover:", idParaRemover);
+              setDados(dados.filter(item => item.Cod_Turma !== idParaRemover));
+              fecharModal();
+            })
+            .catch(error => {
+              console.error("Erro ao remover docente:", error);
+            });
         }
-        fecharModal();
-    };
+      };
 
     // Abre o modal de edição com os dados da Turma selecionada
     const abrirModalEdicao = (item) => {
-        setEditarItemId(item.id);
+        setEditarItemId(item.Cod_Turma);
         setEditarCampos(item);
         setTituloModal('Editar Turma');
         setModalEdicaoAberta(true);
@@ -79,32 +107,67 @@ const Turma_Forms = ({ filtro }) => {
 
     // Aplica as alterações e atualiza a lista de Turmas
     const confirmarEdicao = () => {
-        setDados(dados.map(item => item.id === editarItemId ? editarCampos : item));
-        fecharModalEdicao();
-    };
+        const dadosParaEnviar = {
+            Cod_Turma: editarCampos.Cod_Turma,
+            Cod_Curso: editarCampos.Cod_Curso,
+            Cod_AnoSemestre: editarCampos.Cod_AnoSemestre,
+            Turma_Abv: editarCampos.Turma_Abv,
+            AnoTurma: editarCampos.AnoTurma
+        };
+    
+        console.log('Dados enviados para updateTurma:', dadosParaEnviar);
+    
+        axios.post(`http://localhost:5170/updateTurma`, dadosParaEnviar)
+          .then(() => {
+            const updatedItem = {
+                Cod_Turma: editarCampos.Cod_Turma,
+                Cod_Curso: editarCampos.Cod_Curso,
+                Cod_AnoSemestre: editarCampos.Cod_AnoSemestre,
+                Turma_Abv: editarCampos.Turma_Abv,
+                AnoTurma: editarCampos.AnoTurma
+            };
+            setDados(prev => prev.map(item =>item.Cod_Turma === editarCampos.Cod_Turma ? updatedItem : item )  );
+            
+            console.log('Dados depois de atualizar', dados);
+            fecharModalEdicao();
+          })
+          .catch(error => {
+            if (error.response) {
+              console.error('Status:', error.response.status);
+              console.error('Dados retornados:', error.response.data);
+            } else {
+              console.error('Erro ao atualizar docente:', error.message);
+            }
+          });
+      };
 
     return (
         <div className="lista-container">
             <div className="lista">
-                {dadosFiltrados.map((item) => (
-                    <div key={item.id} className="card">
-                        <div className="card-info">
-                            <h3>{item.nome}</h3>
-                            <p>Código de Curso: {item.codCurso}</p>
-                            <p>Ano da Turma {item.nome}: {item.ano}</p>
-                            <p>Escola: {item.escola}</p>
-                            <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
-                                <img src={pencil} alt="Editar" width="20" height="20" />
-                            </button>
-                            <button className='btRemove' onClick={() => abrirModal(item.id)}>
-                                <img src={bin} alt="Remover" width="20" height="20" />
-                            </button>
+                {dadosFiltrados.map((item) => {
+                    const curso = cursos.find(c => String(c.Cod_Curso) === String(item.Cod_Curso));
+                    const anosemestre = anosemestres.find(a => String(a.Cod_AnoSemestre) === String(item.Cod_AnoSemestre));
+                    return (
+                        <div key={item.id} className="card">
+                            <div className="card-info">
+                                <h3>{item.Turma_Abv}</h3>
+                                <p><b>Curso:</b> {curso ? curso.Nome : item.Cod_Curso}</p>
+                                <p><b>Ano da Turma</b>: {item.AnoTurma}º Ano</p>
+                                <p><b>Ano/Semestre:</b> {anosemestre ? anosemestre.Nome : item.Cod_AnoSemestre}</p>
+                                <button className='btEdit' onClick={() => abrirModalEdicao(item)}>
+                                    <TbEdit size={25}/>
+                                </button>
+                                <button className='btRemove' onClick={() => abrirModal(item.Cod_Turma)}>
+                                    <TbTrash size={25}/>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <ConfirmacaoModal
+                itemToRemove={`Nome "${dados.find(item => item.Cod_Turma === idParaRemover)?.Cod_AnoSemestre} -  Turma ${dados.find(item => item.Cod_Turma === idParaRemover)?.Turma_Abv}"`}
                 isOpen={modalAberta}
                 onClose={fecharModal}
                 onConfirm={confirmarRemocao}
@@ -117,6 +180,8 @@ const Turma_Forms = ({ filtro }) => {
                 campos={editarCampos}
                 onSave={confirmarEdicao}
                 titulo={tituloModal}
+                cursos={cursos}
+                anosemestres={anosemestres}
             />
         </div>
     );

@@ -15,9 +15,9 @@ router.get('/getTurma', (req, res) => {
 })
 
 router.post('/createTurma', async (req, res) => {
-    const {Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma, AnoTurma} = req.body;
-    const query = `INSERT INTO turma (Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma, AnoTurma) VALUES (?, ?, ?, ?, ?)`;
-    const values = [Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma, AnoTurma]
+    const {Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma} = req.body;
+    const query = `INSERT INTO turma (Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma) VALUES (?, ?, ?, ?)`;
+    const values = [Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma]
     pool.query(query, values, (err) => {
         if (err) {
             console.error(err)
@@ -29,9 +29,9 @@ router.post('/createTurma', async (req, res) => {
 })
 
 router.post('/updateTurma', async (req, res) => {
-    const {Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma, AnoTurma} = req.body;
-    const query = `UPDATE turma SET Cod_Curso = ?, Cod_AnoSemestre = ?, Turma = ?, AnoTurma = ? WHERE Cod_Turma = ?`;
-    const values = [Cod_Curso, Cod_AnoSemestre, Turma, AnoTurma, Cod_Turma]
+    const {Cod_Turma, Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma} = req.body;
+    const query = `UPDATE turma SET Cod_Curso = ?, Cod_AnoSemestre = ?, Turma_Abv = ?, AnoTurma = ? WHERE Cod_Turma = ?`;
+    const values = [Cod_Curso, Cod_AnoSemestre, Turma_Abv, AnoTurma, Cod_Turma]
     pool.query(query, values, (err) => {
         if (err) {
             console.error(err)

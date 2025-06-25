@@ -18,19 +18,19 @@ router.get('/getUC',(req,res)=>{
 
 //FUNCIONA
 router.post('/createUC',async(req,res)=>{
-    const {Nome, Horas, Cod_Curso} = req.body
+    const {Nome, Cod_Curso} = req.body
     // Validação dos dados
-    if (!Nome || !Horas || !Cod_Curso) {
+    if (!Nome || !Cod_Curso) {
         return res.status(400).json({ error: 'Nome, horas e código do curso são obrigatórios' })
     }
     // Verificar se a UC já existe
-    const [resultado] = await pool.promise().query(`SELECT * FROM uc WHERE Nome = ? and Horas = ? and Cod_Curso = ?`,[Nome, Horas, Cod_Curso])
+    const [resultado] = await pool.promise().query(`SELECT * FROM uc WHERE Nome = ? and Cod_Curso = ?`,[Nome, Cod_Curso])
     if(resultado.length > 0){
         return res.status(400).json({ error: 'Essa UC já existe' })
     }
     // Inserir nova UC
-    const query = `INSERT INTO uc (Nome, Horas, Cod_Curso) VALUES (?,?,?)`
-    const values = [Nome, Horas, Cod_Curso]
+    const query = `INSERT INTO uc (Nome, Cod_Curso) VALUES (?,?)`
+    const values = [Nome, Cod_Curso]
     pool.query(query,values,(err) => {
         if(err) {
             console.error(err)
@@ -43,20 +43,22 @@ router.post('/createUC',async(req,res)=>{
 
 //FUNCIONA
 router.post('/updateUC', async(req,res)=>{
-    const {Nome, Horas, Cod_Curso, Cod_Uc} = req.body
+    const {Nome, Cod_Curso, Cod_Uc} = req.body
     // Validação dos dados
-    if (!Nome || !Horas || !Cod_Curso || !Cod_Uc) {
-        return res.status(400).json({ error: 'Nome, horas, código do curso e código da UC são obrigatórios' })
+    if (!Nome || !Cod_Curso || !Cod_Uc) {
+        return res.status(400).json({ error: 'Nome, código do curso e código da UC são obrigatórios' })
     }
-    // Verificar se a UC já existe
-    const [resultado] = await pool.promise().query(`SELECT * FROM uc WHERE Nome = ? and Horas = ? and Cod_Curso = ? and Cod_Uc = ?`,[Nome, Horas, Cod_Curso, Cod_Uc])
+    // Verificar se já existe outra UC com o mesmo nome e curso (mas diferente Cod_Uc)
+    const [resultado] = await pool.promise().query(
+        `SELECT * FROM uc WHERE Nome = ? and Cod_Curso = ? and Cod_Uc != ?`,
+        [Nome, Cod_Curso, Cod_Uc]
+    )
     if(resultado.length > 0){
-        return res.status(400).json({ error: 'Essa UC já existe' })
+        return res.status(400).json({ error: 'Já existe uma UC com esse nome e curso' })
     }
-
     // Atualizar UC
-    const query = `UPDATE uc SET Nome = ?, Horas = ?, Cod_Curso = ? WHERE Cod_Uc = ?`
-    const values = [Nome, Horas, Cod_Curso, Cod_Uc]
+    const query = `UPDATE uc SET Nome = ?, Cod_Curso = ? WHERE Cod_Uc = ?`
+    const values = [Nome, Cod_Curso, Cod_Uc]
     pool.query(query,values,(err)=>{
         if(err){
             console.error(err)

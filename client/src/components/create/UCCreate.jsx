@@ -1,71 +1,61 @@
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import "../../styles/createForms.css";
 import axios from 'axios'
 
 
 const UCCreate = () => {
-
     const [nome, setNome] = useState("");
-    const [horas, setHoras] = useState("");
-    const [curso, setCurso] = useState([""]);
-    const [codUC, setCodUC] = useState("");
+    const [codCurso, setCodCurso] = useState("");
+    const [cursosDisponiveis, setCursosDisponiveis] = useState([]);
     const [error, setError] = useState("");
-    const opcoesCurso = ["Curso A", "Curso B", "Curso C"]; // Simulação de dados do backend
+    const [successMessage, setSuccessMessage] = useState("");
+
+
+    useEffect(() => {
+        axios.get("http://localhost:5170/getCurso")
+            .then(response => {
+                setCursosDisponiveis(response.data);
+            })
+            .catch(() => {
+                setError("Erro ao buscar cursos.");
+            });
+    }, []);
 
     const handleSubmit = async (e) => {
         //previne que a página de refresh, por default o onsubmit do forms da refresh na página
         e.preventDefault();
         //elimina todos os erros
         setError("");
+        setSuccessMessage("");
 
         // Verifica se os campos estão vazios
-        if (!nome.trim() || curso[0] == "" ||  codUC === null || codUC === "" ||  horas === null || horas === "") {
+        if (!nome.trim() || !codCurso) {
             setError("Por favor, preencha todos os campos.");
             return;
         }
 
         // Criar Unidade Curricular para mandar para o backend
-        const novoCurso = {
-            nome,
-            horas,
-            curso,
-            codUC
+        const novaUC = {
+            Nome: nome,
+            Cod_Curso: codCurso
         };
 
         //post no backend através de axios
         //dá post do nome, horas, curso, codUC no backend
-        axios.post("http://localhost:5170/createUC", novoCurso, {
+        axios.post("http://localhost:5170/createUC", novaUC, {
             headers: { "Content-Type": "application/json" }
         })
             .then(response => {
                 if (response.status === 200) {
                     setSuccessMessage("UC criada com sucesso!");
                     setNome("");
-                    setHoras("")
-                    setCurso("")
-                    setCodUC("")
+                    setCodCurso("");
                 }
             })
             .catch(err => {
-                setError(err.response?.data?.message || "Erro ao criar UC.");
+                setError(err.response?.data?.error || "Erro ao criar UC.");
             });
 
-    };
-
-    // Função para adicionar uma nova dropdown ao array de cursos
-    const adicionarDropdown = () => {
-        // Adiciona um novo curso vazia ao array
-        setCurso([...curso, ""]);
-    };
-
-    // Função para atualizar o valor da dropdown quando o utilizador seleciona uma opção
-    const handleChange = (index, value) => {
-        // Cria uma cópia do array atual de escolas
-        const novosCursos = [...curso];
-        // Atualiza o valor do curso na posição selecionada
-        novosCursos[index] = value;
-        // Atualiza o estado com a nova lista de cursos
-        setCurso(novosCursos);
     };
 
 
@@ -73,38 +63,28 @@ const UCCreate = () => {
         <div className="formulario">
             <div className='loginSquare'>
                 {error && <p style={{ color: "red" }}>{error}</p>}
+                {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
                 <form className='forms' onSubmit={handleSubmit}>
                     <div className='createIdentifier'>
                         <p><b>Criar Unidade Curricular</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome da UC</font></label>
+                        <label><font>Nome da UC</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Código da UC</font></label>
-                        <input className='textbox_input' type="number" name="codUc" required="" value={codUC} onChange={(e) => setCodUC(e.target.value)} />
-                    </div>
-                    <div className="create_input_field">
-                        <label><font color="#75c734">Horas Totais</font></label>
-                        <input className='textbox_input' type="number" name="horas" required="" value={horas} onChange={(e) => setHoras(e.target.value)} />
-                    </div>
-                    <div className="create_input_field">
-                        <label><font color="#75c734">Cursos da UC</font></label>
-                        {curso.map((escola, index) => (
-                            <select
-                                key={index}
-                                className='input_dropdown'
-                                value={escola}
-                                onChange={(e) => handleChange(index, e.target.value)}
-                            >
-                                <option value="">Selecione um Curso</option>
-                                {opcoesCurso.map((opcao, idx) => (
-                                    <option key={idx} value={opcao}>{opcao}</option>
-                                ))}
-                            </select>
-                        ))}
-                        <button className="botao_create" type="button" onClick={adicionarDropdown} style={{ marginTop: '5px' }}>Adicionar outro curso</button>
+                        <label><font>Curso</font></label>
+                        <select
+                            className='input_dropdown'
+                            value={codCurso}
+                            onChange={e => setCodCurso(e.target.value)}
+                            required
+                        >
+                            <option value="">Selecione um Curso</option>
+                            {cursosDisponiveis.map((curso) => (
+                                <option key={curso.Cod_Curso} value={curso.Cod_Curso}>{curso.Nome}</option>
+                            ))}
+                        </select>
                     </div>
                     <button className="botao_create" type='submit' >Criar</button>
                 </form>

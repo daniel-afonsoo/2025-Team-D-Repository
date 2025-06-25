@@ -66,15 +66,15 @@ const DocenteCreate = () => {
                         <p><b>Criar Docente</b></p>
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Nome do Docente</font></label>
+                        <label><font>Nome do Docente</font></label>
                         <input className='textbox_input' type="text" name="nome" required="" value={nome} onChange={(e) => setNome(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Email IPT</font></label>
+                        <label><font>Email IPT</font></label>
                         <input className='textbox_input' type="email" name="user" required="" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <div className="create_input_field">
-                        <label><font color="#75c734">Password</font></label>
+                        <label><font>Password</font></label>
                         <input className='textbox_input'  type={showPassword ? "text" : "password"} name="pass" required="" value={password} onChange={(e) => setPassword(e.target.value)} />
                         <button className="botao_create" type="button" onClick={togglePasswordVisibility} style={{ marginTop: '5px' }}>
                             {showPassword ? "Ocultar" : "Mostrar"} Senha
