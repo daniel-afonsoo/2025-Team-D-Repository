@@ -15,7 +15,7 @@ export default function HandleDragEnd(
   }
 ) {
   const { active, over } = event;
-  if (!over) {
+  if (!over || (active.id.startsWith("disponivel_") && over.id === "aulas-disponiveis")) {
     alert("Dropped outside the schedule");
     setErro("");
     return;

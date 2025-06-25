@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db/connection.js')
+const {logToClient} = require('../utils/logger')
 
 //FUNCIONA
 router.get('/getCurso',(req,res)=>{
@@ -36,6 +37,7 @@ router.post('/createCurso',async(req,res)=>{
             console.error(err)
             return res.status(500).json({error: 'Internal server error'})
         }
+        logToClient("info","Curso criado", `foi criado o curso ${Nome} na escola ${Cod_Escola}`)
         return res.status(200).json({message: 'Curso criado com sucesso'})
     })
 })
@@ -61,6 +63,7 @@ router.post('/updateCurso', async(req,res)=>{
             console.error(err)
             return res.status(500).json({error: 'Internal server error'})
         }
+        logToClient("info","Curso editado", `o curso ${Nome} da escola ${Cod_Escola} foi editado`)
         return res.status(200).json({message: 'Curso atualizado com sucesso'})
     })
 })
@@ -86,6 +89,7 @@ router.delete('/deleteCurso', async(req,res)=>{
             console.error(err)
             return res.status(500).json({error: 'Internal server error'})
         }
+        logToClient("info","Curso removido", `o curso ${Nome} da escola ${Cod_Escola} foi removido`)
         return res.status(200).json({message: 'Curso removido com sucesso'})
     })
 })

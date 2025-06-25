@@ -9,6 +9,7 @@ import HorariosESTT from '../pages/HorariosESTT';
 import HorariosESTA from '../pages/HorariosESTA';
 import BackOffice   from '../pages/BackOffice';
 import Data_Pages   from '../pages/Data_Pages';
+import ExportarAulas from '../pages/ExportarAulas';
 
 import PrivateRoute from '../components/PrivateRoute';
 
@@ -25,6 +26,7 @@ export default function RouterConfig() {
         <Route path="/horariosESGT" element={<HorariosESGT />} />
         <Route path="/horariosESTT" element={<HorariosESTT />} />
         <Route path="/horariosESTA" element={<HorariosESTA />} />
+        <Route path="/exportar-aulas" element={<ExportarAulas />} />
       </Route>
 
       {/* backoffice: só admins */}

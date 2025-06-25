@@ -15,6 +15,29 @@ router.get('/getUC',(req,res)=>{
     })
 })
 
+router.get('/getUC/:Cod_Uc', (req, res) => {
+  const { Cod_Uc } = req.params;
+
+  if (!Cod_Uc) {
+    return res.status(400).json({ error: "Cod_Uc é obrigatório" });
+  }
+
+  const query = "SELECT * FROM uc WHERE Cod_Uc = ?";
+  pool.query(query, [Cod_Uc], (err, results) => {
+    if (err) {
+      console.error("Erro na consulta à base de dados:", err);
+      return res.status(500).json({ error: "Consulta à base de dados falhou" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "UC não encontrada" });
+    }
+
+    res.status(200).json(results[0]);
+  });
+});
+
+
 
 //FUNCIONA
 router.post('/createUC',async(req,res)=>{

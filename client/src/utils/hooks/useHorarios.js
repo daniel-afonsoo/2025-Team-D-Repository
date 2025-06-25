@@ -185,9 +185,10 @@ export function useHorarios(escola) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Erro ao criar aula");
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erro ao criar aula");
+        return data;
       })
       .then(() => {
         socket.emit("update-aulas", { Cod_Turma: aulaInfo.turma });
@@ -196,7 +197,8 @@ export function useHorarios(escola) {
       })
       .catch(err => {
         console.error(err);
-        setErro("Erro ao adicionar aula. Verifique os dados.");
+        setErro(err.message || "Erro ao adicionar aula. Verifique os dados.");
+        setTimeout(() => setErro(""), 5000);
       });
   };
 
@@ -241,16 +243,19 @@ export function useHorarios(escola) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Erro ao atualizar aula");
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erro ao atualizar aula");
+        return data;
       })
       .then(() => {
         socket.emit("refresh-aulas", { Cod_Turma: aula.turma });
+        setErro(""); // Limpa erro anterior, se houver
       })
       .catch(err => {
         console.error(err);
-        setErro("Erro ao atualizar aula.");
+        setErro(err.message || "Erro ao atualizar aula.");
+        setTimeout(() => setErro(""), 5000);
       });
   };
 

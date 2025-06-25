@@ -35,7 +35,7 @@ const ConsoleViewer = () => {
 
   const getColorForLevel = (level) => {
     switch (level) {
-      case 'info': return '#00FF00';
+      case 'info': return '#75CD63';
       case 'error': return '#FF0000';
       case 'warn': return '#FFA500';
       case 'debug': return '#00FFFF';

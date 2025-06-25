@@ -18,7 +18,6 @@ import EscolaCreate from '../components/create/EscolaCreate.jsx'
 import SalaCreate from '../components/create/SalaCreate.jsx'
 import TurmaCreate from '../components/create/TurmaCreate.jsx'
 import SemestreCreate from '../components/create/SemestreCreate.jsx'
-import ipt_background from '../images/background_ipt_logo.svg'
 
 const DataPages = () => {
 
@@ -70,7 +69,7 @@ const DataPages = () => {
     }
 
     return (
-        <div className='data_pages_area' style={{ backgroundImage: `url(${ipt_background})` }}>
+        <div className='data_pages_area'>
             <div className='PageTop'>
                 <SearchBar pageToGo={() => setShowModal(true)}  ButtonText={TextoBotao} searchValue={termoPesquisa} onSearchChange={setTermoPesquisa} />
             </div>
