@@ -1,0 +1,58 @@
+.data_pages_area {
+    text-align: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.PageTop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay-dataPages {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.692);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content-dataPages {
+    padding: 25px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+
+}
+
+.botaoModal {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+    text-shadow: 0 0 3px #FFF;
+    font-size: 20px;
+    text-align: center;
+    display: block;
+    margin: 20px auto 0 auto;
+}
+
+.botaoModal:hover {
+    background-color: #82C748;
+}

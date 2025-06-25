@@ -1,0 +1,130 @@
+.lista-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    justify-items: center;
+}
+
+.card {
+    width: 100%;
+    max-width: 300px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.3);
+    background-color: white;
+}
+
+.card h3 {
+    background-color: #3e8802;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    font-size: 1.3rem;
+    background-position: center;
+    background-size: 100%;
+    color: white;
+    min-width: 150px;
+    text-align: center;
+}
+
+.card p {
+    text-align: left;
+    font-size: 1.2rem;
+    min-width: 200px;
+}
+
+.limited-password {
+    max-width: 300px;       
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+.btSave {
+    font-size: 20px;
+    padding: 0.3rem 0.6rem;
+    text-align: center;
+    border-radius: 12px;
+    text-shadow: 0 0 3px #FFF;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    margin-right: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+}
+
+.btSave:hover{
+    background-color: #82C748;
+}
+
+.btEdit {
+    font-size: 15px;
+    text-align: center;
+    justify-content: center;
+    border-radius: 12px;
+    text-shadow: 0 0 3px #FFF;
+    max-width: 100%;
+    max-height: 100%;
+    margin-right: 10%;
+    margin-top: 5px;
+    display: inline-block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding: 5px 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+}
+
+.btEdit:hover{
+    background-color: #82C748;
+}
+
+.btRemove {
+    font-size: 15px;
+    text-align: center;
+    padding: 0.4rem 0.8rem;
+    justify-content: center;
+    border-radius: 12px;
+    text-shadow: 0 0 3px #FFF;
+    display: inline-block;
+    max-width: 100%;
+    max-height: 100%;
+    margin-right: 0;
+    margin-top: 5px;
+    padding: 5px 10px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ff7f11;
+    color: white;
+}
+
+.btRemove:hover{
+    background-color: #82C748;
+}
