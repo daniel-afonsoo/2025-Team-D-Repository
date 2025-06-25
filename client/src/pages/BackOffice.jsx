@@ -7,20 +7,37 @@ import UploadSQL from '../components/backoffice/UploadSQL';
 import { exportToPdf, exportToExcel } from '../utils/exportFunctions';
 
 const Backoffice = () => {
-  
+
   const navigate = useNavigate();
 
   const [codTurma, setCodTurma] = useState("");
+  const [escola, setEscola] = useState("");
+  const [escolas, setEscolas] = useState([]);
 
   // export feature
   const [showPopup, setShowPopup] = useState(false);
   const handleExportSubmit = (formData) => {
-    // ADD CLASSES LOADING AND EXPORT LOGIC LATER
-    console.log('Form Data:', formData);
+    const { turma, tipo } = formData;
+
+    if (!turma || !tipo) {
+      console.warn("Turma ou tipo de exportação em falta.");
+      return;
+    }
+
+    if (tipo === "pdf") {
+      exportToPdf(turma);
+    } else if (tipo === "excel") {
+      exportToExcel(turma);
+    }
   };
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    fetch("http://localhost:5170/getEscola") // Ajusta o URL conforme necessário
+      .then(res => res.json())
+      .then(data => setEscolas(data))
+      .catch(err => console.error("Erro ao buscar escolas:", err));
   }, []);
 
   return (
@@ -45,9 +62,9 @@ const Backoffice = () => {
           <button className="botao_backoffice" onClick={() => navigate('/backoffice/salas')}>Salas</button>
           {/* Botão Turmas */}
           <button className="botao_backoffice" onClick={() => navigate('/backoffice/turmas')}>Turmas</button>
-           {/* Botão Semestres */}
+          {/* Botão Semestres */}
           <button className="botao_backoffice" onClick={() => navigate('/backoffice/semestres')}>Semestres</button>
-        </div>  
+        </div>
       </div>
 
       <div className="container_back">
@@ -66,14 +83,24 @@ const Backoffice = () => {
         />
         <button onClick={() => exportToPdf(codTurma)}>PDF</button>
         <button onClick={() => exportToExcel(codTurma)}>Excel</button>
+        <h3>Exportação com Pesquisa:</h3>
+        <select value={escola} onChange={(e) => setEscola(e.target.value)}>
+          <option value="" disabled>Escolher Escola</option>
+          {escolas.map((e) => (
+            <option key={e.Cod_Escola} value={e.Cod_Escola}>
+              {e.Nome}
+            </option>
+          ))}
+        </select>
         <div>
-          <button onClick={() => setShowPopup(true)}>Exportação com Pesquisa</button>
+          <button onClick={() => setShowPopup(true)}>Procurar</button>
         </div>
         {showPopup && (
           <ExportPopup
             onClose={() => setShowPopup(false)}
             // callback function to handle form data submission
             onSubmit={handleExportSubmit}
+            escola={escola}
           />
         )}
       </div>

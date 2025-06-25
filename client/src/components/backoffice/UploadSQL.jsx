@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../../styles/backoffice.css"; // ou outro ficheiro de estilos onde definirás as classes
 
 const UploadSQL = () => {
   const [file, setFile] = useState(null);
@@ -45,13 +46,18 @@ const UploadSQL = () => {
   };
 
   return (
-    <div className="p-4 border rounded shadow-md max-w-md mx-auto mt-10">
-      <h2 className="text-xl font-semibold mb-4">Upload de Ficheiro Excel</h2>
-      <input type="file" accept=".xlsx" onChange={handleFileChange} className="mb-4" />
-      <button onClick={handleUpload} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    <div className="upload-sql-wrapper">
+      <h2 className="upload-title">Upload de Ficheiro Excel</h2>
+      <input
+        type="file"
+        accept=".xlsx"
+        onChange={handleFileChange}
+        className="upload-input"
+      />
+      <button onClick={handleUpload} className="upload-button">
         Enviar e Baixar SQL
       </button>
-      {status && <p className="mt-4 font-medium">{status}</p>}
+      {status && <p className="upload-status">{status}</p>}
     </div>
   );
 };
