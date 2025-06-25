@@ -2,6 +2,8 @@
   padding: 20px;
   overflow: visible;
   position: relative;
+  background-color: #ffffffff;
+  min-height: 100vh;
 }
 
 .drag-overlay {
@@ -87,6 +89,7 @@
 .error-message {
   color: red;
   margin-top: 10px;
+  font-size: 2rem;
 }
 
 /* MAIN LAYOUT ADJUSTED */

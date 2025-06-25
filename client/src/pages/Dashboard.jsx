@@ -68,9 +68,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div style={{ marginTop: '2rem' }}>
-          <button className="botao_dashboard" onClick={() => navigate("/exportar-aulas")}>
-            Exportar Aulas
+        <div  style={{ marginTop: '2rem' }}>
+          <button className="botao_backoffice_dashboard" onClick={() => navigate("/exportar-aulas")}>
+            Exportar Horários
           </button>
         </div>
 

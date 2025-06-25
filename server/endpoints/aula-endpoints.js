@@ -110,73 +110,125 @@ router.get('/aulas/sala/:Cod_Sala/ano/:Cod_AnoSemestre', (req, res) => {
 
 //FUNCIONA
 router.post('/createAula', async (req, res) => {
+    const { Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration } = req.body;
     console.log("REQ BODY RECEBIDO:", req.body);
-    const { Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration } = req.body
-    const query = `INSERT INTO aula (Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration]
-    pool.query(query, values, (err) => {
+
+    const checkQuery = `
+      SELECT Cod_Aula FROM aula
+      WHERE Cod_AnoSemestre = ?
+        AND Dia = ?
+        AND (
+          (Inicio < ? AND Fim > ?) -- sobreposição
+        )
+        AND (
+          Cod_Docente = ? OR
+          Cod_Sala = ? OR
+          Cod_Turma = ?
+        )
+    `;
+
+    const checkValues = [Cod_AnoSemestre, Dia, Fim, Inicio, Cod_Docente, Cod_Sala, Cod_Turma];
+
+    pool.query(checkQuery, checkValues, (err, results) => {
         if (err) {
-            console.error(err)
-            return res.status(500).json({ error: 'Internal server error' })
-        } else {
+            console.error("Erro na verificação de conflitos:", err);
+            return res.status(500).json({ error: 'Erro ao verificar conflitos' });
+        }
+
+        if (results.length > 0) {
+            return res.status(400).json({ error: 'Conflito de horário detectado (docente, sala ou turma)' });
+        }
+
+        // Sem conflitos, podemos inserir
+        const insertQuery = `
+          INSERT INTO aula (Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const insertValues = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration];
+
+        pool.query(insertQuery, insertValues, (insertErr) => {
+            if (insertErr) {
+                console.error(insertErr);
+                return res.status(500).json({ error: 'Erro ao criar aula' });
+            }
+
             const io = getSocketIOInstance();
             if (io) {
                 io.emit("update-aulas", { Cod_Turma });
             }
-            return res.status(200).json({ message: 'Aula criada com sucesso' })
-        }
-    })
-})
-
-//FUNCIONA
-router.post('/updateAula', async (req, res) => {
-
-
-    const { Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration
-    } = req.body;
-
-    console.log("🧾 RECEBIDO EM /updateAula:", {
-        Cod_Aula,
-        Cod_Docente,
-        Cod_Sala,
-        Cod_Turma,
-        Cod_Uc,
-        Cod_Curso,
-        Cod_AnoSemestre,
-        Dia,
-        Inicio,
-        Fim,
-        Duration
+            return res.status(200).json({ message: 'Aula criada com sucesso' });
+        });
     });
+});
 
-    // Validação dos campos obrigatórios
-    if (!Cod_Aula || !Cod_Docente || !Cod_Sala || !Cod_Turma || !Cod_Uc || !Cod_Curso || !Cod_AnoSemestre || !Dia || !Inicio || !Fim || Duration == null) {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+
+router.post('/updateAula', async (req, res) => {
+  const {
+    Cod_Aula, Cod_Docente, Cod_Sala, Cod_Turma,
+    Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia,
+    Inicio, Fim, Duration
+  } = req.body;
+
+  console.log("🧾 RECEBIDO EM /updateAula:", req.body);
+
+  if (!Cod_Aula || !Cod_Docente || !Cod_Sala || !Cod_Turma || !Cod_Uc || !Cod_Curso || !Cod_AnoSemestre || !Dia || !Inicio || !Fim || Duration == null) {
+    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+  }
+
+  try {
+    const conflictQuery = `
+      SELECT Cod_Aula FROM aula
+      WHERE Cod_AnoSemestre = ?
+        AND Dia = ?
+        AND Cod_Aula != ? -- exclui a própria aula
+        AND (
+          (Inicio < ? AND Fim > ?) -- sobreposição de tempo
+        )
+        AND (
+          Cod_Docente = ? OR
+          Cod_Sala = ? OR
+          Cod_Turma = ?
+        )
+    `;
+
+    const conflictValues = [
+      Cod_AnoSemestre, Dia, Cod_Aula,
+      Fim, Inicio,
+      Cod_Docente, Cod_Sala, Cod_Turma
+    ];
+
+    const [conflicts] = await pool.promise().query(conflictQuery, conflictValues);
+
+    if (conflicts.length > 0) {
+      return res.status(400).json({ error: 'Conflito de horário detectado (docente, sala ou turma)' });
     }
 
-    try {
-        const query = `
+    const updateQuery = `
       UPDATE aula SET
         Cod_Docente = ?, Cod_Sala = ?, Cod_Turma = ?, Cod_Uc = ?, Cod_Curso = ?,
         Cod_AnoSemestre = ?, Dia = ?, Inicio = ?, Fim = ?, Duration = ?
       WHERE Cod_Aula = ?
     `;
 
-        const values = [Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso, Cod_AnoSemestre, Dia, Inicio, Fim, Duration, Cod_Aula
-        ];
+    const updateValues = [
+      Cod_Docente, Cod_Sala, Cod_Turma, Cod_Uc, Cod_Curso,
+      Cod_AnoSemestre, Dia, Inicio, Fim, Duration,
+      Cod_Aula
+    ];
 
-        const [result] = await pool.promise().query(query, values);
+    const [result] = await pool.promise().query(updateQuery, updateValues);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Aula não encontrada' });
-        }
-
-        return res.status(200).json({ message: 'Aula atualizada com sucesso' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Erro interno do servidor' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Aula não encontrada' });
     }
+
+    return res.status(200).json({ message: 'Aula atualizada com sucesso' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
 });
+
 
 
 //FUNCIONA

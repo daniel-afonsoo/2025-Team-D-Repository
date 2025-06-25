@@ -73,36 +73,39 @@ const Backoffice = () => {
       </div>
 
       <div className="container_back">
-        <h2>Exportar Aulas</h2>
-        <h3>Exportação Rápida:</h3>
-        <input
-          type="text"
-          placeholder="Insira o Codigo da turma:"
-          value={codTurma}
-          onChange={(e) => setCodTurma(e.target.value)}
-        />
-        <button onClick={() => exportToPdf(codTurma)}>PDF</button>
-        <button onClick={() => exportToExcel(codTurma)}>Excel</button>
-        <h3>Exportação com Pesquisa:</h3>
-        <select value={escola} onChange={(e) => setEscola(e.target.value)}>
-          <option value="" disabled>Escolher Escola</option>
-          {escolas.map((e) => (
-            <option key={e.Cod_Escola} value={e.Cod_Escola}>
-              {e.Nome}
-            </option>
-          ))}
-        </select>
-        <div>
-          <button onClick={() => setShowPopup(true)}>Procurar</button>
-        </div>
-        {showPopup && (
-          <ExportPopup
-            onClose={() => setShowPopup(false)}
-            // callback function to handle form data submission
-            onSubmit={handleExportSubmit}
-            escola={escola}
+        <div className="export-wrapper">
+          <h2>Exportar Aulas</h2>
+          <h3>Exportação Rápida:</h3>
+          <input
+            type="text"
+            placeholder="Insira o Codigo da turma:"
+            value={codTurma}
+            onChange={(e) => setCodTurma(e.target.value)}
           />
-        )}
+          <button onClick={() => exportToPdf(codTurma)}>PDF</button>
+          <button onClick={() => exportToExcel(codTurma)}>Excel</button>
+          <h3>Exportação com Pesquisa:</h3>
+          <select value={escola} onChange={(e) => setEscola(e.target.value)}>
+            <option value="" disabled>Escolher Escola</option>
+            {escolas.map((e) => (
+              <option key={e.Cod_Escola} value={e.Cod_Escola}>
+                {e.Nome}
+              </option>
+            ))}
+          </select>
+          <div>
+            <button onClick={() => setShowPopup(true)}>Procurar</button>
+          </div>
+          {showPopup && (
+            <ExportPopup
+              onClose={() => setShowPopup(false)}
+              // callback function to handle form data submission
+              onSubmit={handleExportSubmit}
+              escola={escola}
+            />
+          )}
+        </div>
+
       </div>
     </div>
   );

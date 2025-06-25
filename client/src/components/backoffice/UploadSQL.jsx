@@ -47,7 +47,6 @@ const UploadSQL = () => {
 
   return (
     <div className="upload-sql-wrapper">
-      <h2 className="upload-title">Upload de Ficheiro Excel</h2>
       <input
         type="file"
         accept=".xlsx"

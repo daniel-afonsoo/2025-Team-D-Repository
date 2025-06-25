@@ -121,7 +121,7 @@
   text-align: center;
   color: white;
   background-color: rgba(255, 255, 255, 1); 
-  padding: 40px;
+  padding: 40px 150px 100px 150px; 
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   max-width: 800px;

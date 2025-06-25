@@ -30,7 +30,7 @@
 }
 
 .exportar-aulas-container button {
-  background-color: #007bff;
+  background-color: #ff7f11;
   color: white;
   border: none;
   cursor: pointer;
@@ -38,7 +38,7 @@
 }
 
 .exportar-aulas-container button:hover {
-  background-color: #0056b3;
+  background-color: #82C748;
 }
 
 .exportar-aulas-container .erro {
