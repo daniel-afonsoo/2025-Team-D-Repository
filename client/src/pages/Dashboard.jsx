@@ -68,6 +68,12 @@ const Dashboard = () => {
           </div>
         </div>
 
+        <div style={{ marginTop: '2rem' }}>
+          <button className="botao_dashboard" onClick={() => navigate("/exportar-aulas")}>
+            Exportar Aulas
+          </button>
+        </div>
+
         {['diretor', 'admin'].includes(role) && (
           <div className="backoffice-container_dashboard">
             <button
@@ -78,6 +84,7 @@ const Dashboard = () => {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );

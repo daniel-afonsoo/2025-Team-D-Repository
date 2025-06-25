@@ -16,6 +16,29 @@ router.get('/getSala', (req,res) => {
     })
 })
 
+router.get('/getSala/:Cod_Sala', (req, res) => {
+  const { Cod_Sala } = req.params;
+
+  if (!Cod_Sala) {
+    return res.status(400).json({ error: "Cod_Sala é obrigatório" });
+  }
+
+  const query = "SELECT * FROM sala WHERE Cod_Sala = ?";
+  pool.query(query, [Cod_Sala], (err, results) => {
+    if (err) {
+      console.error("Erro na consulta à base de dados:", err);
+      return res.status(500).json({ error: "Consulta à base de dados falhou" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Sala não encontrada" });
+    }
+
+    res.status(200).json(results[0]);
+  });
+});
+
+
 //FUNCIONA
 // Endpoint para criar uma nova sala
 router.post('/createSala', async (req, res) => {

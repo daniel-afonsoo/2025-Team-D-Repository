@@ -1,0 +1,54 @@
+.exportar-aulas-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+}
+
+.exportar-aulas-container h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.exportar-aulas-container label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.exportar-aulas-container select,
+.exportar-aulas-container button {
+  width: 100%;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.exportar-aulas-container button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.exportar-aulas-container button:hover {
+  background-color: #0056b3;
+}
+
+.exportar-aulas-container .erro {
+  color: red;
+  font-weight: bold;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.exportar-aulas-container .resultado {
+  margin-top: 2rem;
+  text-align: center;
+}
