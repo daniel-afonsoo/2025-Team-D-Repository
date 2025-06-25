@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db/connection.js')
+const {logToClient} = require('../utils/logger')
 
 // GET todas as entradas de anosemestre
 router.get('/getAnoSemestre', (req, res) => {
@@ -32,6 +33,7 @@ router.post('/createAnoSemestre', async (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         }
+        logToClient("info","Semestre criado", `O semestre ${Nome} foi criado`)
         return res.status(200).json({ message: 'AnoSemestre criado com sucesso' })
     })
 })
@@ -54,6 +56,7 @@ router.post('/updateAnoSemestre', async (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         }
+        logToClient("info","Semestre editado", `O semestre ${Cod_AnoSemestre} foi alterado para ${Nome}`)
         return res.status(200).json({ message: 'AnoSemestre atualizado com sucesso' })
     })
 })
@@ -71,6 +74,7 @@ router.delete('/deleteAnoSemestre', (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         } else {
+            logToClient("info","Semestre removido", `O semestre ${Cod_AnoSemestre} removido`)
             return res.status(200).json({ message: 'AnoSemestre eliminado com sucesso' })
         }
     })

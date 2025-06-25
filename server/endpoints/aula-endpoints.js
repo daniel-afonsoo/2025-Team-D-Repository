@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const pool = require('../db/connection.js')
 const { getSocketIOInstance } = require("../utils/socketInstance");
+const {logToClient} = require('../utils/logger')
 
 //FUNCIONA
 router.get('/aulas', (req, res) => {
@@ -66,6 +67,7 @@ router.get('/aulas/turma/:Cod_Turma', (req, res) => {
             console.error(err);
             return res.status(500).json({ error: 'Internal server error' });
         }
+
         res.json(rows);
     });
 });
@@ -156,6 +158,7 @@ router.post('/createAula', async (req, res) => {
             if (io) {
                 io.emit("update-aulas", { Cod_Turma });
             }
+            logToClient("info","Aula adicionada", `Uma aula foi adicionada para a turma ${Cod_Turma}`)
             return res.status(200).json({ message: 'Aula criada com sucesso' });
         });
     });
@@ -221,7 +224,7 @@ router.post('/updateAula', async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Aula não encontrada' });
     }
-
+    logToClient("info","Aula editada", `A aula ${Cod_Aula} foi editada`)
     return res.status(200).json({ message: 'Aula atualizada com sucesso' });
   } catch (err) {
     console.error(err);
@@ -247,7 +250,7 @@ router.delete('/deleteAula', async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Aula não encontrada' });
         }
-
+        logToClient("info","Aula removida", `A aula ${Cod_Aula} foi removida`)
         return res.status(200).json({ message: 'Aula eliminada com sucesso' });
     } catch (err) {
         console.error(err);

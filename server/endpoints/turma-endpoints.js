@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection.js');
+const {logToClient} = require('../utils/logger')
 
 
 router.get('/getTurma', (req, res) => {
@@ -23,6 +24,7 @@ router.post('/createTurma', async (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         } else {
+            logToClient("info","Turma criada", `A turma ${Turma_Abv} do ${AnoTurma}º ano  do curso ${Cod_Curso} foir criada para o semestre ${Cod_AnoSemestre}.`)
             return res.status(200).json({ message: 'Turma criada com sucesso' })
         }
     })
@@ -37,6 +39,7 @@ router.post('/updateTurma', async (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         } else {
+            logToClient("info","Turma editada", `A turma ${Cod_Turma} foi alterada`)
             return res.status(200).json({ message: 'Turma atualizada com sucesso' })
         }
     })
@@ -51,6 +54,7 @@ router.delete('/deleteTurma', async (req, res) => {
             console.error(err)
             return res.status(500).json({ error: 'Internal server error' })
         } else {
+            logToClient("info","Turma Turma removida", `A turma ${Cod_Turma} foi removida`)
             return res.status(200).json({ message: 'Turma eliminada com sucesso' })
         }
     })
