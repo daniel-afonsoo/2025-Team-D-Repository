@@ -264,4 +264,4 @@ ALTER TABLE `uc`
   ADD CONSTRAINT `FKUC184900` FOREIGN KEY (`Cod_Curso`) REFERENCES `curso` (`Cod_Curso`);
 COMMIT;
 
-----------------------------------------------------------
+-- --------------------------------------------------------
